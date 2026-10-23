@@ -3354,4 +3354,117 @@ public class SsurgeonTest {
     executeScribbles.execute(sg);
     assertEquals(executedAlone.seen, executedScribbled.seen);
   }
+
+  /** A few of the invented verb lemmas of UD_Spanish-GSD, with the lemmas they should be */
+  private static final String LEMMA_TABLE = String.join(newline,
+                                                        "# from UD_Spanish-GSD issue 120",
+                                                        "table lemma_mapping",
+                                                        "estudir\testudiar",
+                                                        "var\tvariar",
+                                                        "estener\testar");
+
+  /** "Juan estudió y comió", with estudir for the first verb's lemma */
+  private static SemanticGraph spanishVerbs() {
+    SemanticGraph sg = SemanticGraph.valueOf("[estudió-2 nsubj> Juan-1 conj> [comió-4 cc> y-3]]", Language.UniversalEnglish);
+    sg.getNodeByIndex(2).setLemma("estudir");
+    sg.getNodeByIndex(4).setLemma("comer");
+    for (int i : new int[] {2, 4}) {
+      sg.getNodeByIndex(i).set(CoreAnnotations.CoarseTagAnnotation.class, "VERB");
+    }
+    return sg;
+  }
+
+  /**
+   * remap fixes the lemmas the table lists and leaves the others alone.
+   * Once a lemma is fixed, the table has no entry for it, so iterate stops
+   */
+  @Test
+  public void remapLemmas() {
+    String text = String.join(newline,
+                              "{cpos:VERB;lemma:__#0%lemma}=verb",
+                              "remap -var lemma -table lemma_mapping",
+                              "editNode -node verb -lemma ${lemma}",
+                              "",
+                              LEMMA_TABLE);
+    List<SsurgeonPattern> patterns = Ssurgeon.readFromEditText(text, "UniversalEnglish");
+    assertEquals(1, patterns.size());
+    SsurgeonPattern pattern = patterns.get(0);
+
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(spanishVerbs());
+    assertTrue(result.second);
+    assertEquals("estudiar", result.first.getNodeByIndex(2).lemma());
+    assertEquals("comer", result.first.getNodeByIndex(4).lemma());
+
+    // nothing the table lists, so nothing changes
+    result = pattern.iterate(result.first);
+    assertFalse(result.second);
+
+    String remap = pattern.getEditScript().get(0).toEditString();
+    assertEquals("remap\t-var lemma\t-table lemma_mapping", remap);
+    Map<String, SsurgeonTable> tables = Collections.singletonMap("lemma_mapping", ((Remap) pattern.getEditScript().get(0)).table);
+    assertEquals(remap, Ssurgeon.parseEditLine(remap, new HashMap<>(), Language.UniversalEnglish, new HashSet<>(), tables).toEditString());
+  }
+
+  /** With -to, the variable looked up keeps its value */
+  @Test
+  public void remapTo() {
+    String text = String.join(newline,
+                              LEMMA_TABLE,
+                              "",
+                              "{cpos:VERB;lemma:__#0%lemma}=verb",
+                              "remap -var lemma -table lemma_mapping -to fixed",
+                              "editNode -node verb -lemma ${fixed} -updateMorphoFeatures Typo=${lemma}");
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(text, "UniversalEnglish").get(0);
+    SemanticGraph edited = pattern.iterate(spanishVerbs()).first;
+    assertEquals("estudiar", edited.getNodeByIndex(2).lemma());
+    assertEquals("estudir", edited.getNodeByIndex(2).get(CoreAnnotations.CoNLLUFeats.class).get("Typo"));
+    assertNull(edited.getNodeByIndex(4).get(CoreAnnotations.CoNLLUFeats.class));
+    assertEquals("remap\t-var lemma\t-table lemma_mapping\t-to fixed", pattern.getEditScript().get(0).toEditString());
+  }
+
+  /** A chain is followed to its end, one match at a time */
+  @Test
+  public void remapChain() {
+    String text = String.join(newline,
+                              "table chain",
+                              "estudir\testudar",
+                              "estudar\testudiar",
+                              "",
+                              "{lemma:__#0%lemma}=verb",
+                              "remap -var lemma -table chain",
+                              "editNode -node verb -lemma ${lemma}");
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(text, "UniversalEnglish").get(0);
+    assertEquals("estudiar", pattern.iterate(spanishVerbs()).first.getNodeByIndex(2).lemma());
+  }
+
+  /** Tables which are malformed, or would keep iterate going forever, are errors when they are read */
+  @Test
+  public void tableErrors() {
+    String pattern = String.join(newline, "", "{lemma:__#0%lemma}=verb", "remap -var lemma -table t", "editNode -node verb -lemma ${lemma}");
+    // a cycle, and a key which maps to itself
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText("table t\na\tb\nb\ta" + newline + pattern, "UniversalEnglish"));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText("table t\na\ta" + newline + pattern, "UniversalEnglish"));
+    // no tab, a key with two values, no name, two tables of one name
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText("table t\na b" + newline + pattern, "UniversalEnglish"));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText("table t\na\tb\na\tc" + newline + pattern, "UniversalEnglish"));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText("table\na\tb" + newline + pattern, "UniversalEnglish"));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText("table t\na\tb\n\ntable t\nc\td" + newline + pattern, "UniversalEnglish"));
+    // a table nobody defined, and remap without its arguments
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText("table u\na\tb" + newline + pattern, "UniversalEnglish"));
+    Set<String> knownEdges = new HashSet<>();
+    Map<String, SsurgeonTable> tables = Collections.singletonMap("t", new SsurgeonTable("t", Collections.singletonMap("a", "b")));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("remap -table t", new HashMap<>(), Language.UniversalEnglish, knownEdges, tables));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("remap -var lemma", new HashMap<>(), Language.UniversalEnglish, knownEdges, tables));
+    // a duplicate entry with the same value, and a chain, are fine
+    Ssurgeon.readFromEditText("table t\na\tb\na\tb\nb\tc" + newline + pattern, "UniversalEnglish");
+  }
+
+  /** A key or value may contain spaces, as the tab separates them */
+  @Test
+  public void tableSpaces() {
+    SsurgeonTable table = SsurgeonTable.fromLines("vi", Arrays.asList("xin chao\txin chào", "cam on\tcảm ơn"));
+    assertEquals("xin chào", table.get("xin chao"));
+    assertEquals("cảm ơn", table.get("cam on"));
+    assertNull(table.get("xin"));
+  }
 }
