@@ -96,6 +96,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code deleteLeaf -node node -graph enhanced}
  * <li> {@code killNonRooted -graph basic}
  * <li> {@code reindexGraph}
+ * <li> {@code remap -var variable -table table -to variable}
  * </ul>
  *
  *<p>
@@ -249,6 +250,16 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   A graph's last root is never deleted, and the words left keep their indices.
  *</p><p>
  * {@code reindexGraph} reindexes the graph from 1 in case there are gaps or the node indices start later than 1.  (Warning: does not work for first index less than 1)
+ *</p><p>
+ * {@code remap} looks up a variable of the match in a table, for the edits after it. <br>
+ * {@code -var} is the variable to look up, such as one the Semgrex pattern captured with {@code #0%lemma}. <br>
+ * {@code -table} is the table, defined in the same edit file with a {@code table} block. <br>
+ * {@code -to} is the variable to set to the result.  The default is the variable looked up. <br>
+ *   If the table has no entry for the variable, the result is unset, so an edit which uses it does nothing.
+ *   This changes nothing in the graphs, so it does not count as a change by itself.  For example, to fix
+ *   the verb lemmas a table lists: <br>
+ *   {@code {cpos:VERB;lemma:__#0%lemma}=verb}, {@code remap -var lemma -table lemma_mapping},
+ *   {@code editNode -node verb -lemma ${lemma}}
  *</p>
  *<p>
  * A practical example comes from the {@code UD_English-Pronouns}
@@ -550,6 +561,12 @@ public class Ssurgeon  {
   public static final String POSITION_ARG = "-position";
   /** Arg which says which graph of the sentence an edit works on, such as {@code enhanced} */
   public static final String GRAPH_ARG = "-graph";
+  /** Arg for the variable remap looks up */
+  public static final String VAR_ARG = "-var";
+  /** Arg for the table remap looks a variable up in */
+  public static final String TABLE_ARG = "-table";
+  /** Arg for the variable remap sets */
+  public static final String TO_ARG = "-to";
   /** Flag for morpho features to add or change without removing the others */
   public static final String UPDATE_MORPHO_FEATURES = "-updateMorphoFeatures";
   /** Lowercase spelling of {@link #UPDATE_MORPHO_FEATURES} */
@@ -622,6 +639,15 @@ public class Ssurgeon  {
 
     /** The {@code -graph} the edit works on, or null if not given */
     public SemgrexGraphName graph = null;
+
+    /** The {@code -var} value */
+    public String variable = null;
+
+    /** The {@code -table} value */
+    public String table = null;
+
+    /** The {@code -to} value */
+    public String to = null;
   }
 
   /**
@@ -728,6 +754,15 @@ public class Ssurgeon  {
         case GRAPH_ARG:
           argsBox.graph = parseGraphName(argsValue);
           break;
+        case VAR_ARG:
+          argsBox.variable = argsValue;
+          break;
+        case TABLE_ARG:
+          argsBox.table = argsValue;
+          break;
+        case TO_ARG:
+          argsBox.to = argsValue;
+          break;
         case UPDATE_MORPHO_FEATURES:
         case UPDATE_MORPHO_FEATURES_LOWER:
           argsBox.updateMorphoFeatures = argsValue;
@@ -763,6 +798,24 @@ public class Ssurgeon  {
    * @throws SsurgeonParseException if the line cannot be parsed
    */
   public static SsurgeonEdit parseEditLine(String editLine, Map<String, String> attributeArgs, Language language, Set<String> knownEdges) {
+    return parseEditLine(editLine, attributeArgs, language, knownEdges, Collections.emptyMap());
+  }
+
+  /**
+   * Given a string entry, converts it into a SsurgeonEdit object, with
+   * the tables a {@code remap} can use.
+   *
+   * @param editLine The edit, a command word followed by its arguments
+   * @param attributeArgs Extra arguments, such as XML attributes of the edit element,
+   *   treated as if each key were a flag with a dash in front of it
+   * @param language The language used for new relations
+   * @param knownEdges The edge names defined so far; edges named by this edit are added to it
+   * @param tables The tables a {@code remap} can name, by name
+   * @return The new edit
+   * @throws SsurgeonParseException if the line cannot be parsed, or names a table which is not given
+   */
+  public static SsurgeonEdit parseEditLine(String editLine, Map<String, String> attributeArgs, Language language, Set<String> knownEdges,
+                                           Map<String, SsurgeonTable> tables) {
     try {
       // Extract the operation name first
       final String[] tuples1 = editLine.split("\\s+", 2);
@@ -848,6 +901,15 @@ public class Ssurgeon  {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
         }
         return new EditNode(argsBox.nodes.get(0), argsBox.annotations, argsBox.updateMorphoFeatures, argsBox.remove, argsBox.removeMorphoFeatures);
+      } else if (command.equalsIgnoreCase(Remap.LABEL)) {
+        if (argsBox.table == null) {
+          throw new SsurgeonParseException("Remap needs a table, given with " + TABLE_ARG);
+        }
+        SsurgeonTable table = tables.get(argsBox.table);
+        if (table == null) {
+          throw new SsurgeonParseException("Remap names the table " + argsBox.table + ", but the tables are " + new TreeSet<>(tables.keySet()));
+        }
+        return new Remap(argsBox.variable, table, argsBox.to);
       } else if (command.equalsIgnoreCase(Lemmatize.LABEL)) {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make a Lemmatize out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
@@ -1092,13 +1154,28 @@ public class Ssurgeon  {
    * }</pre>
    * A block of nothing but comments is skipped.  Each pattern's UID is the
    * position of its block, counting from 1 and including skipped blocks.
+   *<br>
+   * A block whose first line is {@code table name} is a table for
+   * {@code remap} rather than a pattern, with one {@code key<TAB>value}
+   * line per entry, as {@link SsurgeonTable} describes.  A table can be
+   * used by any pattern in the same text, before or after it.
+   *<pre>{@code
+   * table lemma_mapping
+   * estudir	estudiar
+   * var	variar
+   *
+   * {cpos:VERB;lemma:__#0%lemma}=verb
+   * remap -var lemma -table lemma_mapping
+   * editNode -node verb -lemma ${lemma}
+   * }</pre>
    *
    * @param text The blocks to read
    * @param language The name of the language used when parsing relation names in the edits,
    *   such as {@code UniversalEnglish}
    * @return The patterns, in the order their blocks appear
-   * @throws SsurgeonParseException if the language is unknown, or a
-   *   semgrex pattern or an edit cannot be parsed
+   * @throws SsurgeonParseException if the language is unknown, a
+   *   semgrex pattern, an edit, or a table cannot be parsed, or two
+   *   tables have the same name
    */
   public static List<SsurgeonPattern> readFromEditText(String text, String language) {
     if (Language.valueOfSafe(language) == null) {
@@ -1121,6 +1198,24 @@ public class Ssurgeon  {
       blocks.add(block);
     }
 
+    // the tables are read first, so a pattern can use one defined after it
+    Map<String, SsurgeonTable> tables = new LinkedHashMap<>();
+    for (List<String> tableBlock : blocks) {
+      List<String> lines = new ArrayList<>();
+      for (String line : tableBlock) {
+        if (!line.startsWith("#")) {
+          lines.add(line);
+        }
+      }
+      String name = lines.isEmpty() ? null : tableName(lines.get(0));
+      if (name != null) {
+        if (tables.containsKey(name)) {
+          throw new SsurgeonParseException("There are two tables named " + name);
+        }
+        tables.put(name, SsurgeonTable.fromLines(name, lines.subList(1, lines.size())));
+      }
+    }
+
     for (int blockIdx = 0; blockIdx < blocks.size(); ++blockIdx) {
       List<String> comments = new ArrayList<>();
       List<String> lines = new ArrayList<>();
@@ -1131,7 +1226,7 @@ public class Ssurgeon  {
           lines.add(line);
         }
       }
-      if (lines.isEmpty()) {
+      if (lines.isEmpty() || tableName(lines.get(0)) != null) {
         continue;
       }
 
@@ -1148,11 +1243,30 @@ public class Ssurgeon  {
 
       Set<String> knownEdges = new HashSet<>(semgrex.getKnownEdges());
       for (String edit : lines.subList(1, lines.size())) {
-        pattern.addEdit(parseEditLine(edit, Collections.emptyMap(), pattern.getLanguage(), knownEdges));
+        pattern.addEdit(parseEditLine(edit, Collections.emptyMap(), pattern.getLanguage(), knownEdges, tables));
       }
       patterns.add(pattern);
     }
     return patterns;
+  }
+
+  /**
+   * The name of the table a block starts, if its first line is {@code table name}.
+   * A semgrex pattern cannot start with a bare word, so such a line is never one.
+   *
+   * @param line the first line of a block, other than its comments
+   * @return the table's name, or null if the line does not start a table
+   * @throws SsurgeonParseException if the line starts a table but does not give one name
+   */
+  private static String tableName(String line) {
+    String[] pieces = line.trim().split("\\s+");
+    if (!pieces[0].equalsIgnoreCase(SsurgeonTable.LABEL)) {
+      return null;
+    }
+    if (pieces.length != 2) {
+      throw new SsurgeonParseException("A table block starts with " + SsurgeonTable.LABEL + " and the table's name, not |" + line + "|");
+    }
+    return pieces[1];
   }
 
   /**
