@@ -1,5 +1,5 @@
 /**
- * A module with a command line program for the processing of semgrex requests.
+ * A module with a command line program for the processing of ssurgeon requests.
  *<br>
  * This will compile a given semgrex expression, build SemanticGraph objects,
  * and return the results of those objects
@@ -11,32 +11,49 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 import edu.stanford.nlp.util.XMLUtils;
 
 /**
  * Processes Ssurgeon requests sent as protobufs.  A request holds
- * Ssurgeon operations and dependency graphs, and the response holds
- * each graph after all of the operations have been applied to it.
+ * Ssurgeon operations and the sentences to apply them to, and the
+ * response holds each sentence after all of the operations have been
+ * applied to it.
+ *<br>
+ * A sentence is sent either as a basic dependency graph with its
+ * tokens, in {@code graph}, or as a SemgrexRequest.Dependencies with
+ * its tokens, its basic graph, and optionally its enhanced graph, in
+ * {@code sentence}.  The edits apply to every graph a sentence has.
  */
 public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
   /** Creates a processor; there is no state to initialize. */
   public ProcessSsurgeonRequest() { }
 
   /**
-   * Read each operation, then read each graph.  For each graph, apply each operation
-   * and append it to the output.
+   * Read each operation, then read each graph and each sentence.  For
+   * each, apply each operation and append the result to the output.
    *
-   * @param request the Ssurgeon operations and the graphs to apply them to
-   * @return one result per input graph, in order, with the edited graph and whether any operation changed it
+   * @param request the Ssurgeon operations and the graphs and sentences to apply them to
+   * @return one result per input graph, in order, with the edited graph and whether any operation
+   *   changed it, and likewise one sentence result per input sentence, with the edited sentence
+   * @throws RuntimeException naming the pattern and the sentence, if an operation fails on a sentence
    */
   public static CoreNLPProtos.SsurgeonResponse processRequest(CoreNLPProtos.SsurgeonRequest request) {
     ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
@@ -80,7 +97,117 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
       graphBuilder.setChanged(isChanged);
       responseBuilder.addResult(graphBuilder.build());
     }
+
+    for (int sentenceIndex = 0; sentenceIndex < request.getSentenceCount(); ++sentenceIndex) {
+      CoreNLPProtos.SemgrexRequest.Dependencies sentence = request.getSentence(sentenceIndex);
+      final List<CoreLabel> tokens;
+      if (sentence.getGraph().getTokenList().size() > 0) {
+        tokens = sentence.getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      } else {
+        tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+      }
+      SemanticGraph basic = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "ssurgeon");
+      SemanticGraph enhanced = null;
+      if (sentence.hasEnhancedGraph()) {
+        enhanced = shareWords(basic, ProtobufAnnotationSerializer.fromProto(sentence.getEnhancedGraph(), tokens, "ssurgeon"));
+      }
+      SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+
+      boolean isChanged = false;
+      for (SsurgeonPattern pattern : patterns) {
+        try {
+          Pair<SemgrexGraphs, Boolean> result = pattern.iterate(graphs);
+          graphs = result.first;
+          isChanged = isChanged || result.second;
+        } catch (RuntimeException e) {
+          throw new RuntimeException("Ssurgeon pattern " + pattern.getUID() + " failed on " + describe(sentence, sentenceIndex), e);
+        }
+      }
+      CoreNLPProtos.SsurgeonResponse.SsurgeonResult.Builder sentenceBuilder = CoreNLPProtos.SsurgeonResponse.SsurgeonResult.newBuilder();
+      sentenceBuilder.setSentence(toDependencies(serializer, graphs, sentence));
+      sentenceBuilder.setChanged(isChanged);
+      responseBuilder.addSentenceResult(sentenceBuilder.build());
+    }
     return responseBuilder.build();
+  }
+
+  /**
+   * The enhanced graph, rebuilt over the IndexedWords of the basic graph
+   * wherever it has the same word, so the two graphs share their words
+   * as Ssurgeon needs.  fromProto wraps the tokens in new IndexedWords
+   * for each graph it builds, even when the graphs are built over the
+   * same tokens.  Words the basic graph does not have, such as empty
+   * words and copies, keep the IndexedWords they have.
+   */
+  static SemanticGraph shareWords(SemanticGraph basic, SemanticGraph other) {
+    Map<List<Integer>, IndexedWord> basicWords = new HashMap<>();
+    for (IndexedWord word : basic.vertexSet()) {
+      basicWords.put(position(word), word);
+    }
+    Map<IndexedWord, IndexedWord> sharedWords = new HashMap<>();
+    SemanticGraph shared = new SemanticGraph();
+    for (IndexedWord word : other.vertexSet()) {
+      IndexedWord sharedWord = basicWords.getOrDefault(position(word), word);
+      sharedWords.put(word, sharedWord);
+      shared.addVertex(sharedWord);
+    }
+    for (SemanticGraphEdge edge : other.edgeIterable()) {
+      shared.addEdge(sharedWords.get(edge.getSource()), sharedWords.get(edge.getTarget()), edge.getRelation(), edge.getWeight(), edge.isExtra());
+    }
+    List<IndexedWord> roots = new ArrayList<>();
+    for (IndexedWord root : other.getRoots()) {
+      roots.add(sharedWords.get(root));
+    }
+    shared.setRoots(roots);
+    return shared;
+  }
+
+  /** Where a word is in the sentence: its index, empty index, and copy count */
+  private static List<Integer> position(IndexedWord word) {
+    return Arrays.asList(word.index(), word.getEmptyIndex(), word.copyCount());
+  }
+
+  /**
+   * The edited sentence: the tokens of the words of its graphs, empty
+   * words included, in order, then its graphs, built over those tokens,
+   * and the sentenceID of the sentence in the request.  A copy of a word
+   * has no token of its own, as its node refers to the token of the word.
+   */
+  private static CoreNLPProtos.SemgrexRequest.Dependencies toDependencies(ProtobufAnnotationSerializer serializer, SemgrexGraphs graphs,
+                                                                         CoreNLPProtos.SemgrexRequest.Dependencies request) {
+    Map<List<Integer>, IndexedWord> words = new TreeMap<>(Comparator.<List<Integer>>comparingInt(x -> x.get(0)).thenComparingInt(x -> x.get(1)));
+    for (SemgrexGraphName name : SemgrexGraphName.values()) {
+      SemanticGraph graph = graphs.get(name);
+      if (graph == null) {
+        continue;
+      }
+      for (IndexedWord word : graph.vertexSet()) {
+        if (word.copyCount() == 0) {
+          words.putIfAbsent(Arrays.asList(word.index(), word.getEmptyIndex()), word);
+        }
+      }
+    }
+    CoreNLPProtos.SemgrexRequest.Dependencies.Builder builder = CoreNLPProtos.SemgrexRequest.Dependencies.newBuilder();
+    for (IndexedWord word : words.values()) {
+      builder.addToken(serializer.toProto(word.backingLabel()));
+    }
+    builder.setGraph(serializer.toProto(graphs.getDefault(), false));
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    if (enhanced != null) {
+      builder.setEnhancedGraph(serializer.toProto(enhanced, false));
+    }
+    if (request.hasSentenceID()) {
+      builder.setSentenceID(request.getSentenceID());
+    }
+    return builder.build();
+  }
+
+  /** A sentence of the request as it would be named in a complaint about it */
+  private static String describe(CoreNLPProtos.SemgrexRequest.Dependencies sentence, int sentenceIndex) {
+    if (sentence.hasSentenceID()) {
+      return "the sentence with sent_id |" + sentence.getSentenceID() + "|";
+    }
+    return "sentence " + sentenceIndex + " of the request, counting from 0";
   }
 
   /**
