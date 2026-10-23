@@ -45,7 +45,12 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 public class AddDep extends SsurgeonEdit {
   /** The name of this operation in an Ssurgeon edit string */
   public static final String LABEL = "addDep";
+  /** The attribute values as written in the edit */
   final Map<String, String> attributes;
+  /** The attribute values, parsed for variables */
+  final Map<String, SsurgeonTemplate> attributeTemplates;
+  /** The attribute values, if none of them refer to variables, or else null */
+  final Map<String, String> literalAttributes;
   final GrammaticalRelation relation;
   final String govNodeName;
   final String position;
@@ -60,7 +65,8 @@ public class AddDep extends SsurgeonEdit {
    * @param govNodeName the name of the matched node which governs the new node,
    *   or null to add the node with no edges
    * @param relation the relation from the governor to the new node, or null if there is no governor
-   * @param attributes the attributes of the new node, such as word or lemma; the map is copied
+   * @param attributes the attributes of the new node, such as word or lemma, whose values
+   *   may refer to variables of the match; the map is copied
    * @param position where to put the new node, or null for the end of the sentence.
    *   Must start with {@code -} or {@code +}
    * @param weight the weight of the new edge
@@ -92,7 +98,8 @@ public class AddDep extends SsurgeonEdit {
     } else if (relation == null) {
       throw new SsurgeonParseException("No relation given for an AddDep");
     }
-    checkIllegalAttributes(attributes);
+    this.attributeTemplates = SsurgeonTemplate.attributes(attributes);
+    this.literalAttributes = EditNode.literalValues(attributeTemplates);
 
     this.attributes = new TreeMap<>(attributes);
     this.relation = relation;
@@ -157,7 +164,8 @@ public class AddDep extends SsurgeonEdit {
    * to make room for it.  This does nothing if the governor, or the node
    * the position names, is not in the match, if the graph this edit names
    * has not got the governor, or if the match already has a node by the
-   * name this edit gives its new node.
+   * name this edit gives its new node, or if an attribute value refers
+   * to a variable which is not set in this match.
    *<br>
    * Otherwise, nothing checks whether the governor already has such a
    * dependent, so the semgrex pattern has to stop matching once the node
@@ -165,13 +173,30 @@ public class AddDep extends SsurgeonEdit {
    * optional relation and name it as this edit does.  Otherwise each new
    * match adds another.
    *
-   * @throws SsurgeonRuntimeException if the position is directly before an empty word
+   * @throws SsurgeonRuntimeException if the position is directly before an empty word,
+   *   or an attribute value with variables comes out as one the attribute cannot take
    */
   @Override
   public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     if (nodeName != null && sm.getNode(nodeName) != null) {
       // the match already has this node, so there is nothing to fill in
       return false;
+    }
+    // the values are worked out before anything moves, so an unset
+    // variable leaves the sentence as it was
+    final Map<String, String> values;
+    if (literalAttributes != null) {
+      values = literalAttributes;
+    } else {
+      values = SsurgeonTemplate.expand(attributeTemplates, sm);
+      if (values == null) {
+        return false;
+      }
+      try {
+        checkIllegalAttributes(values);
+      } catch (SsurgeonParseException e) {
+        throw new SsurgeonRuntimeException("AddDep could not set the attributes " + values, e);
+      }
     }
     IndexedWord govNode = null;
     List<SemanticGraph> edgeGraphs = new ArrayList<>();
@@ -224,7 +249,7 @@ public class AddDep extends SsurgeonEdit {
     // must make new copy of CoreLabel - if the same word is added
     // multiple times by the same operation, we don't want to have the
     // same backing CoreLabel in each instance
-    CoreLabel newWord = fromCheapStrings(attributes);
+    CoreLabel newWord = fromCheapStrings(values);
     IndexedWord newNode = new IndexedWord(newWord);
     // the new word belongs to the same sentence as the governor,
     // or without one, as any other word
@@ -300,6 +325,25 @@ public class AddDep extends SsurgeonEdit {
   }
 
   /**
+   * Certain attributes cannot be set by an edit, as they would mess up
+   * the hashmaps in the SemanticGraph: idx, sentIndex, and docID.
+   *
+   * @param names the attribute names
+   * @throws SsurgeonParseException if the names include idx, sentIndex, or docID
+   */
+  static void checkAttributeNames(Collection<String> names) {
+    if (names.contains("idx")) {
+      throw new SsurgeonParseException("Cannot manually set the index attribute.  If you need a moveWord operation, please file an issue on github.");
+    }
+    if (names.contains("sentIndex")) {
+      throw new SsurgeonParseException("Cannot manually change the sentence index.  If you need an operation to change an entire sentence's sentIndex, please file an issue on github.");
+    }
+    if (names.contains("docID")) {
+      throw new SsurgeonParseException("Cannot manually change a document ID.  If you need an operation to change an entire sentence's document ID, please file an issue on github.");
+    }
+  }
+
+  /**
    * Certain attributes cannot be edited, especially docid, sentid, idx,
    * or they mess up the hashmaps in the SemanticGraph
    *
@@ -308,15 +352,7 @@ public class AddDep extends SsurgeonEdit {
    *   or if they can't be converted to a CoreLabel
    */
   public static void checkIllegalAttributes(Map<String, String> attributes) {
-    if (attributes.containsKey("idx")) {
-      throw new SsurgeonParseException("Cannot manually set the index attribute.  If you need a moveWord operation, please file an issue on github.");
-    }
-    if (attributes.containsKey("sentIndex")) {
-      throw new SsurgeonParseException("Cannot manually change the sentence index.  If you need an operation to change an entire sentence's sentIndex, please file an issue on github.");
-    }
-    if (attributes.containsKey("docID")) {
-      throw new SsurgeonParseException("Cannot manually change a document ID.  If you need an operation to change an entire sentence's document ID, please file an issue on github.");
-    }
+    checkAttributeNames(attributes.keySet());
 
     // if there's an exception, we'll barf when creating the pattern rather than at runtime
     try {

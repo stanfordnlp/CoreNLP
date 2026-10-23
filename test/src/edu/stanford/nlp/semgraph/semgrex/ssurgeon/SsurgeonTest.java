@@ -3133,6 +3133,120 @@ public class SsurgeonTest {
     assertNull(AnnotationLookup.toCoreKey(Ssurgeon.UPDATE_MORPHO_FEATURES_LOWER));
   }
 
+  /** "Juan estudió", with the verb's lemma estudir, which should be estudiar */
+  private static SemanticGraph estudirGraph() {
+    SemanticGraph sg = SemanticGraph.valueOf("[estudió-2 nsubj> Juan-1]", Language.UniversalEnglish);
+    sg.getNodeByIndex(2).setLemma("estudir");
+    sg.getNodeByIndex(2).set(CoreAnnotations.CoarseTagAnnotation.class, "VERB");
+    return sg;
+  }
+
+  /**
+   * A value can use a regex group the pattern captured: estud from estudir,
+   * which becomes estudiar.  Once the lemma is fixed, the pattern no
+   * longer matches, so iterate stops
+   */
+  @Test
+  public void editNodeVariable() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{cpos:VERB;lemma:/(.*)ir/#1%stem}=verb\neditNode -node verb -lemma ${stem}iar", "UniversalEnglish").get(0);
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(estudirGraph());
+    assertTrue(result.second);
+    assertEquals("estudiar", result.first.getNodeByIndex(2).lemma());
+
+    String edit = pattern.getEditScript().get(0).toEditString();
+    assertTrue(edit, edit.contains("${stem}iar"));
+    assertEquals(edit, Ssurgeon.parseEditLine(edit, new HashMap<>(), Language.UniversalEnglish, new HashSet<>()).toEditString());
+  }
+
+  /** An edit which needs a variable the match has not got edits nothing, not even its other attributes */
+  @Test
+  public void editNodeUnsetVariable() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{cpos:VERB}=verb\neditNode -node verb -lemma ${stem}ar -cpos AUX", "UniversalEnglish").get(0);
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(estudirGraph());
+    assertFalse(result.second);
+    assertEquals("estudir", result.first.getNodeByIndex(2).lemma());
+    assertEquals("VERB", result.first.getNodeByIndex(2).get(CoreAnnotations.CoarseTagAnnotation.class));
+  }
+
+  /** $$ is a literal $, so $${x} is the text ${x}, and any other $ is literal too */
+  @Test
+  public void editNodeDollar() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:Juan}=n\neditNode -node n -word US$$ -lemma $${x} -pos $", "UniversalEnglish").get(0);
+    SemanticGraph edited = pattern.iterate(estudirGraph()).first;
+    IndexedWord juan = edited.getNodeByIndex(1);
+    assertEquals("US$", juan.word());
+    assertEquals("${x}", juan.lemma());
+    assertEquals("$", juan.tag());
+
+    String edit = pattern.getEditScript().get(0).toEditString();
+    assertEquals(edit, Ssurgeon.parseEditLine(edit, new HashMap<>(), Language.UniversalEnglish, new HashSet<>()).toEditString());
+  }
+
+  /** A malformed variable, or a variable for an attribute which cannot be set, is an error when the edit is read */
+  @Test
+  public void variableParseErrors() {
+    Set<String> knownEdges = new HashSet<>();
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("editNode -node n -lemma ${stem", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("editNode -node n -lemma ${}", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("editNode -node n -zzzzzz ${stem}", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.parseEditLine("addDep -gov n -reln dep -word x -idx ${i}", new HashMap<>(), Language.UniversalEnglish, knownEdges));
+  }
+
+  /** addDep can build its new word from variables, and adds nothing if one is not set */
+  @Test
+  public void addDepVariable() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:/(.*)ó/#1%stem}=verb !> {word:/.*ar/}\naddDep -gov verb -reln dep -word ${stem}ar -lemma ${stem}ar -position +verb", "UniversalEnglish").get(0);
+    SemanticGraph edited = pattern.iterate(estudirGraph()).first;
+    assertEquals(3, edited.size());
+    assertEquals("estudiar", edited.getNodeByIndex(3).word());
+    assertEquals("estudiar", edited.getNodeByIndex(3).lemma());
+
+    pattern = Ssurgeon.readFromEditText("{word:Juan}=n\naddDep -gov n -reln dep -word ${nothing}", "UniversalEnglish").get(0);
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(estudirGraph());
+    assertFalse(result.second);
+    assertEquals(2, result.first.size());
+  }
+
+  /** The features to update can refer to variables as well */
+  @Test
+  public void editNodeFeatureVariable() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:/estudi(.)/#1%ending}=verb\neditNode -node verb -updateMorphoFeatures Ending=${ending}", "UniversalEnglish").get(0);
+    SemanticGraph edited = pattern.iterate(estudirGraph()).first;
+    assertEquals("ó", edited.getNodeByIndex(2).get(CoreAnnotations.CoNLLUFeats.class).get("Ending"));
+    String edit = pattern.getEditScript().get(0).toEditString();
+    assertTrue(edit, edit.contains("Ending=${ending}"));
+  }
+
+  /**
+   * A variable set in a match takes the place of the one the pattern
+   * captured, in that match alone: the matcher, and the next match made
+   * from it, have what the pattern captured
+   */
+  @Test
+  public void matchEditVariables() {
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:/(.*)/#1%w}").matcher(SemanticGraph.valueOf("[A-1 dep> B-2]"));
+    assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    String first = match.getVariableString("w");
+    assertNotNull(first);
+    match.putVariableString("w", "changed");
+    match.putVariableString("other", "x");
+    assertEquals("changed", match.getVariableString("w"));
+    assertEquals(Arrays.asList("other", "w"), new ArrayList<>(match.getVariableNames()));
+    match.putVariableString("w", null);
+    assertNull(match.getVariableString("w"));
+    assertEquals(Arrays.asList("other"), new ArrayList<>(match.getVariableNames()));
+    assertEquals(first, matcher.getVariableString("w"));
+    assertNull(matcher.getVariableString("other"));
+
+    assertTrue(matcher.find());
+    SemgrexMatch second = new SemgrexMatch(matcher);
+    assertNotNull(second.getVariableString("w"));
+    assertNotEquals(first, second.getVariableString("w"));
+    assertNull(second.getVariableString("other"));
+    assertFalse(matcher.find());
+  }
+
   /**
    * execute gives each match its own names: the article the first match
    * names does not stop the second match from adding its own
@@ -3174,7 +3288,7 @@ public class SsurgeonTest {
     }
   }
 
-  /** Rebinds every name of the match to something else, and changes nothing in the graph */
+  /** Rebinds every name and variable of the match to something else, and changes nothing in the graph */
   private static class ScribbleMatch extends SsurgeonEdit {
     @Override
     public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
@@ -3186,7 +3300,11 @@ public class SsurgeonTest {
       for (String name : new ArrayList<>(sm.getEdgeNames())) {
         sm.putNamedEdge(name, edge, SemgrexGraphName.BASIC);
       }
+      for (String var : new ArrayList<>(sm.getVariableNames())) {
+        sm.putVariableString(var, "scribbled");
+      }
       sm.putNode("extra", other);
+      sm.putVariableString("extra", "scribbled");
       return false;
     }
 
@@ -3197,11 +3315,11 @@ public class SsurgeonTest {
   }
 
   /**
-   * Whatever the edits do to the names of a match, the search goes on as
-   * it would have.  The pattern backtracks over named nodes, a named edge,
-   * a backreference, and a variable, and an edit which rebinds all of the
-   * names, and adds more, changes nothing about the matches iterate goes
-   * on to find
+   * Whatever the edits do to the names and variables of a match, the
+   * search goes on as it would have.  The pattern backtracks over named
+   * nodes, a named edge, a backreference, and a variable, and an edit
+   * which rebinds all of them, and adds more, changes nothing about the
+   * matches iterate goes on to find
    */
   @Test
   public void editsLeaveTheSearchAlone() {

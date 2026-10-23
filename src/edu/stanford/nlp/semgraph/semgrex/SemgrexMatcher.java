@@ -245,6 +245,17 @@ public abstract class SemgrexMatcher  {
   }
 
   /**
+   * Returns the string a variable group of the pattern matched in the
+   * current match, such as {@code {lemma:/(.*)ir/#1%stem}}.
+   *
+   * @param var the name of the variable
+   * @return the variable's string, or null if it is not set
+   */
+  public String getVariableString(String var) {
+    return variableStrings.getString(var);
+  }
+
+  /**
    * Returns the relation name matched by the relation labeled with {@code name} in the pattern.
    *
    * @param name the name of the relation, specified in the pattern

@@ -203,8 +203,8 @@ public class SsurgeonPattern {
       // We use the same nodes, since the matcher operates off of those.
       SemanticGraph tgt = SemanticGraphFactory.duplicateKeepNodes(sg);
       SemgrexGraphs tgtGraphs = new SemgrexGraphs(tgt);
-      // the edits share a copy of the match, so a name one of them
-      // binds is seen by the rest, and not by the next match
+      // the edits share a copy of the match, so a name or variable one
+      // of them sets is seen by the rest, and not by the next match
       SemgrexMatch match = new SemgrexMatch(matcher);
       for (SsurgeonEdit edit : editScript) {      
         edit.evaluate(tgtGraphs, match);
@@ -300,9 +300,9 @@ public class SsurgeonPattern {
     boolean anyChanges = false;
     while (matcher.find()) {
       boolean edited = false;
-      // the edits share a copy of the match, so a name one of them
-      // binds is seen by the rest, and the matcher's search, which
-      // goes on when no edit changes anything, is left alone
+      // the edits share a copy of the match, so a name or variable one
+      // of them sets is seen by the rest, and the matcher's search,
+      // which goes on when no edit changes anything, is left alone
       SemgrexMatch match = new SemgrexMatch(matcher);
       for (SsurgeonEdit edit : editScript) {
         if (edit.evaluate(graphs, match)) {
