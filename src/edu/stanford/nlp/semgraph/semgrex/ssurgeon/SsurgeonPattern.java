@@ -265,7 +265,7 @@ public class SsurgeonPattern {
    * @return the edited copies of the graphs, and whether any edit changed them
    * @throws IllegalArgumentException if the graphs have an alignment, or do not share their words
    * @throws IllegalStateException if the pattern or an edit names a graph the sentence has not got,
-   *   or an edit leaves the graphs with different copies of a word, or with different words
+   *   or an edit leaves the graphs with different IndexedWords for a word, or with different words
    *   when they had the same words before
    */
   public Pair<SemgrexGraphs, Boolean> iterate(SemgrexGraphs graphs) {
@@ -315,7 +315,7 @@ public class SsurgeonPattern {
     }
     unshared = unsharedWord(graphs);
     if (unshared != null) {
-      throw new IllegalStateException("Ssurgeon pattern " + getUID() + " left the graphs with different copies of a word.  " + unshared);
+      throw new IllegalStateException("Ssurgeon pattern " + getUID() + " left the graphs with different IndexedWords for a word.  " + unshared);
     }
     return new Pair<>(graphs, anyChanges);
   }
@@ -325,7 +325,7 @@ public class SsurgeonPattern {
    *<br>
    * A word in more than one graph, which is to say one with the same
    * index, empty index, and copy count, must be the very same IndexedWord
-   * in each.  There is then one copy of each word: an edit to a word, such
+   * in each.  There is then one IndexedWord for each word: an edit to it, such
    * as EditNode, is seen in every graph, and there is only ever one answer
    * for what the word is.  An edit which adds, removes, or renumbers words
    * does the same to each graph, with the same IndexedWords.
@@ -336,7 +336,7 @@ public class SsurgeonPattern {
    * their own.
    *
    * @param graphs the graphs of one sentence
-   * @throws IllegalArgumentException naming a word the graphs have different copies of
+   * @throws IllegalArgumentException naming a word the graphs have different IndexedWords for
    */
   public static void checkSharedWords(SemgrexGraphs graphs) {
     String unshared = unsharedWord(graphs);
@@ -345,15 +345,15 @@ public class SsurgeonPattern {
     }
   }
 
-  /** A description of a word the graphs have different copies of, or null if they share all of their words */
+  /** A description of a word the graphs have different IndexedWords for, or null if they share all of their words */
   private static String unsharedWord(SemgrexGraphs graphs) {
     SemanticGraph basic = graphs.getDefault();
     if (basic == null) {
       return null;
     }
-    Map<String, IndexedWord> basicWords = new HashMap<>();
+    Map<List<Integer>, IndexedWord> basicWords = new HashMap<>();
     for (IndexedWord word : basic.vertexSet()) {
-      basicWords.put(word.toCopyOrEmptyIndex(), word);
+      basicWords.put(wordPosition(word), word);
     }
     for (SemgrexGraphName name : SemgrexGraphName.values()) {
       SemanticGraph other = graphs.get(name);
@@ -361,15 +361,25 @@ public class SsurgeonPattern {
         continue;
       }
       for (IndexedWord word : other.vertexSet()) {
-        IndexedWord basicWord = basicWords.get(word.toCopyOrEmptyIndex());
+        IndexedWord basicWord = basicWords.get(wordPosition(word));
         if (basicWord != null && basicWord != word) {
-          return "The " + SemgrexGraphName.BASIC + " and " + name + " graphs have different copies of word " +
-            word.toCopyOrEmptyIndex() + " (" + word.word() + ").  Ssurgeon needs every graph of a sentence " +
+          String which = word.copyCount() == 0 ? "word " + word.toCopyOrEmptyIndex() : "copy " + word.copyCount() + " of word " + word.index();
+          return "The " + SemgrexGraphName.BASIC + " and " + name + " graphs have different IndexedWords for " +
+            which + " (" + word.word() + ").  Ssurgeon needs every graph of a sentence " +
             "to share its words, so that an edit to a word is seen in all of them";
         }
       }
     }
     return null;
+  }
+
+  /**
+   * Where a word is in the sentence: its index, empty index, and copy count.
+   * toCopyOrEmptyIndex would print a copy of word 2 and the empty word 2.1
+   * the same way, but they are different words.
+   */
+  private static List<Integer> wordPosition(IndexedWord word) {
+    return Arrays.asList(word.index(), word.getEmptyIndex(), word.copyCount());
   }
 
   /** A copy of each graph, sharing its words and edges with the original */
