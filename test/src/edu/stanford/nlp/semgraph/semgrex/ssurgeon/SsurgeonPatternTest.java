@@ -165,6 +165,27 @@ public class SsurgeonPatternTest {
     assertNotNull(result.first().get(SemgrexGraphName.ENHANCED));
   }
 
+  /**
+   * A copy of word 5 and the empty word 5.1 both print as 5.1, but they
+   * are different words, so the graphs still share their words
+   */
+  @Test
+  public void sharedWordsCopyAndEmptyWord() throws IOException {
+    SemgrexGraphs graphs = readGraphs(EMPTY_WORD_SENTENCE);
+    SemanticGraph basic = graphs.getDefault();
+    IndexedWord bill = basic.getNodeByIndex(5);
+    IndexedWord copy = bill.makeSoftCopy(1);
+    basic.addEdge(basic.getNodeByIndex(2), copy, GrammaticalRelation.valueOf(Language.UniversalEnglish, "dep"), 1.0, false);
+    IndexedWord empty = word(graphs.get(SemgrexGraphName.ENHANCED), 5, 1);
+    assertEquals(copy.toCopyOrEmptyIndex(), empty.toCopyOrEmptyIndex());
+    SsurgeonPattern.checkSharedWords(graphs);
+
+    // a second copy of the copy in the enhanced graph is still caught
+    SemanticGraph enhanced = graphs.get(SemgrexGraphName.ENHANCED);
+    enhanced.addEdge(enhanced.getNodeByIndex(2), bill.makeSoftCopy(1), GrammaticalRelation.valueOf(Language.UniversalEnglish, "dep"), 1.0, false);
+    assertThrows(IllegalArgumentException.class, () -> SsurgeonPattern.checkSharedWords(graphs));
+  }
+
   @Test
   public void sharedWordsFromConllu() throws IOException {
     SsurgeonPattern.checkSharedWords(readGraphs(ENHANCED_SENTENCE));
@@ -290,7 +311,7 @@ public class SsurgeonPatternTest {
     pattern.addEdit(new SeparateWordEdit());
     SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
     IllegalStateException e = assertThrows(IllegalStateException.class, () -> pattern.iterate(graphs));
-    assertTrue(e.getMessage(), e.getMessage().contains("different copies of word 8 (ok)"));
+    assertTrue(e.getMessage(), e.getMessage().contains("different IndexedWords for word 8 (ok)"));
   }
 
   /** "Sue likes coffee and Bill tea", where the enhanced graph has an empty word 5.1 for the elided "likes" */
