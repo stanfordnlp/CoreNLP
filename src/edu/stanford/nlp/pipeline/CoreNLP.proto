@@ -755,15 +755,17 @@ message SemgrexResponse {
 
 
 // A message for processing an Ssurgeon
-// Each sentence stores information about the tokens making up the
-// corresponding graph
+// The sentences to edit can be sent two ways.  Each entry of graph
+// is the basic dependency graph of one sentence, with its tokens in
+// graph.token.  Each entry of sentence is one sentence with its
+// tokens, its basic graph, and optionally its enhanced graph, in the
+// same form as a SemgrexRequest.  The edits apply to every graph of a
+// sentence: an edit which adds, removes, or renumbers words does so in
+// both graphs, and the semgrex can search the enhanced graph with
+// relations such as >nsubj@enhanced.  A request may use either or both.
 // An alternative would have been to use the existing Document or
 // Sentence classes, but the problem with that is it would be
-// ambiguous which dependency object to use.  Another problem
-// is that if the intent is to use multiple graphs from a
-// Sentence, then edits to the nodes of one graph would show up
-// in the nodes of the other graph (same backing CoreLabels)
-// and the operations themselves may not have the intended effect.
+// ambiguous which dependency object to use.
 // The Ssurgeon is composed of two pieces, the semgrex and the
 // ssurgeon operations, along with some optional documentation.
 message SsurgeonRequest {
@@ -776,16 +778,30 @@ message SsurgeonRequest {
   }
 
   repeated Ssurgeon          ssurgeon    = 1;
+  // One basic graph per sentence, with its tokens in graph.token
   repeated DependencyGraph   graph       = 2;
+  // One sentence per entry, with its tokens, its basic graph, and
+  // optionally its enhanced graph.  This is the same message a
+  // SemgrexRequest uses, so a sentence built for one can be sent to
+  // the other
+  repeated SemgrexRequest.Dependencies sentence = 3;
 }
 
 message SsurgeonResponse {
   message SsurgeonResult {
+    // The edited graph, for a result of SsurgeonRequest.graph
     optional DependencyGraph graph      = 1;
     optional bool            changed    = 2;
+    // The edited sentence, for a result of SsurgeonRequest.sentence:
+    // its tokens, including any empty nodes, its basic graph, its
+    // enhanced graph if the request had one, and its sentenceID
+    optional SemgrexRequest.Dependencies sentence = 3;
   }
 
-  repeated SsurgeonResult    result      = 1;
+  // One result per SsurgeonRequest.graph, in the same order
+  repeated SsurgeonResult    result         = 1;
+  // One result per SsurgeonRequest.sentence, in the same order
+  repeated SsurgeonResult    sentenceResult = 2;
 }
 
 // It's possible to send in a whole document, but we
