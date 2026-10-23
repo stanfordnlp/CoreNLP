@@ -46,15 +46,6 @@ public class KillNonRootedNodes extends SsurgeonEdit {
   }
 
   /**
-   * Removes the nodes, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
-   * for a sentence with only this graph.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Removes from every graph each node with no path to a root, in any
    * graph which has it, or in the graph this edit names.
    *<br>
@@ -118,16 +109,6 @@ public class KillNonRootedNodes extends SsurgeonEdit {
       }
     }
     return changed;
-  }
-
-  /**
-   * KillNonRootedNodes deletes its words from every graph.
-   *
-   * @return true
-   */
-  @Override
-  public boolean changesWordsInEveryGraph() {
-    return true;
   }
 
   /**

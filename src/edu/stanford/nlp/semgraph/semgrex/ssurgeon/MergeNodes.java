@@ -189,15 +189,6 @@ public class MergeNodes extends SsurgeonEdit {
   }
 
   /**
-   * Merges the words, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
-   * for a sentence with only this graph.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * If the edges of each graph which has the named nodes allow for it,
    * with a head which each graph allows, squish those words into one word.
    * Of the words which every graph allows as the head, the first is used.
@@ -377,14 +368,5 @@ public class MergeNodes extends SsurgeonEdit {
     return count;
   }
 
-  /**
-   * MergeNodes merges the words in every graph and renumbers the words of every graph.
-   *
-   * @return true
-   */
-  @Override
-  public boolean changesWordsInEveryGraph() {
-    return true;
-  }
 }
 

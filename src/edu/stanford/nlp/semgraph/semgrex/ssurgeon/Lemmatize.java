@@ -6,7 +6,6 @@ import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.process.Morphology;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 
@@ -59,14 +58,6 @@ public class Lemmatize extends SsurgeonEdit {
     buf.append(Ssurgeon.NODENAME_ARG);buf.append(" ");
     buf.append(nodeName);
     return buf.toString();
-  }
-
-  /**
-   * Lemmatizes the named word, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
   }
 
   /**

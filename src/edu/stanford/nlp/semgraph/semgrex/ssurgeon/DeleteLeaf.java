@@ -63,15 +63,6 @@ public class DeleteLeaf extends SsurgeonEdit {
   }
 
   /**
-   * Deletes the node, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
-   * for a sentence with only this graph.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Deletes the node from every graph which has it, if it is a leaf in
    * each of them, or in the graph this edit names, and it is not the only
    * root of any of them.  The words after it move down in every graph.
@@ -144,16 +135,6 @@ public class DeleteLeaf extends SsurgeonEdit {
       }
     }
     return false;
-  }
-
-  /**
-   * DeleteLeaf deletes the word from every graph and renumbers the words of every graph.
-   *
-   * @return true
-   */
-  @Override
-  public boolean changesWordsInEveryGraph() {
-    return true;
   }
 
   /**

@@ -45,14 +45,6 @@ public class KillAllIncomingEdges extends SsurgeonEdit {
   }
 
   /**
-   * Removes the edges, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Removes the incoming edges of the node in this edit's graph.
    * If executed twice on the same node, the second time there
    * will be no further updates

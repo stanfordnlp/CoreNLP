@@ -248,15 +248,6 @@ public class SplitWord extends SsurgeonEdit {
   }
 
   /**
-   * Splits the word, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
-   * for a sentence with only this graph.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Splits the word in every graph of the sentence which has it.
    *<br>
    * The words after the matched node move down to make room for the
@@ -422,13 +413,4 @@ public class SplitWord extends SsurgeonEdit {
     }
   }
 
-  /**
-   * SplitWord adds its words to every graph and renumbers the words of every graph.
-   *
-   * @return true
-   */
-  @Override
-  public boolean changesWordsInEveryGraph() {
-    return true;
-  }
 }

@@ -167,14 +167,6 @@ public class RemoveEdge extends SsurgeonEdit {
   }
 
   /**
-   * Removes the edges, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * The graph this edit works on, if it is not the basic graph.
    */
   @Override

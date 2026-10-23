@@ -149,15 +149,6 @@ public class AddDep extends SsurgeonEdit {
   }
 
   /**
-   * Adds the node, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does
-   * for a sentence with only this graph.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Adds the new node to every graph of the sentence, and its edge from the
    * governor to the graph this edit names, or to each graph with the governor.
    * Without a governor, the node is added with no edges.
@@ -298,16 +289,6 @@ public class AddDep extends SsurgeonEdit {
       }
     }
     return index == Integer.MAX_VALUE ? 1 : index;
-  }
-
-  /**
-   * AddDep changes the words of every graph, so the graphs still describe the same words.
-   *
-   * @return true
-   */
-  @Override
-  public boolean changesWordsInEveryGraph() {
-    return true;
   }
 
   /**

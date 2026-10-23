@@ -65,14 +65,6 @@ public class RelabelNamedEdge extends SsurgeonEdit {
   }
 
   /**
-   * Relabels the named edge, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * "Rename" the named edge by removing it and then recreating it
    *<br>
    * The edge is relabeled in the graph it was matched in.  An edge with

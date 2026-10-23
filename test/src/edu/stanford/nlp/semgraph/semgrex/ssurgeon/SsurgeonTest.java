@@ -21,6 +21,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
@@ -2267,7 +2268,7 @@ public class SsurgeonTest {
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}").matcher(sg);
     assertTrue(matcher.find());
     RelabelNamedEdge edit = new RelabelNamedEdge("e", GrammaticalRelation.valueOf(Language.UniversalEnglish, "iobj"));
-    assertTrue(edit.evaluate(sg, matcher));
+    assertTrue(edit.evaluate(new SemgrexGraphs(sg), matcher));
     assertEquals("iobj", matcher.getEdge("e").getRelation().toString());
     assertNamedEdgeInGraph(sg, matcher, "e");
   }
@@ -2278,7 +2279,7 @@ public class SsurgeonTest {
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {} >nsubj {}=s").matcher(sg);
     assertTrue(matcher.find());
     ReattachNamedEdge edit = new ReattachNamedEdge("e", "s", null);
-    assertTrue(edit.evaluate(sg, matcher));
+    assertTrue(edit.evaluate(new SemgrexGraphs(sg), matcher));
     assertEquals(2, matcher.getEdge("e").getSource().index());
     assertNamedEdgeInGraph(sg, matcher, "e");
   }
@@ -2290,8 +2291,8 @@ public class SsurgeonTest {
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}").matcher(sg);
     assertTrue(matcher.find());
     RemoveNamedEdge edit = new RemoveNamedEdge("e");
-    assertTrue(edit.evaluate(sg, matcher));
-    assertFalse(edit.evaluate(sg, matcher));
+    assertTrue(edit.evaluate(new SemgrexGraphs(sg), matcher));
+    assertFalse(edit.evaluate(new SemgrexGraphs(sg), matcher));
   }
 
   /**

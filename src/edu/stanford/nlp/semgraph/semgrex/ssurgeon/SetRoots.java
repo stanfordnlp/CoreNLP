@@ -42,14 +42,6 @@ public class SetRoots extends SsurgeonEdit {
   }
 
   /**
-   * Sets the roots, as {@link #evaluate(SemgrexGraphs, SemgrexMatcher)} does.
-   */
-  @Override
-  public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    return evaluate(new SemgrexGraphs(sg), sm);
-  }
-
-  /**
    * Sets the roots of this edit's graph.
    * If executed twice on the same graph, the second time there
    * will be no further updates
