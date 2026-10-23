@@ -2775,6 +2775,27 @@ public class SsurgeonTest {
     assertSame(pattern, edits.get(0).getOwningPattern());
   }
 
+  /** A pattern written out by writeToString reads back with the same edits and language */
+  @Test
+  public void writeAndReadPattern() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:dog}=noun !> {word:the}\naddDep -gov noun -reln det -word the -position -noun\neditNode -node noun -lemma dog", "UniversalEnglish").get(0);
+    String xml = Ssurgeon.writeToString(pattern);
+    List<SsurgeonPattern> read = Ssurgeon.inst().readFromString(xml);
+    assertEquals(1, read.size());
+    SsurgeonPattern copy = read.get(0);
+    assertEquals(Language.UniversalEnglish, copy.getLanguage());
+    assertEquals(pattern.getEditScript().size(), copy.getEditScript().size());
+    for (int i = 0; i < pattern.getEditScript().size(); ++i) {
+      assertEquals(pattern.getEditScript().get(i).toEditString(), copy.getEditScript().get(i).toEditString());
+    }
+
+    // the copy edits a graph just as the original does
+    SemanticGraph expected = pattern.iterate(SemanticGraph.valueOf("[chased-2 nsubj> dog-1]", Language.UniversalEnglish)).first;
+    SemanticGraph edited = copy.iterate(SemanticGraph.valueOf("[chased-2 nsubj> dog-1]", Language.UniversalEnglish)).first;
+    assertEquals(expected, edited);
+    assertEquals("dog", edited.getNodeByIndex(2).lemma());
+  }
+
   /**
    * Test that a couple fields used in Ssurgeon don't conflict with annotation keys in AnnotationLookup
    */

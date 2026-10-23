@@ -896,21 +896,21 @@ public class Ssurgeon  {
         Element notesElem = domDoc.createElement(SsurgeonPattern.NOTES_ELEM_TAG);
         notesElem.appendChild(domDoc.createTextNode(pattern.getNotes()));
         patElt.appendChild(notesElem);
+        // the relations in the edits are read in this language
+        Element languageElem = domDoc.createElement(SsurgeonPattern.LANGUAGE_TAG);
+        languageElem.appendChild(domDoc.createTextNode(pattern.getLanguage().toString()));
+        patElt.appendChild(languageElem);
 
         SemanticGraph semgrexGraph = pattern.getSemgrexGraph();
         if (semgrexGraph != null) {
           Element patNode = domDoc.createElement(SsurgeonPattern.SEMGREX_GRAPH_ELEM_TAG);
           patNode.appendChild(domDoc.createTextNode(semgrexGraph.toCompactString()));
         }
-        Element editList = domDoc.createElement(SsurgeonPattern.EDIT_LIST_ELEM_TAG);
-        patElt.appendChild(editList);
-        int editOrdinal = 1;
+        // one edit-list element per edit, as the reader expects
         for (SsurgeonEdit edit : pattern.getEditScript()) {
-          Element editElem = domDoc.createElement(SsurgeonPattern.EDIT_ELEM_TAG);
-          editElem.setAttribute(SsurgeonPattern.ORDINAL_ATTR, String.valueOf(editOrdinal));
+          Element editElem = domDoc.createElement(SsurgeonPattern.EDIT_LIST_ELEM_TAG);
           editElem.appendChild(domDoc.createTextNode(edit.toEditString()));
-          editList.appendChild(editElem);
-          editOrdinal++;
+          patElt.appendChild(editElem);
         }
         rootElt.appendChild(patElt);
         ordinal++;
