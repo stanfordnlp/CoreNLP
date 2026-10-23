@@ -55,9 +55,7 @@ public class SsurgeonPattern {
   protected SsurgPred predicateTest = null; // Predicate tests to apply, if non-null, must return true to execute.
   
   /**
-   * Creates a pattern with the given edit script, and sets this as the
-   * owning pattern of each edit, as {@link #addEdit} does.  The list is
-   * used directly.
+   * Creates a pattern with the given edit script.  The list is used directly.
    *
    * @param UID an identifier for this pattern
    * @param pattern the semgrex pattern which finds the places to edit
@@ -67,9 +65,6 @@ public class SsurgeonPattern {
     semgrexPattern = pattern;
     this.UID = UID;
     this.editScript = editScript;
-    for (SsurgeonEdit edit : editScript) {
-      edit.setOwningPattern(this);
-    }
   }
 
   /**
@@ -137,12 +132,11 @@ public class SsurgeonPattern {
   }
 
   /**
-   * Appends an edit to the edit script and sets this as the edit's owning pattern.
+   * Appends an edit to the edit script.
    *
    * @param newEdit the edit to add
    */
   public void addEdit(SsurgeonEdit newEdit) {
-    newEdit.setOwningPattern(this);
     editScript.add(newEdit);
   }
 
@@ -532,8 +526,6 @@ public class SsurgeonPattern {
   public static final String NOTES_ELEM_TAG = "notes";
   /** XML element for one edit when reading patterns; the writer instead puts all of the edits in one such element */
   public static final String EDIT_LIST_ELEM_TAG = "edit-list";
-  /** XML element for one edit inside the edit list, used only when writing patterns */
-  public static final String EDIT_ELEM_TAG = "edit";
   /** XML attribute giving the position of a pattern or edit when writing */
   public static final String ORDINAL_ATTR = "ordinal";
 

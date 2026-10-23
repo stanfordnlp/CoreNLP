@@ -64,7 +64,7 @@ public class SetRoots extends SsurgeonEdit {
     SemanticGraph sg = graphs.get(graph);
     Set<IndexedWord> newRoots = new LinkedHashSet<>();
     for (String name : newRootNames) {
-      IndexedWord root = getNamedNode(name, sm);
+      IndexedWord root = sm.getNode(name);
       if (root == null) {
         throw new SsurgeonRuntimeException("Ssurgeon rule tried to set root to " + name + " but that name does not exist in the semgrex results");
       }

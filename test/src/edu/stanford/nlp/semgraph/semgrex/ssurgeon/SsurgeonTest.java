@@ -3054,21 +3054,6 @@ public class SsurgeonTest {
     assertEquals("[bartender nsubj>Joe det>the cop>is]", firstGraphString);
   }
 
-  /** The edits given to the constructor belong to the pattern, as those added with addEdit do */
-  @Test
-  public void editListSetsOwningPattern() {
-    SemgrexPattern semgrexPattern = SemgrexPattern.compile("{}=a");
-    List<SsurgeonEdit> edits = java.util.Arrays.asList(new KillNonRootedNodes(), new KillNonRootedNodes());
-    SsurgeonPattern pattern = new SsurgeonPattern("owned", semgrexPattern, edits);
-    for (SsurgeonEdit edit : edits) {
-      assertSame(pattern, edit.getOwningPattern());
-    }
-
-    edits = java.util.Arrays.asList(new KillNonRootedNodes());
-    pattern = new SsurgeonPattern(semgrexPattern, edits);
-    assertSame(pattern, edits.get(0).getOwningPattern());
-  }
-
   /** A pattern written out by writeToString reads back with the same edits and language */
   @Test
   public void writeAndReadPattern() {
