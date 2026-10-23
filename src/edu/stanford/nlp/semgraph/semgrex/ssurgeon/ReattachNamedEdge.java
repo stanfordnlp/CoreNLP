@@ -5,7 +5,7 @@ import java.io.StringWriter;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 
@@ -76,7 +76,7 @@ public class ReattachNamedEdge extends SsurgeonEdit {
   /**
    * Removes {@code edge} from the graph and adds an edge with the same relation,
    * weight, and extra flag from {@code gov} to {@code dep}.  If {@code edgeName}
-   * is not null, that name in the matcher is updated to refer to the new edge.
+   * is not null, that name in the match is updated to refer to the new edge.
    * If an edge with the same relation already goes from {@code gov} to
    * {@code dep}, no edge is added and the name refers to that edge.
    *<br>
@@ -89,13 +89,13 @@ public class ReattachNamedEdge extends SsurgeonEdit {
    * @param sg The graph to edit
    * @param sm The matcher whose named edge is updated
    * @param edge The edge to move
-   * @param edgeName The name of the edge in the matcher, or null to not update any name
+   * @param edgeName The name of the edge in the match, or null to not update any name
    * @param gov The new gov
    * @param dep The new dep
    * @return false if the edge already goes from {@code gov} to {@code dep}, could not be removed,
    *   or would join a word the graph does not have; true otherwise
    */
-  public static boolean reattachEdge(SemanticGraph sg, SemgrexMatcher sm,
+  public static boolean reattachEdge(SemanticGraph sg, SemgrexMatch sm,
                                      SemanticGraphEdge edge, String edgeName, IndexedWord gov, IndexedWord dep) {
     if (gov == edge.getSource() && dep == edge.getTarget()) {
       // we were asked to point the edge to the same nodes it already pointed to
@@ -125,13 +125,14 @@ public class ReattachNamedEdge extends SsurgeonEdit {
     }
     // whether we recreated a new edge with the new relation,
     // or found an existing edge with the relation we wanted,
-    // update the named edge in the SemgrexMatcher so future
-    // iterations have the name connected to the edge.  the name
-    // stays bound in the graph it was found in, which is this one
+    // update the named edge in the match so the edits after this
+    // one have the name connected to the edge.  the name stays
+    // bound in the graph it was found in, which is this one
     // TODO: if an existing edge was clobbered, perhaps we need to
     // update anything that named it
     if (edgeName != null) {
-      sm.putNamedEdge(edgeName, newEdge);
+      SemgrexGraphName graph = sm.getEdgeGraph(edgeName);
+      sm.putNamedEdge(edgeName, newEdge, graph == null ? SemgrexGraphName.BASIC : graph);
     }
     return true;
   }
@@ -144,7 +145,7 @@ public class ReattachNamedEdge extends SsurgeonEdit {
    * any of them.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     SemanticGraphEdge edge = sm.getEdge(edgeName);
     SemgrexGraphName graphName = sm.getEdgeGraph(edgeName);
     SemanticGraph sg = graphName == null ? null : graphs.get(graphName);

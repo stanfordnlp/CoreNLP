@@ -10,7 +10,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 
 /**
  * This action deletes the given node, along with its incoming edges,
@@ -71,7 +71,7 @@ public class DeleteLeaf extends SsurgeonEdit {
    * will be no further updates
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     IndexedWord tgtNode = sm.getNode(nodeName);
     if (tgtNode == null) {
       return false;

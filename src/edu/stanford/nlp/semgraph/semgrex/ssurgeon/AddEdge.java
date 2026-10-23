@@ -7,7 +7,7 @@ import java.util.Set;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -37,7 +37,7 @@ public class AddEdge extends SsurgeonEdit {
   protected final GrammaticalRelation relation;
   /** Weight of the new edge */
   protected final double weight;
-  /** Name to give the new edge in the matcher, or null */
+  /** Name to give the new edge in the match, or null */
   protected final String edgeName;
   /** The graph this edit works on */
   protected final SemgrexGraphName graph;
@@ -73,7 +73,7 @@ public class AddEdge extends SsurgeonEdit {
    * @param depName name of the dependent node in the match
    * @param relation the relation of the new edge
    * @param weight the weight of the new edge
-   * @param edgeName name to give the new edge in the matcher, or null
+   * @param edgeName name to give the new edge in the match, or null
    */
   public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight, String edgeName) {
     this(govName, depName, relation, weight, edgeName, SemgrexGraphName.BASIC);
@@ -86,7 +86,7 @@ public class AddEdge extends SsurgeonEdit {
    * @param depName name of the dependent node in the match
    * @param relation the relation of the new edge
    * @param weight the weight of the new edge
-   * @param edgeName name to give the new edge in the matcher, or null
+   * @param edgeName name to give the new edge in the match, or null
    * @param graph the graph to add the edge to
    */
   public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight, String edgeName, SemgrexGraphName graph) {
@@ -165,7 +165,7 @@ public class AddEdge extends SsurgeonEdit {
    * word when adding to the basic graph, or a word an earlier edit deleted.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     SemanticGraph sg = graphs.get(graph);
     IndexedWord govNode = sm.getNode(govName);
     IndexedWord depNode =  sm.getNode(depName);

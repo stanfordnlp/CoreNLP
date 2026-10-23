@@ -28,6 +28,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.Alignment;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -266,7 +267,7 @@ public class SsurgeonPatternTest {
     }
 
     @Override
-    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
       return edit.evaluate(new SemgrexGraphs(graphs.getDefault()), sm);
     }
 
@@ -284,7 +285,7 @@ public class SsurgeonPatternTest {
     boolean done = false;
 
     @Override
-    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
       if (done) {
         return false;
       }
@@ -589,9 +590,10 @@ public class SsurgeonPatternTest {
     SemgrexGraphs graphs = readGraphs(ENHANCED_SENTENCE);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:go}=g").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     AddDep edit = new AddDep(null, null, Collections.singletonMap("word", "quickly"), "+g", 0.0, "q", null);
-    assertTrue(edit.evaluate(graphs, matcher));
-    IndexedWord quickly = matcher.getNode("q");
+    assertTrue(edit.evaluate(graphs, match));
+    IndexedWord quickly = match.getNode("q");
     assertEquals(5, quickly.index());
     for (SemanticGraph sg : Arrays.asList(graphs.getDefault(), graphs.get(SemgrexGraphName.ENHANCED))) {
       assertTrue(sg.containsVertex(quickly));
@@ -772,8 +774,9 @@ public class SsurgeonPatternTest {
     enhanced.addEdge(enhanced.getNodeByIndex(4), copy, GrammaticalRelation.valueOf(Language.UniversalEnglish, "advmod"), 1.0, false);
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:go}").matcher(graphs);
     assertTrue(matcher.find());
-    matcher.putNode("c", copy);
-    assertTrue(new DeleteLeaf("c").evaluate(graphs, matcher));
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    match.putNode("c", copy);
+    assertTrue(new DeleteLeaf("c").evaluate(graphs, match));
     assertFalse(enhanced.containsVertex(copy));
     assertTrue(enhanced.containsVertex(now));
     assertEquals("1=I 2=want 3=to 4=go 5=: 6=now 7=: 8=ok", wordsOf(enhanced));
@@ -792,14 +795,15 @@ public class SsurgeonPatternTest {
     enhanced.setRoots(Collections.singleton(enhanced.getNodeByIndex(8)));
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:ok}=o").matcher(graphs);
     assertTrue(matcher.find());
-    assertFalse(new DeleteLeaf("o").evaluate(graphs, matcher));
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    assertFalse(new DeleteLeaf("o").evaluate(graphs, match));
     assertEquals(8, enhanced.size());
     assertEquals(8, graphs.getDefault().size());
 
     // with a second root, it goes, and stops being a root
     IndexedWord want = enhanced.getNodeByIndex(2);
     enhanced.setRoots(Arrays.asList(want, enhanced.getNodeByIndex(8)));
-    assertTrue(new DeleteLeaf("o").evaluate(graphs, matcher));
+    assertTrue(new DeleteLeaf("o").evaluate(graphs, match));
     assertEquals(Collections.singleton(want), new HashSet<>(enhanced.getRoots()));
     assertEquals("1=I 2=want 3=to 4=go 5=: 6=now 7=:", wordsOf(enhanced));
   }
@@ -1011,7 +1015,8 @@ public class SsurgeonPatternTest {
   private static boolean reindex(SemgrexGraphs graphs) {
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:sleeps}").matcher(graphs);
     assertTrue(matcher.find());
-    return new ReindexGraph().evaluate(graphs, matcher);
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    return new ReindexGraph().evaluate(graphs, match);
   }
 
   /**
@@ -1108,8 +1113,9 @@ public class SsurgeonPatternTest {
     enhanced.setRoots(Arrays.asList(want, go));
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:want}").matcher(graphs);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     assertTrue(basic.removeEdge(basic.getEdge(want, go)));
-    assertTrue(new KillNonRootedNodes(SemgrexGraphName.BASIC).evaluate(graphs, matcher));
+    assertTrue(new KillNonRootedNodes(SemgrexGraphName.BASIC).evaluate(graphs, match));
     assertEquals("1=I 2=want 5=: 6=now 7=: 8=ok", wordsOf(basic));
     assertEquals(wordsOf(basic), wordsOf(enhanced));
     assertEquals(Collections.singleton(want), new HashSet<>(enhanced.getRoots()));
@@ -1127,7 +1133,8 @@ public class SsurgeonPatternTest {
     enhanced.setRoots(Collections.singleton(ok));
     SemgrexMatcher matcher = SemgrexPattern.compile("{word:want}").matcher(graphs);
     assertTrue(matcher.find());
-    assertTrue(new KillNonRootedNodes(SemgrexGraphName.ENHANCED).evaluate(graphs, matcher));
+    SemgrexMatch match = new SemgrexMatch(matcher);
+    assertTrue(new KillNonRootedNodes(SemgrexGraphName.ENHANCED).evaluate(graphs, match));
     assertEquals("2=want 8=ok", wordsOf(enhanced));
     assertEquals("2=want 8=ok", wordsOf(basic));
     assertTrue(basic.isRoot(want));

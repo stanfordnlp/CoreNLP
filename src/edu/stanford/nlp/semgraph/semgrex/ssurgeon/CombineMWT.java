@@ -8,7 +8,7 @@ import java.util.List;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.util.StringUtils;
 
 
@@ -74,7 +74,7 @@ public class CombineMWT extends SsurgeonEdit {
    * no token, so a match which names one is left alone.
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     List<IndexedWord> nodes = new ArrayList<>();
     for (String name : names) {
       IndexedWord node = sm.getNode(name);

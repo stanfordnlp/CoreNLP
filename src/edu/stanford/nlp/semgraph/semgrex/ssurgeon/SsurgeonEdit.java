@@ -5,7 +5,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 
 /**
  * An edit which an Ssurgeon pattern applies to a graph at each Semgrex match.
@@ -19,11 +19,14 @@ public abstract class SsurgeonEdit {
   
   
   /**
-   * Given a matching instance (via the SemgrexMatcher), performs an in-place
-   * modification on the graphs of a sentence.
+   * Given a match, performs an in-place modification on the graphs of a sentence.
+   *<br>
+   * The match has its own copies of the named nodes, edges, and variables
+   * of the semgrex match.  An edit can bind names in it for the edits after
+   * it, without changing the matcher's search.
    *<br>
    * The graphs are the ones the match was found in, or copies of them which
-   * share their words and edges, so the matcher's nodes and edges can be
+   * share their words and edges, so the match's nodes and edges can be
    * looked up in them.  A sentence with only a basic graph is edited by
    * passing {@code new SemgrexGraphs(graph)}.
    *<br>
@@ -32,10 +35,10 @@ public abstract class SsurgeonEdit {
    * describing the same words.
    *
    * @param graphs The graphs to edit
-   * @param sm The matcher, positioned at the current match
+   * @param sm The match, with its named nodes, edges, and variables
    * @return whether or not there was an edit
    */
-  public abstract boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm);
+  public abstract boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm);
 
   /**
    * The graphs this edit chooses to edit, such as with {@code -graph enhanced}.

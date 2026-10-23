@@ -245,18 +245,6 @@ public abstract class SemgrexMatcher  {
   }
 
   /**
-   * Binds a name to a node in this matcher's named nodes, as Ssurgeon does
-   * when an edit creates or replaces a named node.
-   *
-   * @param name the name of the node
-   * @param node the node to bind to the name
-   * @return the node previously bound to the name, or null
-   */
-  public IndexedWord putNode(String name, IndexedWord node) {
-    return namesToNodes.put(name, node);
-  }
-
-  /**
    * Returns the relation name matched by the relation labeled with {@code name} in the pattern.
    *
    * @param name the name of the relation, specified in the pattern
@@ -320,37 +308,6 @@ public abstract class SemgrexMatcher  {
    */
   public Set<String> getEdgeNames() {
     return namesToEdges.keySet();
-  }
-
-  /**
-   * Binds a name to an edge in this matcher's named edges, as Ssurgeon does
-   * when an edit creates or replaces a named edge.
-   *<br>
-   * The edge is taken to be in the graph the name was already bound in,
-   * as when an edit replaces an edge with a relabeled copy, or the basic
-   * graph if the name is new.  Use {@link #putNamedEdge(String, SemanticGraphEdge, SemgrexGraphName)}
-   * to say which graph.
-   *
-   * @param name the name of the edge
-   * @param edge the edge to bind to the name
-   * @return the edge previously bound to the name, or null
-   */
-  public SemanticGraphEdge putNamedEdge(String name, SemanticGraphEdge edge) {
-    SemgrexGraphName graph = getEdgeGraph(name);
-    return putNamedEdge(name, edge, graph == null ? SemgrexGraphName.BASIC : graph);
-  }
-
-  /**
-   * Binds a name to an edge in the given graph in this matcher's named edges.
-   *
-   * @param name the name of the edge
-   * @param edge the edge to bind to the name
-   * @param graph the graph the edge is in
-   * @return the edge previously bound to the name, or null
-   */
-  public SemanticGraphEdge putNamedEdge(String name, SemanticGraphEdge edge, SemgrexGraphName graph) {
-    MatchedEdge previous = namesToEdges.put(name, new MatchedEdge(edge, graph));
-    return previous == null ? null : previous.edge;
   }
 
   @Override

@@ -2,6 +2,7 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.Test;
 
@@ -22,6 +24,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
@@ -2253,8 +2256,8 @@ public class SsurgeonTest {
   }
 
   /** The edge a named-edge edit gives its name to is the one in the graph */
-  private static void assertNamedEdgeInGraph(SemanticGraph sg, SemgrexMatcher matcher, String name) {
-    SemanticGraphEdge named = matcher.getEdge(name);
+  private static void assertNamedEdgeInGraph(SemanticGraph sg, SemgrexMatch match, String name) {
+    SemanticGraphEdge named = match.getEdge(name);
     boolean found = false;
     for (SemanticGraphEdge edge : sg.getAllEdges(named.getSource(), named.getTarget())) {
       found = found || edge == named;
@@ -2267,10 +2270,11 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[ate-1 nsubj> Bill-2 obj> cake-3]");
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}").matcher(sg);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     RelabelNamedEdge edit = new RelabelNamedEdge("e", GrammaticalRelation.valueOf(Language.UniversalEnglish, "iobj"));
-    assertTrue(edit.evaluate(new SemgrexGraphs(sg), matcher));
-    assertEquals("iobj", matcher.getEdge("e").getRelation().toString());
-    assertNamedEdgeInGraph(sg, matcher, "e");
+    assertTrue(edit.evaluate(new SemgrexGraphs(sg), match));
+    assertEquals("iobj", match.getEdge("e").getRelation().toString());
+    assertNamedEdgeInGraph(sg, match, "e");
   }
 
   @Test
@@ -2278,10 +2282,11 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[ate-1 nsubj> Bill-2 obj> cake-3]");
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {} >nsubj {}=s").matcher(sg);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     ReattachNamedEdge edit = new ReattachNamedEdge("e", "s", null);
-    assertTrue(edit.evaluate(new SemgrexGraphs(sg), matcher));
-    assertEquals(2, matcher.getEdge("e").getSource().index());
-    assertNamedEdgeInGraph(sg, matcher, "e");
+    assertTrue(edit.evaluate(new SemgrexGraphs(sg), match));
+    assertEquals(2, match.getEdge("e").getSource().index());
+    assertNamedEdgeInGraph(sg, match, "e");
   }
 
   /** RemoveNamedEdge only reports a change when there was an edge to remove */
@@ -2290,9 +2295,10 @@ public class SsurgeonTest {
     SemanticGraph sg = SemanticGraph.valueOf("[ate-1 nsubj> Bill-2 obj> cake-3]");
     SemgrexMatcher matcher = SemgrexPattern.compile("{}=a >obj=e {}").matcher(sg);
     assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(matcher);
     RemoveNamedEdge edit = new RemoveNamedEdge("e");
-    assertTrue(edit.evaluate(new SemgrexGraphs(sg), matcher));
-    assertFalse(edit.evaluate(new SemgrexGraphs(sg), matcher));
+    assertTrue(edit.evaluate(new SemgrexGraphs(sg), match));
+    assertFalse(edit.evaluate(new SemgrexGraphs(sg), match));
   }
 
   /**
@@ -3125,5 +3131,109 @@ public class SsurgeonTest {
     assertNull(AnnotationLookup.toCoreKey(Ssurgeon.REMOVE));
     assertNull(AnnotationLookup.toCoreKey(Ssurgeon.UPDATE_MORPHO_FEATURES));
     assertNull(AnnotationLookup.toCoreKey(Ssurgeon.UPDATE_MORPHO_FEATURES_LOWER));
+  }
+
+  /**
+   * execute gives each match its own names: the article the first match
+   * names does not stop the second match from adding its own
+   */
+  @Test
+  public void executeNamesEachMatch() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:/dog|cat/}=noun !> {word:the}\naddDep -gov noun -reln det -word the -position -noun -name article", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[chased-2 nsubj> dog-1 obj> cat-3]", Language.UniversalEnglish);
+    Collection<SemanticGraph> results = pattern.execute(sg);
+    assertEquals(2, results.size());
+    for (SemanticGraph result : results) {
+      assertEquals(result.toCompactString(), 4, result.size());
+    }
+  }
+
+  /** Records the nodes, edges, and variables of each match it sees, as the pattern bound them */
+  private static class RecordMatch extends SsurgeonEdit {
+    final List<String> seen = new ArrayList<>();
+
+    @Override
+    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
+      List<String> names = new ArrayList<>();
+      for (String name : new TreeSet<>(sm.getNodeNames())) {
+        names.add(name + "=" + sm.getNode(name).toCopyOrEmptyIndex());
+      }
+      for (String name : new TreeSet<>(sm.getEdgeNames())) {
+        names.add(name + "=" + sm.getEdge(name));
+      }
+      for (String var : sm.getVariableNames()) {
+        names.add(var + "=" + sm.getVariableString(var));
+      }
+      seen.add(String.join(" ", names));
+      return false;
+    }
+
+    @Override
+    public String toEditString() {
+      return "recordMatch";
+    }
+  }
+
+  /** Rebinds every name of the match to something else, and changes nothing in the graph */
+  private static class ScribbleMatch extends SsurgeonEdit {
+    @Override
+    public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
+      IndexedWord other = graphs.getDefault().getFirstRoot();
+      for (String name : new ArrayList<>(sm.getNodeNames())) {
+        sm.putNode(name, other);
+      }
+      SemanticGraphEdge edge = graphs.getDefault().edgeListSorted().get(0);
+      for (String name : new ArrayList<>(sm.getEdgeNames())) {
+        sm.putNamedEdge(name, edge, SemgrexGraphName.BASIC);
+      }
+      sm.putNode("extra", other);
+      return false;
+    }
+
+    @Override
+    public String toEditString() {
+      return "scribbleMatch";
+    }
+  }
+
+  /**
+   * Whatever the edits do to the names of a match, the search goes on as
+   * it would have.  The pattern backtracks over named nodes, a named edge,
+   * a backreference, and a variable, and an edit which rebinds all of the
+   * names, and adds more, changes nothing about the matches iterate goes
+   * on to find
+   */
+  @Test
+  public void editsLeaveTheSearchAlone() {
+    // d is a dep and b is not, so no two names bind the same node, which would stop execute
+    String semgrex = "{}=a >/nsubj|obj/=e ({}=b >/.*/ {word:/(.).*/#1%first}=c) >dep {word:/(.).*/#1%first}=d";
+    SemanticGraph sg = SemanticGraph.valueOf("[saw-2 nsubj> [cat-1 amod> calm-4 det> crazy-5] obj> [dog-3 amod> cute-6] dep> dull-7 dep> cold-8 dep> clean-9]", Language.UniversalEnglish);
+
+    RecordMatch alone = new RecordMatch();
+    SsurgeonPattern recordOnly = new SsurgeonPattern("record", SemgrexPattern.compile(semgrex));
+    recordOnly.addEdit(alone);
+    assertFalse(recordOnly.iterate(sg).second);
+    assertTrue(alone.seen.toString(), alone.seen.size() > 1);
+
+    RecordMatch scribbled = new RecordMatch();
+    SsurgeonPattern withScribbles = new SsurgeonPattern("scribble", SemgrexPattern.compile(semgrex));
+    withScribbles.addEdit(scribbled);
+    withScribbles.addEdit(new ScribbleMatch());
+    assertFalse(withScribbles.iterate(sg).second);
+    assertEquals(alone.seen, scribbled.seen);
+
+    // execute goes on with the same matcher after each match, too
+    RecordMatch executedAlone = new RecordMatch();
+    SsurgeonPattern executeOnly = new SsurgeonPattern("record", SemgrexPattern.compile(semgrex));
+    executeOnly.addEdit(executedAlone);
+    executeOnly.execute(sg);
+    assertTrue(executedAlone.seen.toString(), executedAlone.seen.size() > 1);
+
+    RecordMatch executedScribbled = new RecordMatch();
+    SsurgeonPattern executeScribbles = new SsurgeonPattern("scribble", SemgrexPattern.compile(semgrex));
+    executeScribbles.addEdit(executedScribbled);
+    executeScribbles.addEdit(new ScribbleMatch());
+    executeScribbles.execute(sg);
+    assertEquals(executedAlone.seen, executedScribbled.seen);
   }
 }

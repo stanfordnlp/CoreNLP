@@ -5,7 +5,7 @@ import java.util.*;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.*;
 
 /**
@@ -53,7 +53,7 @@ public class KillNonRootedNodes extends SsurgeonEdit {
    * will be no further updates
    */
   @Override
-  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
+  public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
     List<SemanticGraph> present = new ArrayList<>();
     for (SemgrexGraphName name : SemgrexGraphName.values()) {
       SemanticGraph sg = graphs.get(name);
