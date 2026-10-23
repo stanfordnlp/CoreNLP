@@ -59,8 +59,9 @@ public class SsurgeonPattern {
   private Map<String, IndexedWord> nodeMap = null;
   
   /**
-   * Creates a pattern with the given edit script.  The list is used
-   * directly, and the edits' owning pattern is not set.
+   * Creates a pattern with the given edit script, and sets this as the
+   * owning pattern of each edit, as {@link #addEdit} does.  The list is
+   * used directly.
    *
    * @param UID an identifier for this pattern
    * @param pattern the semgrex pattern which finds the places to edit
@@ -70,6 +71,9 @@ public class SsurgeonPattern {
     semgrexPattern = pattern;
     this.UID = UID;
     this.editScript = editScript;
+    for (SsurgeonEdit edit : editScript) {
+      edit.setOwningPattern(this);
+    }
   }
 
   /**
