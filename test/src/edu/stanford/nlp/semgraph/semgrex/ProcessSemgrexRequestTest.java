@@ -3,7 +3,13 @@ package edu.stanford.nlp.semgraph.semgrex;
 import org.junit.Assert;
 import org.junit.Test;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
+import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.util.CoreMap;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -385,6 +391,35 @@ sentence {
       }
     }
     throw new AssertionError("No edge named " + name);
+  }
+
+  /**
+   * The graphs of a request sentence share their words, as graphs read
+   * from CoNLL-U do: a word in both is the same IndexedWord in each, and
+   * the empty word 5.1, which only the enhanced graph has, is in it with
+   * its edges
+   */
+  @Test
+  public void testReadSentenceSharesWords() {
+    CoreNLPProtos.SemgrexRequest request = buildEnhancedRequest("{}");
+    CoreMap sentence = ProcessSemgrexRequest.readSentence(new ProtobufAnnotationSerializer(), request.getQuery(0), 3, "semgrex");
+    SemanticGraph basic = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    SemanticGraph enhanced = sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
+    Assert.assertEquals(6, basic.size());
+    Assert.assertEquals(7, enhanced.size());
+    for (IndexedWord word : basic.vertexSet()) {
+      IndexedWord enhancedWord = null;
+      for (IndexedWord other : enhanced.vertexSet()) {
+        if (other.index() == word.index() && other.getEmptyIndex() == 0) {
+          enhancedWord = other;
+        }
+      }
+      Assert.assertSame(word, enhancedWord);
+    }
+    Assert.assertEquals(6, enhanced.edgeCount());
+    Assert.assertEquals(1, enhanced.getRoots().size());
+    Assert.assertSame(basic.getFirstRoot(), enhanced.getFirstRoot());
+    Assert.assertEquals(Integer.valueOf(3), sentence.get(CoreAnnotations.SentenceIndexAnnotation.class));
   }
 
   /**

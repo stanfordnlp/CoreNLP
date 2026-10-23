@@ -13,7 +13,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -24,9 +23,11 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.semgrex.ProcessSemgrexRequest;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ProcessProtobufRequest;
 import edu.stanford.nlp.util.XMLUtils;
@@ -100,18 +101,10 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
 
     for (int sentenceIndex = 0; sentenceIndex < request.getSentenceCount(); ++sentenceIndex) {
       CoreNLPProtos.SemgrexRequest.Dependencies sentence = request.getSentence(sentenceIndex);
-      final List<CoreLabel> tokens;
-      if (sentence.getGraph().getTokenList().size() > 0) {
-        tokens = sentence.getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
-      } else {
-        tokens = sentence.getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
-      }
-      SemanticGraph basic = ProtobufAnnotationSerializer.fromProto(sentence.getGraph(), tokens, "ssurgeon");
-      SemanticGraph enhanced = null;
-      if (sentence.hasEnhancedGraph()) {
-        enhanced = shareWords(basic, ProtobufAnnotationSerializer.fromProto(sentence.getEnhancedGraph(), tokens, "ssurgeon"));
-      }
-      SemgrexGraphs graphs = SemgrexGraphs.of(basic, enhanced);
+      // the graphs share their words, as Ssurgeon needs
+      CoreMap read = ProcessSemgrexRequest.readSentence(serializer, sentence, sentenceIndex, "ssurgeon");
+      SemgrexGraphs graphs = SemgrexGraphs.of(read.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class),
+                                              read.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class));
 
       boolean isChanged = false;
       for (SsurgeonPattern pattern : patterns) {
@@ -129,42 +122,6 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
       responseBuilder.addSentenceResult(sentenceBuilder.build());
     }
     return responseBuilder.build();
-  }
-
-  /**
-   * The enhanced graph, rebuilt over the IndexedWords of the basic graph
-   * wherever it has the same word, so the two graphs share their words
-   * as Ssurgeon needs.  fromProto wraps the tokens in new IndexedWords
-   * for each graph it builds, even when the graphs are built over the
-   * same tokens.  Words the basic graph does not have, such as empty
-   * words and copies, keep the IndexedWords they have.
-   */
-  static SemanticGraph shareWords(SemanticGraph basic, SemanticGraph other) {
-    Map<List<Integer>, IndexedWord> basicWords = new HashMap<>();
-    for (IndexedWord word : basic.vertexSet()) {
-      basicWords.put(position(word), word);
-    }
-    Map<IndexedWord, IndexedWord> sharedWords = new HashMap<>();
-    SemanticGraph shared = new SemanticGraph();
-    for (IndexedWord word : other.vertexSet()) {
-      IndexedWord sharedWord = basicWords.getOrDefault(position(word), word);
-      sharedWords.put(word, sharedWord);
-      shared.addVertex(sharedWord);
-    }
-    for (SemanticGraphEdge edge : other.edgeIterable()) {
-      shared.addEdge(sharedWords.get(edge.getSource()), sharedWords.get(edge.getTarget()), edge.getRelation(), edge.getWeight(), edge.isExtra());
-    }
-    List<IndexedWord> roots = new ArrayList<>();
-    for (IndexedWord root : other.getRoots()) {
-      roots.add(sharedWords.get(root));
-    }
-    shared.setRoots(roots);
-    return shared;
-  }
-
-  /** Where a word is in the sentence: its index, empty index, and copy count */
-  private static List<Integer> position(IndexedWord word) {
-    return Arrays.asList(word.index(), word.getEmptyIndex(), word.copyCount());
   }
 
   /**
