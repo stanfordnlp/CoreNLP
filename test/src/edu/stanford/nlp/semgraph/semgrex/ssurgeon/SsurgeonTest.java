@@ -16,6 +16,7 @@ import org.junit.Test;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -2173,6 +2174,12 @@ public class SsurgeonTest {
     edit = Ssurgeon.parseEditLine("addDep -gov a -reln det -word the", new HashMap<>(), Language.UniversalEnglish, knownEdges);
     assertEquals(Collections.emptySet(), edit.requiredGraphs());
     assertFalse(edit.toEditString().contains("-graph"));
+    edit = Ssurgeon.parseEditLine("deleteLeaf -node a -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
+    assertEquals(edit.toEditString(), Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
+    edit = Ssurgeon.parseEditLine("deleteLeaf -node a", new HashMap<>(), Language.UniversalEnglish, knownEdges);
+    assertEquals(Collections.emptySet(), edit.requiredGraphs());
+    assertFalse(edit.toEditString().contains("-graph"));
     edit = Ssurgeon.parseEditLine("killNonRooted -graph enhanced", new HashMap<>(), Language.UniversalEnglish, knownEdges);
     assertEquals(Collections.singleton(SemgrexGraphName.ENHANCED), edit.requiredGraphs());
     assertEquals(edit.toEditString(), Ssurgeon.parseEditLine(edit.toEditString(), new HashMap<>(), Language.UniversalEnglish, knownEdges).toEditString());
@@ -2685,6 +2692,40 @@ public class SsurgeonTest {
     expected = SemanticGraph.valueOf("[nobre-6 nmod> [decreto-9 case> com-7 det> o-8] cop> fez-3 punct> [--4 expl:pv> [se-5 advmod> [Assim punct> ,-2]]]]");
     newSg = pattern.iterate(sg).first;
     assertEquals(newSg, expected);
+  }
+
+  /** The last word of a sentence is its only root, so it is not deleted */
+  @Test
+  public void deleteLeafKeepsLastWord() {
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:ok}=o\ndeleteLeaf -node o", "UniversalEnglish").get(0);
+    SemanticGraph sg = SemanticGraph.valueOf("[ok-1]");
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(sg);
+    assertFalse(result.second);
+    assertEquals(1, result.first.size());
+  }
+
+  /** A root which is not the only root can be deleted, and stops being a root */
+  @Test
+  public void deleteLeafRoot() {
+    SemanticGraph sg = SemanticGraph.valueOf("[ok-1]");
+    IndexedWord ok = sg.getNodeByIndex(1);
+    IndexedWord yes = new IndexedWord(new CoreLabel(ok.backingLabel()));
+    yes.setWord("yes");
+    yes.setValue("yes");
+    yes.setIndex(2);
+    sg.addVertex(yes);
+    Set<IndexedWord> roots = new HashSet<>(sg.getRoots());
+    roots.add(yes);
+    sg.setRoots(roots);
+
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText("{word:ok}=o\ndeleteLeaf -node o", "UniversalEnglish").get(0);
+    SemanticGraph edited = pattern.iterate(sg).first;
+    assertEquals(1, edited.size());
+    assertEquals(1, edited.getRoots().size());
+    IndexedWord root = edited.getFirstRoot();
+    assertEquals("yes", root.word());
+    assertTrue(edited.containsVertex(root));
+    assertEquals(1, root.index());
   }
 
   @Test

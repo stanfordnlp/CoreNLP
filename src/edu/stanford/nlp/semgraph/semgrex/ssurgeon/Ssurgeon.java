@@ -93,7 +93,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <li> {@code setRoots n1 (n2 n3 ...) -graph enhanced}
  * <li> {@code mergeNodes -node n1 -node n2 ...}
  * <li> {@code killAllIncomingEdges -node node -graph enhanced}
- * <li> {@code deleteLeaf -node node}
+ * <li> {@code deleteLeaf -node node -graph enhanced}
  * <li> {@code killNonRooted -graph basic}
  * <li> {@code reindexGraph}
  * </ul>
@@ -223,7 +223,14 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code deleteLeaf} deletes a node as long as it is a leaf. <br>
  * {@code -node} is the node to delete. <br>
- * If the node is not a leaf (no outgoing edges), it will not be deleted.
+ * If the node is not a leaf (no outgoing edges), it will not be deleted. <br>
+ * The node is deleted from every graph of the sentence which has it, and has to be a leaf in each of them.
+ *   With {@code -graph}, only that graph decides whether it is a leaf, {@code basic} or {@code enhanced},
+ *   and its edges in the other graphs, outgoing as well as incoming, are deleted along with it. <br>
+ * The words after it move down by one.  An empty word stays after the word it follows, so deleting word 5
+ *   with 4.1 and 5.1 present makes 5.1 into 4.2, and deleting empty word 2.1 makes 2.2 into 2.1.
+ *   Deleting a copy of a word moves nothing, as the word still holds its place. <br>
+ * A graph's last root is never deleted: if the node is the only root of a graph which has it, nothing happens.
  *</p><p>
  * {@code killNonRooted} searches the graph and deletes all nodes which have no path to a root. <br>
  * After cutting a piece of the graph off with {@code removeEdge}, this deletes the piece without the root.
@@ -657,6 +664,7 @@ public class Ssurgeon  {
   private static final Set<String> GRAPH_EDITS =
     new HashSet<>(Arrays.asList(AddDep.LABEL.toLowerCase(Locale.ROOT),
                                 AddEdge.LABEL.toLowerCase(Locale.ROOT),
+                                DeleteLeaf.LABEL.toLowerCase(Locale.ROOT),
                                 RemoveEdge.LABEL.toLowerCase(Locale.ROOT),
                                 KillAllIncomingEdges.LABEL.toLowerCase(Locale.ROOT),
                                 SetPhraseHead.LABEL.toLowerCase(Locale.ROOT)));
@@ -826,7 +834,7 @@ public class Ssurgeon  {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make a DeleteLeaf out of " + argsBox.nodes.size() + " nodes");
         }
-        return new DeleteLeaf(argsBox.nodes.get(0));
+        return new DeleteLeaf(argsBox.nodes.get(0), argsBox.graph);
       } else if (command.equalsIgnoreCase(EditNode.LABEL)) {
         if (argsBox.nodes.size() != 1) {
           throw new SsurgeonParseException("Cannot make an EditNode out of " + argsBox.nodes.size() + " nodes.  Please use exactly one -node");
