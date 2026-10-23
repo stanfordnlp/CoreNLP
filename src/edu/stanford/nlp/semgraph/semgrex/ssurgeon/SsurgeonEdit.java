@@ -7,7 +7,6 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphName;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexGraphs;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.ling.IndexedWord;
 
 /**
  * An edit which an Ssurgeon pattern applies to a graph at each Semgrex match.
@@ -15,10 +14,8 @@ import edu.stanford.nlp.ling.IndexedWord;
  * in {@link Ssurgeon}.
  */
 public abstract class SsurgeonEdit {
-   
-  private SsurgeonPattern owningPattern = null;
 
-  /** Creates an edit with no owning pattern. */
+  /** Creates an edit. */
   public SsurgeonEdit() { }
   
   
@@ -97,35 +94,5 @@ public abstract class SsurgeonEdit {
    */
   public boolean equals(SsurgeonEdit tgt) {
     return this.toString().equals(tgt.toString());
-  }
-
-  /**
-   * Returns the pattern this edit belongs to.
-   *
-   * @return The owning pattern, or null if none has been set
-   */
-  public SsurgeonPattern getOwningPattern() {
-    return owningPattern;
-  }
-
-  /**
-   * Sets the pattern this edit belongs to.
-   *
-   * @param owningPattern The owning pattern
-   */
-  public void setOwningPattern(SsurgeonPattern owningPattern) {
-    this.owningPattern = owningPattern;
-  }
-  
-  /**
-   * Used to retrieve the named node: one the Semgrex pattern matched, or
-   * one an earlier edit for the same match added, such as with addDep -name.
-   *
-   * @param nodeName The name of the node
-   * @param sm The matcher, positioned at the current match
-   * @return The named node, or null if the match has no node by that name
-   */
-  public IndexedWord getNamedNode(String nodeName, SemgrexMatcher sm) {
-    return sm.getNode(nodeName);
   }
 }

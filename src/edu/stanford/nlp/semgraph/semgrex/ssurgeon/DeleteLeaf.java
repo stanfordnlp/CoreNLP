@@ -35,7 +35,7 @@ public class DeleteLeaf extends SsurgeonEdit {
    */
   @Override
   public boolean evaluate(SemanticGraph sg, SemgrexMatcher sm) {
-    IndexedWord tgtNode = getNamedNode(nodeName, sm);
+    IndexedWord tgtNode = sm.getNode(nodeName);
     if (tgtNode == null) {
       return false;
     }

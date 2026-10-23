@@ -60,7 +60,7 @@ public class KillAllIncomingEdges extends SsurgeonEdit {
   @Override
   public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     SemanticGraph sg = graphs.get(graph);
-    IndexedWord tgtNode = getNamedNode(nodeName, sm);
+    IndexedWord tgtNode = sm.getNode(nodeName);
     if (sg == null || tgtNode == null || !sg.containsVertex(tgtNode)) {
       return false;
     }

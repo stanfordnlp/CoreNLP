@@ -104,8 +104,8 @@ public class RemoveEdge extends SsurgeonEdit {
     }
     boolean govWild = govName.equals(WILDCARD_NODE);
     boolean depWild = depName.equals(WILDCARD_NODE);
-    IndexedWord govNode = getNamedNode(govName, sm);
-    IndexedWord depNode = getNamedNode(depName, sm);
+    IndexedWord govNode = sm.getNode(govName);
+    IndexedWord depNode = sm.getNode(depName);
     if ((govNode != null && !sg.containsVertex(govNode)) || (depNode != null && !sg.containsVertex(depNode))) {
       return false;
     }

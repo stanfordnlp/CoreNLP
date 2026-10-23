@@ -175,8 +175,8 @@ public class AddEdge extends SsurgeonEdit {
   @Override
   public boolean evaluate(SemgrexGraphs graphs, SemgrexMatcher sm) {
     SemanticGraph sg = graphs.get(graph);
-    IndexedWord govNode = getNamedNode(govName, sm);
-    IndexedWord depNode =  getNamedNode(depName, sm);
+    IndexedWord govNode = sm.getNode(govName);
+    IndexedWord depNode =  sm.getNode(depName);
     if (sg == null || govNode == null || depNode == null || !sg.containsVertex(govNode) || !sg.containsVertex(depNode)) {
       return false;
     }
