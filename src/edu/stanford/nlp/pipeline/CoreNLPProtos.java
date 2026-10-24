@@ -82106,6 +82106,55 @@ public final class CoreNLPProtos {
      */
     edu.stanford.nlp.pipeline.CoreNLPProtos.SemgrexRequest.DependenciesOrBuilder getSentenceOrBuilder(
         int index);
+
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table> 
+        getTableList();
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table getTable(int index);
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    int getTableCount();
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder> 
+        getTableOrBuilderList();
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder getTableOrBuilder(
+        int index);
   }
   /**
    * <pre>
@@ -82140,6 +82189,7 @@ public final class CoreNLPProtos {
       ssurgeon_ = java.util.Collections.emptyList();
       graph_ = java.util.Collections.emptyList();
       sentence_ = java.util.Collections.emptyList();
+      table_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -83490,6 +83540,1737 @@ public final class CoreNLPProtos {
 
     }
 
+    public interface TableOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SsurgeonRequest.Table)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>optional string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      boolean hasName();
+      /**
+       * <code>optional string name = 1;</code>
+       * @return The name.
+       */
+      java.lang.String getName();
+      /**
+       * <code>optional string name = 1;</code>
+       * @return The bytes for name.
+       */
+      com.google.protobuf.ByteString
+          getNameBytes();
+
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry> 
+          getEntryList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry getEntry(int index);
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      int getEntryCount();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder> 
+          getEntryOrBuilderList();
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder getEntryOrBuilder(
+          int index);
+    }
+    /**
+     * <pre>
+     * A table for the remap operation, from each key to its value
+     * </pre>
+     *
+     * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest.Table}
+     */
+    public static final class Table extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SsurgeonRequest.Table)
+        TableOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use Table.newBuilder() to construct.
+      private Table(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
+      }
+      private Table() {
+        name_ = "";
+        entry_ = java.util.Collections.emptyList();
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Table();
+      }
+
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder.class);
+      }
+
+      public interface EntryOrBuilder extends
+          // @@protoc_insertion_point(interface_extends:edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry)
+          com.google.protobuf.MessageOrBuilder {
+
+        /**
+         * <code>optional string key = 1;</code>
+         * @return Whether the key field is set.
+         */
+        boolean hasKey();
+        /**
+         * <code>optional string key = 1;</code>
+         * @return The key.
+         */
+        java.lang.String getKey();
+        /**
+         * <code>optional string key = 1;</code>
+         * @return The bytes for key.
+         */
+        com.google.protobuf.ByteString
+            getKeyBytes();
+
+        /**
+         * <code>optional string value = 2;</code>
+         * @return Whether the value field is set.
+         */
+        boolean hasValue();
+        /**
+         * <code>optional string value = 2;</code>
+         * @return The value.
+         */
+        java.lang.String getValue();
+        /**
+         * <code>optional string value = 2;</code>
+         * @return The bytes for value.
+         */
+        com.google.protobuf.ByteString
+            getValueBytes();
+      }
+      /**
+       * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry}
+       */
+      public static final class Entry extends
+          com.google.protobuf.GeneratedMessageV3 implements
+          // @@protoc_insertion_point(message_implements:edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry)
+          EntryOrBuilder {
+      private static final long serialVersionUID = 0L;
+        // Use Entry.newBuilder() to construct.
+        private Entry(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+          super(builder);
+        }
+        private Entry() {
+          key_ = "";
+          value_ = "";
+        }
+
+        @java.lang.Override
+        @SuppressWarnings({"unused"})
+        protected java.lang.Object newInstance(
+            UnusedPrivateParameter unused) {
+          return new Entry();
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder.class);
+        }
+
+        private int bitField0_;
+        public static final int KEY_FIELD_NUMBER = 1;
+        @SuppressWarnings("serial")
+        private volatile java.lang.Object key_ = "";
+        /**
+         * <code>optional string key = 1;</code>
+         * @return Whether the key field is set.
+         */
+        @java.lang.Override
+        public boolean hasKey() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>optional string key = 1;</code>
+         * @return The key.
+         */
+        @java.lang.Override
+        public java.lang.String getKey() {
+          java.lang.Object ref = key_;
+          if (ref instanceof java.lang.String) {
+            return (java.lang.String) ref;
+          } else {
+            com.google.protobuf.ByteString bs = 
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              key_ = s;
+            }
+            return s;
+          }
+        }
+        /**
+         * <code>optional string key = 1;</code>
+         * @return The bytes for key.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString
+            getKeyBytes() {
+          java.lang.Object ref = key_;
+          if (ref instanceof java.lang.String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            key_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+
+        public static final int VALUE_FIELD_NUMBER = 2;
+        @SuppressWarnings("serial")
+        private volatile java.lang.Object value_ = "";
+        /**
+         * <code>optional string value = 2;</code>
+         * @return Whether the value field is set.
+         */
+        @java.lang.Override
+        public boolean hasValue() {
+          return ((bitField0_ & 0x00000002) != 0);
+        }
+        /**
+         * <code>optional string value = 2;</code>
+         * @return The value.
+         */
+        @java.lang.Override
+        public java.lang.String getValue() {
+          java.lang.Object ref = value_;
+          if (ref instanceof java.lang.String) {
+            return (java.lang.String) ref;
+          } else {
+            com.google.protobuf.ByteString bs = 
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              value_ = s;
+            }
+            return s;
+          }
+        }
+        /**
+         * <code>optional string value = 2;</code>
+         * @return The bytes for value.
+         */
+        @java.lang.Override
+        public com.google.protobuf.ByteString
+            getValueBytes() {
+          java.lang.Object ref = value_;
+          if (ref instanceof java.lang.String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            value_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+
+        private byte memoizedIsInitialized = -1;
+        @java.lang.Override
+        public final boolean isInitialized() {
+          byte isInitialized = memoizedIsInitialized;
+          if (isInitialized == 1) return true;
+          if (isInitialized == 0) return false;
+
+          memoizedIsInitialized = 1;
+          return true;
+        }
+
+        @java.lang.Override
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                            throws java.io.IOException {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+          }
+          if (((bitField0_ & 0x00000002) != 0)) {
+            com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_);
+          }
+          getUnknownFields().writeTo(output);
+        }
+
+        @java.lang.Override
+        public int getSerializedSize() {
+          int size = memoizedSize;
+          if (size != -1) return size;
+
+          size = 0;
+          if (((bitField0_ & 0x00000001) != 0)) {
+            size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+          }
+          if (((bitField0_ & 0x00000002) != 0)) {
+            size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, value_);
+          }
+          size += getUnknownFields().getSerializedSize();
+          memoizedSize = size;
+          return size;
+        }
+
+        @java.lang.Override
+        public boolean equals(final java.lang.Object obj) {
+          if (obj == this) {
+           return true;
+          }
+          if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry)) {
+            return super.equals(obj);
+          }
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry) obj;
+
+          if (hasKey() != other.hasKey()) return false;
+          if (hasKey()) {
+            if (!getKey()
+                .equals(other.getKey())) return false;
+          }
+          if (hasValue() != other.hasValue()) return false;
+          if (hasValue()) {
+            if (!getValue()
+                .equals(other.getValue())) return false;
+          }
+          if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+          return true;
+        }
+
+        @java.lang.Override
+        public int hashCode() {
+          if (memoizedHashCode != 0) {
+            return memoizedHashCode;
+          }
+          int hash = 41;
+          hash = (19 * hash) + getDescriptor().hashCode();
+          if (hasKey()) {
+            hash = (37 * hash) + KEY_FIELD_NUMBER;
+            hash = (53 * hash) + getKey().hashCode();
+          }
+          if (hasValue()) {
+            hash = (37 * hash) + VALUE_FIELD_NUMBER;
+            hash = (53 * hash) + getValue().hashCode();
+          }
+          hash = (29 * hash) + getUnknownFields().hashCode();
+          memoizedHashCode = hash;
+          return hash;
+        }
+
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            java.nio.ByteBuffer data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return PARSER.parseFrom(data);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            java.nio.ByteBuffer data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return PARSER.parseFrom(data, extensionRegistry);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            com.google.protobuf.ByteString data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return PARSER.parseFrom(data);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            com.google.protobuf.ByteString data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return PARSER.parseFrom(data, extensionRegistry);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(byte[] data)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return PARSER.parseFrom(data);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            byte[] data,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return PARSER.parseFrom(data, extensionRegistry);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(java.io.InputStream input)
+            throws java.io.IOException {
+          return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+        }
+
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseDelimitedFrom(java.io.InputStream input)
+            throws java.io.IOException {
+          return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input);
+        }
+
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseDelimitedFrom(
+            java.io.InputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          return com.google.protobuf.GeneratedMessageV3
+              .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            com.google.protobuf.CodedInputStream input)
+            throws java.io.IOException {
+          return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input);
+        }
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry parseFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          return com.google.protobuf.GeneratedMessageV3
+              .parseWithIOException(PARSER, input, extensionRegistry);
+        }
+
+        @java.lang.Override
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder() {
+          return DEFAULT_INSTANCE.toBuilder();
+        }
+        public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry prototype) {
+          return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+        }
+        @java.lang.Override
+        public Builder toBuilder() {
+          return this == DEFAULT_INSTANCE
+              ? new Builder() : new Builder().mergeFrom(this);
+        }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          Builder builder = new Builder(parent);
+          return builder;
+        }
+        /**
+         * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry}
+         */
+        public static final class Builder extends
+            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+            // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry)
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder {
+          public static final com.google.protobuf.Descriptors.Descriptor
+              getDescriptor() {
+            return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_descriptor;
+          }
+
+          @java.lang.Override
+          protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+              internalGetFieldAccessorTable() {
+            return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_fieldAccessorTable
+                .ensureFieldAccessorsInitialized(
+                    edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder.class);
+          }
+
+          // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.newBuilder()
+          private Builder() {
+
+          }
+
+          private Builder(
+              com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+            super(parent);
+
+          }
+          @java.lang.Override
+          public Builder clear() {
+            super.clear();
+            bitField0_ = 0;
+            key_ = "";
+            value_ = "";
+            return this;
+          }
+
+          @java.lang.Override
+          public com.google.protobuf.Descriptors.Descriptor
+              getDescriptorForType() {
+            return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_descriptor;
+          }
+
+          @java.lang.Override
+          public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry getDefaultInstanceForType() {
+            return edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.getDefaultInstance();
+          }
+
+          @java.lang.Override
+          public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry build() {
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry result = buildPartial();
+            if (!result.isInitialized()) {
+              throw newUninitializedMessageException(result);
+            }
+            return result;
+          }
+
+          @java.lang.Override
+          public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry buildPartial() {
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry(this);
+            if (bitField0_ != 0) { buildPartial0(result); }
+            onBuilt();
+            return result;
+          }
+
+          private void buildPartial0(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry result) {
+            int from_bitField0_ = bitField0_;
+            int to_bitField0_ = 0;
+            if (((from_bitField0_ & 0x00000001) != 0)) {
+              result.key_ = key_;
+              to_bitField0_ |= 0x00000001;
+            }
+            if (((from_bitField0_ & 0x00000002) != 0)) {
+              result.value_ = value_;
+              to_bitField0_ |= 0x00000002;
+            }
+            result.bitField0_ |= to_bitField0_;
+          }
+
+          @java.lang.Override
+          public Builder clone() {
+            return super.clone();
+          }
+          @java.lang.Override
+          public Builder setField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
+            return super.setField(field, value);
+          }
+          @java.lang.Override
+          public Builder clearField(
+              com.google.protobuf.Descriptors.FieldDescriptor field) {
+            return super.clearField(field);
+          }
+          @java.lang.Override
+          public Builder clearOneof(
+              com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+            return super.clearOneof(oneof);
+          }
+          @java.lang.Override
+          public Builder setRepeatedField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              int index, java.lang.Object value) {
+            return super.setRepeatedField(field, index, value);
+          }
+          @java.lang.Override
+          public Builder addRepeatedField(
+              com.google.protobuf.Descriptors.FieldDescriptor field,
+              java.lang.Object value) {
+            return super.addRepeatedField(field, value);
+          }
+          @java.lang.Override
+          public Builder mergeFrom(com.google.protobuf.Message other) {
+            if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry) {
+              return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry)other);
+            } else {
+              super.mergeFrom(other);
+              return this;
+            }
+          }
+
+          public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry other) {
+            if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.getDefaultInstance()) return this;
+            if (other.hasKey()) {
+              key_ = other.key_;
+              bitField0_ |= 0x00000001;
+              onChanged();
+            }
+            if (other.hasValue()) {
+              value_ = other.value_;
+              bitField0_ |= 0x00000002;
+              onChanged();
+            }
+            this.mergeUnknownFields(other.getUnknownFields());
+            onChanged();
+            return this;
+          }
+
+          @java.lang.Override
+          public final boolean isInitialized() {
+            return true;
+          }
+
+          @java.lang.Override
+          public Builder mergeFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws java.io.IOException {
+            if (extensionRegistry == null) {
+              throw new java.lang.NullPointerException();
+            }
+            try {
+              boolean done = false;
+              while (!done) {
+                int tag = input.readTag();
+                switch (tag) {
+                  case 0:
+                    done = true;
+                    break;
+                  case 10: {
+                    key_ = input.readBytes();
+                    bitField0_ |= 0x00000001;
+                    break;
+                  } // case 10
+                  case 18: {
+                    value_ = input.readBytes();
+                    bitField0_ |= 0x00000002;
+                    break;
+                  } // case 18
+                  default: {
+                    if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                      done = true; // was an endgroup tag
+                    }
+                    break;
+                  } // default:
+                } // switch (tag)
+              } // while (!done)
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+              throw e.unwrapIOException();
+            } finally {
+              onChanged();
+            } // finally
+            return this;
+          }
+          private int bitField0_;
+
+          private java.lang.Object key_ = "";
+          /**
+           * <code>optional string key = 1;</code>
+           * @return Whether the key field is set.
+           */
+          public boolean hasKey() {
+            return ((bitField0_ & 0x00000001) != 0);
+          }
+          /**
+           * <code>optional string key = 1;</code>
+           * @return The key.
+           */
+          public java.lang.String getKey() {
+            java.lang.Object ref = key_;
+            if (!(ref instanceof java.lang.String)) {
+              com.google.protobuf.ByteString bs =
+                  (com.google.protobuf.ByteString) ref;
+              java.lang.String s = bs.toStringUtf8();
+              if (bs.isValidUtf8()) {
+                key_ = s;
+              }
+              return s;
+            } else {
+              return (java.lang.String) ref;
+            }
+          }
+          /**
+           * <code>optional string key = 1;</code>
+           * @return The bytes for key.
+           */
+          public com.google.protobuf.ByteString
+              getKeyBytes() {
+            java.lang.Object ref = key_;
+            if (ref instanceof String) {
+              com.google.protobuf.ByteString b = 
+                  com.google.protobuf.ByteString.copyFromUtf8(
+                      (java.lang.String) ref);
+              key_ = b;
+              return b;
+            } else {
+              return (com.google.protobuf.ByteString) ref;
+            }
+          }
+          /**
+           * <code>optional string key = 1;</code>
+           * @param value The key to set.
+           * @return This builder for chaining.
+           */
+          public Builder setKey(
+              java.lang.String value) {
+            if (value == null) { throw new NullPointerException(); }
+            key_ = value;
+            bitField0_ |= 0x00000001;
+            onChanged();
+            return this;
+          }
+          /**
+           * <code>optional string key = 1;</code>
+           * @return This builder for chaining.
+           */
+          public Builder clearKey() {
+            key_ = getDefaultInstance().getKey();
+            bitField0_ = (bitField0_ & ~0x00000001);
+            onChanged();
+            return this;
+          }
+          /**
+           * <code>optional string key = 1;</code>
+           * @param value The bytes for key to set.
+           * @return This builder for chaining.
+           */
+          public Builder setKeyBytes(
+              com.google.protobuf.ByteString value) {
+            if (value == null) { throw new NullPointerException(); }
+            key_ = value;
+            bitField0_ |= 0x00000001;
+            onChanged();
+            return this;
+          }
+
+          private java.lang.Object value_ = "";
+          /**
+           * <code>optional string value = 2;</code>
+           * @return Whether the value field is set.
+           */
+          public boolean hasValue() {
+            return ((bitField0_ & 0x00000002) != 0);
+          }
+          /**
+           * <code>optional string value = 2;</code>
+           * @return The value.
+           */
+          public java.lang.String getValue() {
+            java.lang.Object ref = value_;
+            if (!(ref instanceof java.lang.String)) {
+              com.google.protobuf.ByteString bs =
+                  (com.google.protobuf.ByteString) ref;
+              java.lang.String s = bs.toStringUtf8();
+              if (bs.isValidUtf8()) {
+                value_ = s;
+              }
+              return s;
+            } else {
+              return (java.lang.String) ref;
+            }
+          }
+          /**
+           * <code>optional string value = 2;</code>
+           * @return The bytes for value.
+           */
+          public com.google.protobuf.ByteString
+              getValueBytes() {
+            java.lang.Object ref = value_;
+            if (ref instanceof String) {
+              com.google.protobuf.ByteString b = 
+                  com.google.protobuf.ByteString.copyFromUtf8(
+                      (java.lang.String) ref);
+              value_ = b;
+              return b;
+            } else {
+              return (com.google.protobuf.ByteString) ref;
+            }
+          }
+          /**
+           * <code>optional string value = 2;</code>
+           * @param value The value to set.
+           * @return This builder for chaining.
+           */
+          public Builder setValue(
+              java.lang.String value) {
+            if (value == null) { throw new NullPointerException(); }
+            value_ = value;
+            bitField0_ |= 0x00000002;
+            onChanged();
+            return this;
+          }
+          /**
+           * <code>optional string value = 2;</code>
+           * @return This builder for chaining.
+           */
+          public Builder clearValue() {
+            value_ = getDefaultInstance().getValue();
+            bitField0_ = (bitField0_ & ~0x00000002);
+            onChanged();
+            return this;
+          }
+          /**
+           * <code>optional string value = 2;</code>
+           * @param value The bytes for value to set.
+           * @return This builder for chaining.
+           */
+          public Builder setValueBytes(
+              com.google.protobuf.ByteString value) {
+            if (value == null) { throw new NullPointerException(); }
+            value_ = value;
+            bitField0_ |= 0x00000002;
+            onChanged();
+            return this;
+          }
+          @java.lang.Override
+          public final Builder setUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
+            return super.setUnknownFields(unknownFields);
+          }
+
+          @java.lang.Override
+          public final Builder mergeUnknownFields(
+              final com.google.protobuf.UnknownFieldSet unknownFields) {
+            return super.mergeUnknownFields(unknownFields);
+          }
+
+
+          // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry)
+        }
+
+        // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry)
+        private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry DEFAULT_INSTANCE;
+        static {
+          DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry();
+        }
+
+        public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry getDefaultInstance() {
+          return DEFAULT_INSTANCE;
+        }
+
+        @java.lang.Deprecated public static final com.google.protobuf.Parser<Entry>
+            PARSER = new com.google.protobuf.AbstractParser<Entry>() {
+          @java.lang.Override
+          public Entry parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            Builder builder = newBuilder();
+            try {
+              builder.mergeFrom(input, extensionRegistry);
+            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+              throw e.setUnfinishedMessage(builder.buildPartial());
+            } catch (com.google.protobuf.UninitializedMessageException e) {
+              throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+            } catch (java.io.IOException e) {
+              throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                  .setUnfinishedMessage(builder.buildPartial());
+            }
+            return builder.buildPartial();
+          }
+        };
+
+        public static com.google.protobuf.Parser<Entry> parser() {
+          return PARSER;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Parser<Entry> getParserForType() {
+          return PARSER;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry getDefaultInstanceForType() {
+          return DEFAULT_INSTANCE;
+        }
+
+      }
+
+      private int bitField0_;
+      public static final int NAME_FIELD_NUMBER = 1;
+      @SuppressWarnings("serial")
+      private volatile java.lang.Object name_ = "";
+      /**
+       * <code>optional string name = 1;</code>
+       * @return Whether the name field is set.
+       */
+      @java.lang.Override
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional string name = 1;</code>
+       * @return The name.
+       */
+      @java.lang.Override
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
+          return s;
+        }
+      }
+      /**
+       * <code>optional string name = 1;</code>
+       * @return The bytes for name.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int ENTRY_FIELD_NUMBER = 2;
+      @SuppressWarnings("serial")
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry> entry_;
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      @java.lang.Override
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry> getEntryList() {
+        return entry_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      @java.lang.Override
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder> 
+          getEntryOrBuilderList() {
+        return entry_;
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      @java.lang.Override
+      public int getEntryCount() {
+        return entry_.size();
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry getEntry(int index) {
+        return entry_.get(index);
+      }
+      /**
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+       */
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder getEntryOrBuilder(
+          int index) {
+        return entry_.get(index);
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (((bitField0_ & 0x00000001) != 0)) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+        }
+        for (int i = 0; i < entry_.size(); i++) {
+          output.writeMessage(2, entry_.get(i));
+        }
+        getUnknownFields().writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+        }
+        for (int i = 0; i < entry_.size(); i++) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(2, entry_.get(i));
+        }
+        size += getUnknownFields().getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table)) {
+          return super.equals(obj);
+        }
+        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table other = (edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table) obj;
+
+        if (hasName() != other.hasName()) return false;
+        if (hasName()) {
+          if (!getName()
+              .equals(other.getName())) return false;
+        }
+        if (!getEntryList()
+            .equals(other.getEntryList())) return false;
+        if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+        return true;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasName()) {
+          hash = (37 * hash) + NAME_FIELD_NUMBER;
+          hash = (53 * hash) + getName().hashCode();
+        }
+        if (getEntryCount() > 0) {
+          hash = (37 * hash) + ENTRY_FIELD_NUMBER;
+          hash = (53 * hash) + getEntryList().hashCode();
+        }
+        hash = (29 * hash) + getUnknownFields().hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * <pre>
+       * A table for the remap operation, from each key to its value
+       * </pre>
+       *
+       * Protobuf type {@code edu.stanford.nlp.pipeline.SsurgeonRequest.Table}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:edu.stanford.nlp.pipeline.SsurgeonRequest.Table)
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.class, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder.class);
+        }
+
+        // Construct using edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.newBuilder()
+        private Builder() {
+
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          bitField0_ = 0;
+          name_ = "";
+          if (entryBuilder_ == null) {
+            entry_ = java.util.Collections.emptyList();
+          } else {
+            entry_ = null;
+            entryBuilder_.clear();
+          }
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_descriptor;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table getDefaultInstanceForType() {
+          return edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table build() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table buildPartial() {
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table result = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table(this);
+          buildPartialRepeatedFields(result);
+          if (bitField0_ != 0) { buildPartial0(result); }
+          onBuilt();
+          return result;
+        }
+
+        private void buildPartialRepeatedFields(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table result) {
+          if (entryBuilder_ == null) {
+            if (((bitField0_ & 0x00000002) != 0)) {
+              entry_ = java.util.Collections.unmodifiableList(entry_);
+              bitField0_ = (bitField0_ & ~0x00000002);
+            }
+            result.entry_ = entry_;
+          } else {
+            result.entry_ = entryBuilder_.build();
+          }
+        }
+
+        private void buildPartial0(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table result) {
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) != 0)) {
+            result.name_ = name_;
+            to_bitField0_ |= 0x00000001;
+          }
+          result.bitField0_ |= to_bitField0_;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table) {
+            return mergeFrom((edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table other) {
+          if (other == edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.getDefaultInstance()) return this;
+          if (other.hasName()) {
+            name_ = other.name_;
+            bitField0_ |= 0x00000001;
+            onChanged();
+          }
+          if (entryBuilder_ == null) {
+            if (!other.entry_.isEmpty()) {
+              if (entry_.isEmpty()) {
+                entry_ = other.entry_;
+                bitField0_ = (bitField0_ & ~0x00000002);
+              } else {
+                ensureEntryIsMutable();
+                entry_.addAll(other.entry_);
+              }
+              onChanged();
+            }
+          } else {
+            if (!other.entry_.isEmpty()) {
+              if (entryBuilder_.isEmpty()) {
+                entryBuilder_.dispose();
+                entryBuilder_ = null;
+                entry_ = other.entry_;
+                bitField0_ = (bitField0_ & ~0x00000002);
+                entryBuilder_ = 
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                     getEntryFieldBuilder() : null;
+              } else {
+                entryBuilder_.addAllMessages(other.entry_);
+              }
+            }
+          }
+          this.mergeUnknownFields(other.getUnknownFields());
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          if (extensionRegistry == null) {
+            throw new java.lang.NullPointerException();
+          }
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                case 10: {
+                  name_ = input.readBytes();
+                  bitField0_ |= 0x00000001;
+                  break;
+                } // case 10
+                case 18: {
+                  edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry m =
+                      input.readMessage(
+                          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.PARSER,
+                          extensionRegistry);
+                  if (entryBuilder_ == null) {
+                    ensureEntryIsMutable();
+                    entry_.add(m);
+                  } else {
+                    entryBuilder_.addMessage(m);
+                  }
+                  break;
+                } // case 18
+                default: {
+                  if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                    done = true; // was an endgroup tag
+                  }
+                  break;
+                } // default:
+              } // switch (tag)
+            } // while (!done)
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.unwrapIOException();
+          } finally {
+            onChanged();
+          } // finally
+          return this;
+        }
+        private int bitField0_;
+
+        private java.lang.Object name_ = "";
+        /**
+         * <code>optional string name = 1;</code>
+         * @return Whether the name field is set.
+         */
+        public boolean hasName() {
+          return ((bitField0_ & 0x00000001) != 0);
+        }
+        /**
+         * <code>optional string name = 1;</code>
+         * @return The name.
+         */
+        public java.lang.String getName() {
+          java.lang.Object ref = name_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            if (bs.isValidUtf8()) {
+              name_ = s;
+            }
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>optional string name = 1;</code>
+         * @return The bytes for name.
+         */
+        public com.google.protobuf.ByteString
+            getNameBytes() {
+          java.lang.Object ref = name_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            name_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>optional string name = 1;</code>
+         * @param value The name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setName(
+            java.lang.String value) {
+          if (value == null) { throw new NullPointerException(); }
+          name_ = value;
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string name = 1;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearName() {
+          name_ = getDefaultInstance().getName();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>optional string name = 1;</code>
+         * @param value The bytes for name to set.
+         * @return This builder for chaining.
+         */
+        public Builder setNameBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) { throw new NullPointerException(); }
+          name_ = value;
+          bitField0_ |= 0x00000001;
+          onChanged();
+          return this;
+        }
+
+        private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry> entry_ =
+          java.util.Collections.emptyList();
+        private void ensureEntryIsMutable() {
+          if (!((bitField0_ & 0x00000002) != 0)) {
+            entry_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry>(entry_);
+            bitField0_ |= 0x00000002;
+           }
+        }
+
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder> entryBuilder_;
+
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry> getEntryList() {
+          if (entryBuilder_ == null) {
+            return java.util.Collections.unmodifiableList(entry_);
+          } else {
+            return entryBuilder_.getMessageList();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public int getEntryCount() {
+          if (entryBuilder_ == null) {
+            return entry_.size();
+          } else {
+            return entryBuilder_.getCount();
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry getEntry(int index) {
+          if (entryBuilder_ == null) {
+            return entry_.get(index);
+          } else {
+            return entryBuilder_.getMessage(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder setEntry(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry value) {
+          if (entryBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureEntryIsMutable();
+            entry_.set(index, value);
+            onChanged();
+          } else {
+            entryBuilder_.setMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder setEntry(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder builderForValue) {
+          if (entryBuilder_ == null) {
+            ensureEntryIsMutable();
+            entry_.set(index, builderForValue.build());
+            onChanged();
+          } else {
+            entryBuilder_.setMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder addEntry(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry value) {
+          if (entryBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureEntryIsMutable();
+            entry_.add(value);
+            onChanged();
+          } else {
+            entryBuilder_.addMessage(value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder addEntry(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry value) {
+          if (entryBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            ensureEntryIsMutable();
+            entry_.add(index, value);
+            onChanged();
+          } else {
+            entryBuilder_.addMessage(index, value);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder addEntry(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder builderForValue) {
+          if (entryBuilder_ == null) {
+            ensureEntryIsMutable();
+            entry_.add(builderForValue.build());
+            onChanged();
+          } else {
+            entryBuilder_.addMessage(builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder addEntry(
+            int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder builderForValue) {
+          if (entryBuilder_ == null) {
+            ensureEntryIsMutable();
+            entry_.add(index, builderForValue.build());
+            onChanged();
+          } else {
+            entryBuilder_.addMessage(index, builderForValue.build());
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder addAllEntry(
+            java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry> values) {
+          if (entryBuilder_ == null) {
+            ensureEntryIsMutable();
+            com.google.protobuf.AbstractMessageLite.Builder.addAll(
+                values, entry_);
+            onChanged();
+          } else {
+            entryBuilder_.addAllMessages(values);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder clearEntry() {
+          if (entryBuilder_ == null) {
+            entry_ = java.util.Collections.emptyList();
+            bitField0_ = (bitField0_ & ~0x00000002);
+            onChanged();
+          } else {
+            entryBuilder_.clear();
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public Builder removeEntry(int index) {
+          if (entryBuilder_ == null) {
+            ensureEntryIsMutable();
+            entry_.remove(index);
+            onChanged();
+          } else {
+            entryBuilder_.remove(index);
+          }
+          return this;
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder getEntryBuilder(
+            int index) {
+          return getEntryFieldBuilder().getBuilder(index);
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder getEntryOrBuilder(
+            int index) {
+          if (entryBuilder_ == null) {
+            return entry_.get(index);  } else {
+            return entryBuilder_.getMessageOrBuilder(index);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder> 
+             getEntryOrBuilderList() {
+          if (entryBuilder_ != null) {
+            return entryBuilder_.getMessageOrBuilderList();
+          } else {
+            return java.util.Collections.unmodifiableList(entry_);
+          }
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder addEntryBuilder() {
+          return getEntryFieldBuilder().addBuilder(
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder addEntryBuilder(
+            int index) {
+          return getEntryFieldBuilder().addBuilder(
+              index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.getDefaultInstance());
+        }
+        /**
+         * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table.Entry entry = 2;</code>
+         */
+        public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder> 
+             getEntryBuilderList() {
+          return getEntryFieldBuilder().getBuilderList();
+        }
+        private com.google.protobuf.RepeatedFieldBuilderV3<
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder> 
+            getEntryFieldBuilder() {
+          if (entryBuilder_ == null) {
+            entryBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Entry.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.EntryOrBuilder>(
+                    entry_,
+                    ((bitField0_ & 0x00000002) != 0),
+                    getParentForChildren(),
+                    isClean());
+            entry_ = null;
+          }
+          return entryBuilder_;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFields(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:edu.stanford.nlp.pipeline.SsurgeonRequest.Table)
+      }
+
+      // @@protoc_insertion_point(class_scope:edu.stanford.nlp.pipeline.SsurgeonRequest.Table)
+      private static final edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table();
+      }
+
+      public static edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      @java.lang.Deprecated public static final com.google.protobuf.Parser<Table>
+          PARSER = new com.google.protobuf.AbstractParser<Table>() {
+        @java.lang.Override
+        public Table parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          Builder builder = newBuilder();
+          try {
+            builder.mergeFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw e.setUnfinishedMessage(builder.buildPartial());
+          } catch (com.google.protobuf.UninitializedMessageException e) {
+            throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+          } catch (java.io.IOException e) {
+            throw new com.google.protobuf.InvalidProtocolBufferException(e)
+                .setUnfinishedMessage(builder.buildPartial());
+          }
+          return builder.buildPartial();
+        }
+      };
+
+      public static com.google.protobuf.Parser<Table> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Table> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
+    }
+
     public static final int SSURGEON_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
     private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Ssurgeon> ssurgeon_;
@@ -83668,6 +85449,72 @@ public final class CoreNLPProtos {
       return sentence_.get(index);
     }
 
+    public static final int TABLE_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table> table_;
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table> getTableList() {
+      return table_;
+    }
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder> 
+        getTableOrBuilderList() {
+      return table_;
+    }
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    @java.lang.Override
+    public int getTableCount() {
+      return table_.size();
+    }
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table getTable(int index) {
+      return table_.get(index);
+    }
+    /**
+     * <pre>
+     * The tables which the remap operations of every Ssurgeon in the
+     * request can use, by name
+     * </pre>
+     *
+     * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+     */
+    @java.lang.Override
+    public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder getTableOrBuilder(
+        int index) {
+      return table_.get(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -83703,6 +85550,9 @@ public final class CoreNLPProtos {
       for (int i = 0; i < sentence_.size(); i++) {
         output.writeMessage(3, sentence_.get(i));
       }
+      for (int i = 0; i < table_.size(); i++) {
+        output.writeMessage(4, table_.get(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -83723,6 +85573,10 @@ public final class CoreNLPProtos {
       for (int i = 0; i < sentence_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, sentence_.get(i));
+      }
+      for (int i = 0; i < table_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, table_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -83745,6 +85599,8 @@ public final class CoreNLPProtos {
           .equals(other.getGraphList())) return false;
       if (!getSentenceList()
           .equals(other.getSentenceList())) return false;
+      if (!getTableList()
+          .equals(other.getTableList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -83767,6 +85623,10 @@ public final class CoreNLPProtos {
       if (getSentenceCount() > 0) {
         hash = (37 * hash) + SENTENCE_FIELD_NUMBER;
         hash = (53 * hash) + getSentenceList().hashCode();
+      }
+      if (getTableCount() > 0) {
+        hash = (37 * hash) + TABLE_FIELD_NUMBER;
+        hash = (53 * hash) + getTableList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -83937,6 +85797,13 @@ public final class CoreNLPProtos {
           sentenceBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000004);
+        if (tableBuilder_ == null) {
+          table_ = java.util.Collections.emptyList();
+        } else {
+          table_ = null;
+          tableBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -83996,6 +85863,15 @@ public final class CoreNLPProtos {
           result.sentence_ = sentence_;
         } else {
           result.sentence_ = sentenceBuilder_.build();
+        }
+        if (tableBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) != 0)) {
+            table_ = java.util.Collections.unmodifiableList(table_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.table_ = table_;
+        } else {
+          result.table_ = tableBuilder_.build();
         }
       }
 
@@ -84125,6 +86001,32 @@ public final class CoreNLPProtos {
             }
           }
         }
+        if (tableBuilder_ == null) {
+          if (!other.table_.isEmpty()) {
+            if (table_.isEmpty()) {
+              table_ = other.table_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureTableIsMutable();
+              table_.addAll(other.table_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.table_.isEmpty()) {
+            if (tableBuilder_.isEmpty()) {
+              tableBuilder_.dispose();
+              tableBuilder_ = null;
+              table_ = other.table_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              tableBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getTableFieldBuilder() : null;
+            } else {
+              tableBuilder_.addAllMessages(other.table_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -84200,6 +86102,19 @@ public final class CoreNLPProtos {
                 }
                 break;
               } // case 26
+              case 34: {
+                edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table m =
+                    input.readMessage(
+                        edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.PARSER,
+                        extensionRegistry);
+                if (tableBuilder_ == null) {
+                  ensureTableIsMutable();
+                  table_.add(m);
+                } else {
+                  tableBuilder_.addMessage(m);
+                }
+                break;
+              } // case 34
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -85133,6 +87048,336 @@ public final class CoreNLPProtos {
           sentence_ = null;
         }
         return sentenceBuilder_;
+      }
+
+      private java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table> table_ =
+        java.util.Collections.emptyList();
+      private void ensureTableIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          table_ = new java.util.ArrayList<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table>(table_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder> tableBuilder_;
+
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table> getTableList() {
+        if (tableBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(table_);
+        } else {
+          return tableBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public int getTableCount() {
+        if (tableBuilder_ == null) {
+          return table_.size();
+        } else {
+          return tableBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table getTable(int index) {
+        if (tableBuilder_ == null) {
+          return table_.get(index);
+        } else {
+          return tableBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder setTable(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table value) {
+        if (tableBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTableIsMutable();
+          table_.set(index, value);
+          onChanged();
+        } else {
+          tableBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder setTable(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder builderForValue) {
+        if (tableBuilder_ == null) {
+          ensureTableIsMutable();
+          table_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          tableBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder addTable(edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table value) {
+        if (tableBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTableIsMutable();
+          table_.add(value);
+          onChanged();
+        } else {
+          tableBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder addTable(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table value) {
+        if (tableBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureTableIsMutable();
+          table_.add(index, value);
+          onChanged();
+        } else {
+          tableBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder addTable(
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder builderForValue) {
+        if (tableBuilder_ == null) {
+          ensureTableIsMutable();
+          table_.add(builderForValue.build());
+          onChanged();
+        } else {
+          tableBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder addTable(
+          int index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder builderForValue) {
+        if (tableBuilder_ == null) {
+          ensureTableIsMutable();
+          table_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          tableBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder addAllTable(
+          java.lang.Iterable<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table> values) {
+        if (tableBuilder_ == null) {
+          ensureTableIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, table_);
+          onChanged();
+        } else {
+          tableBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder clearTable() {
+        if (tableBuilder_ == null) {
+          table_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          tableBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public Builder removeTable(int index) {
+        if (tableBuilder_ == null) {
+          ensureTableIsMutable();
+          table_.remove(index);
+          onChanged();
+        } else {
+          tableBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder getTableBuilder(
+          int index) {
+        return getTableFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder getTableOrBuilder(
+          int index) {
+        if (tableBuilder_ == null) {
+          return table_.get(index);  } else {
+          return tableBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public java.util.List<? extends edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder> 
+           getTableOrBuilderList() {
+        if (tableBuilder_ != null) {
+          return tableBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(table_);
+        }
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder addTableBuilder() {
+        return getTableFieldBuilder().addBuilder(
+            edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder addTableBuilder(
+          int index) {
+        return getTableFieldBuilder().addBuilder(
+            index, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * The tables which the remap operations of every Ssurgeon in the
+       * request can use, by name
+       * </pre>
+       *
+       * <code>repeated .edu.stanford.nlp.pipeline.SsurgeonRequest.Table table = 4;</code>
+       */
+      public java.util.List<edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder> 
+           getTableBuilderList() {
+        return getTableFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder> 
+          getTableFieldBuilder() {
+        if (tableBuilder_ == null) {
+          tableBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.Table.Builder, edu.stanford.nlp.pipeline.CoreNLPProtos.SsurgeonRequest.TableOrBuilder>(
+                  table_,
+                  ((bitField0_ & 0x00000008) != 0),
+                  getParentForChildren(),
+                  isClean());
+          table_ = null;
+        }
+        return tableBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -106351,6 +108596,16 @@ public final class CoreNLPProtos {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -106758,89 +109013,94 @@ public final class CoreNLPProtos {
       "t\022I\n\007pattern\030\001 \003(\01328.edu.stanford.nlp.pi" +
       "peline.SemgrexResponse.PatternResult\022\025\n\r" +
       "sentenceIndex\030\002 \001(\005\"$\n\tGraphName\022\t\n\005BASI" +
-      "C\020\000\022\014\n\010ENHANCED\020\001\"\272\002\n\017SsurgeonRequest\022E\n" +
+      "C\020\000\022\014\n\010ENHANCED\020\001\"\377\003\n\017SsurgeonRequest\022E\n" +
       "\010ssurgeon\030\001 \003(\01323.edu.stanford.nlp.pipel" +
       "ine.SsurgeonRequest.Ssurgeon\0229\n\005graph\030\002 " +
       "\003(\0132*.edu.stanford.nlp.pipeline.Dependen" +
       "cyGraph\022H\n\010sentence\030\003 \003(\01326.edu.stanford" +
       ".nlp.pipeline.SemgrexRequest.Dependencie" +
-      "s\032[\n\010Ssurgeon\022\017\n\007semgrex\030\001 \001(\t\022\021\n\toperat" +
-      "ion\030\002 \003(\t\022\n\n\002id\030\003 \001(\t\022\r\n\005notes\030\004 \001(\t\022\020\n\010" +
-      "language\030\005 \001(\t\"\333\002\n\020SsurgeonResponse\022J\n\006r" +
-      "esult\030\001 \003(\0132:.edu.stanford.nlp.pipeline." +
-      "SsurgeonResponse.SsurgeonResult\022R\n\016sente" +
-      "nceResult\030\002 \003(\0132:.edu.stanford.nlp.pipel" +
-      "ine.SsurgeonResponse.SsurgeonResult\032\246\001\n\016" +
-      "SsurgeonResult\0229\n\005graph\030\001 \001(\0132*.edu.stan" +
-      "ford.nlp.pipeline.DependencyGraph\022\017\n\007cha" +
-      "nged\030\002 \001(\010\022H\n\010sentence\030\003 \001(\01326.edu.stanf" +
-      "ord.nlp.pipeline.SemgrexRequest.Dependen" +
-      "cies\"W\n\022TokensRegexRequest\0220\n\003doc\030\001 \002(\0132" +
-      "#.edu.stanford.nlp.pipeline.Document\022\017\n\007" +
-      "pattern\030\002 \003(\t\"\247\003\n\023TokensRegexResponse\022J\n" +
-      "\005match\030\001 \003(\0132;.edu.stanford.nlp.pipeline" +
-      ".TokensRegexResponse.PatternMatch\0329\n\rMat" +
-      "chLocation\022\014\n\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001(\005\022" +
-      "\013\n\003end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sentence\030\001 \002(\005" +
-      "\022K\n\005match\030\002 \002(\0132<.edu.stanford.nlp.pipel" +
-      "ine.TokensRegexResponse.MatchLocation\022K\n" +
-      "\005group\030\003 \003(\0132<.edu.stanford.nlp.pipeline" +
-      ".TokensRegexResponse.MatchLocation\032S\n\014Pa" +
-      "tternMatch\022C\n\005match\030\001 \003(\01324.edu.stanford" +
-      ".nlp.pipeline.TokensRegexResponse.Match\"" +
-      "\256\001\n\031DependencyEnhancerRequest\0225\n\010documen" +
-      "t\030\001 \002(\0132#.edu.stanford.nlp.pipeline.Docu" +
-      "ment\0227\n\010language\030\002 \001(\0162#.edu.stanford.nl" +
-      "p.pipeline.LanguageH\000\022\032\n\020relativePronoun" +
-      "s\030\003 \001(\tH\000B\005\n\003ref\"\264\001\n\022FlattenedParseTree\022" +
-      "A\n\005nodes\030\001 \003(\01322.edu.stanford.nlp.pipeli" +
-      "ne.FlattenedParseTree.Node\032[\n\004Node\022\022\n\010op" +
-      "enNode\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 \001(\010H\000\022\017\n\005v" +
-      "alue\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n\010contents\"" +
-      "\366\001\n\025EvaluateParserRequest\022N\n\010treebank\030\001 " +
-      "\003(\0132<.edu.stanford.nlp.pipeline.Evaluate" +
-      "ParserRequest.ParseResult\032\214\001\n\013ParseResul" +
-      "t\022;\n\004gold\030\001 \002(\0132-.edu.stanford.nlp.pipel" +
-      "ine.FlattenedParseTree\022@\n\tpredicted\030\002 \003(" +
-      "\0132-.edu.stanford.nlp.pipeline.FlattenedP" +
-      "arseTree\"E\n\026EvaluateParserResponse\022\n\n\002f1" +
-      "\030\001 \002(\001\022\017\n\007kbestF1\030\002 \001(\001\022\016\n\006treeF1\030\003 \003(\001\"" +
-      "\310\001\n\017TsurgeonRequest\022H\n\noperations\030\001 \003(\0132" +
-      "4.edu.stanford.nlp.pipeline.TsurgeonRequ" +
-      "est.Operation\022<\n\005trees\030\002 \003(\0132-.edu.stanf" +
-      "ord.nlp.pipeline.FlattenedParseTree\032-\n\tO" +
-      "peration\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003" +
-      "(\t\"P\n\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-." +
-      "edu.stanford.nlp.pipeline.FlattenedParse" +
-      "Tree\"\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(" +
-      "\01327.edu.stanford.nlp.pipeline.Morphology" +
-      "Request.TaggedWord\032(\n\nTaggedWord\022\014\n\004word" +
-      "\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyRespo" +
-      "nse\022I\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pi" +
-      "peline.MorphologyResponse.WordTagLemma\0329" +
-      "\n\014WordTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001" +
-      "(\t\022\r\n\005lemma\030\003 \002(\t\"Z\n\032DependencyConverter" +
-      "Request\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nl" +
-      "p.pipeline.FlattenedParseTree\"\220\002\n\033Depend" +
-      "encyConverterResponse\022`\n\013conversions\030\001 \003" +
-      "(\0132K.edu.stanford.nlp.pipeline.Dependenc" +
-      "yConverterResponse.DependencyConversion\032" +
-      "\216\001\n\024DependencyConversion\0229\n\005graph\030\001 \002(\0132" +
-      "*.edu.stanford.nlp.pipeline.DependencyGr" +
-      "aph\022;\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pip" +
-      "eline.FlattenedParseTree*\243\001\n\010Language\022\013\n" +
-      "\007Unknown\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chine" +
-      "se\020\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020" +
-      "\006\022\n\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalE" +
-      "nglish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentim" +
-      "ent\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIV" +
-      "E\020\001\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017S" +
-      "TRONG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelatio" +
-      "n\022\017\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT" +
-      "\020\001\022\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003" +
-      "\022\017\n\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPEND" +
-      "ENCE\020\006B*\n\031edu.stanford.nlp.pipelineB\rCor" +
-      "eNLPProtos"
+      "s\022?\n\005table\030\004 \003(\01320.edu.stanford.nlp.pipe" +
+      "line.SsurgeonRequest.Table\032[\n\010Ssurgeon\022\017" +
+      "\n\007semgrex\030\001 \001(\t\022\021\n\toperation\030\002 \003(\t\022\n\n\002id" +
+      "\030\003 \001(\t\022\r\n\005notes\030\004 \001(\t\022\020\n\010language\030\005 \001(\t\032" +
+      "\201\001\n\005Table\022\014\n\004name\030\001 \001(\t\022E\n\005entry\030\002 \003(\01326" +
+      ".edu.stanford.nlp.pipeline.SsurgeonReque" +
+      "st.Table.Entry\032#\n\005Entry\022\013\n\003key\030\001 \001(\t\022\r\n\005" +
+      "value\030\002 \001(\t\"\333\002\n\020SsurgeonResponse\022J\n\006resu" +
+      "lt\030\001 \003(\0132:.edu.stanford.nlp.pipeline.Ssu" +
+      "rgeonResponse.SsurgeonResult\022R\n\016sentence" +
+      "Result\030\002 \003(\0132:.edu.stanford.nlp.pipeline" +
+      ".SsurgeonResponse.SsurgeonResult\032\246\001\n\016Ssu" +
+      "rgeonResult\0229\n\005graph\030\001 \001(\0132*.edu.stanfor" +
+      "d.nlp.pipeline.DependencyGraph\022\017\n\007change" +
+      "d\030\002 \001(\010\022H\n\010sentence\030\003 \001(\01326.edu.stanford" +
+      ".nlp.pipeline.SemgrexRequest.Dependencie" +
+      "s\"W\n\022TokensRegexRequest\0220\n\003doc\030\001 \002(\0132#.e" +
+      "du.stanford.nlp.pipeline.Document\022\017\n\007pat" +
+      "tern\030\002 \003(\t\"\247\003\n\023TokensRegexResponse\022J\n\005ma" +
+      "tch\030\001 \003(\0132;.edu.stanford.nlp.pipeline.To" +
+      "kensRegexResponse.PatternMatch\0329\n\rMatchL" +
+      "ocation\022\014\n\004text\030\001 \001(\t\022\r\n\005begin\030\002 \001(\005\022\013\n\003" +
+      "end\030\003 \001(\005\032\263\001\n\005Match\022\020\n\010sentence\030\001 \002(\005\022K\n" +
+      "\005match\030\002 \002(\0132<.edu.stanford.nlp.pipeline" +
+      ".TokensRegexResponse.MatchLocation\022K\n\005gr" +
+      "oup\030\003 \003(\0132<.edu.stanford.nlp.pipeline.To" +
+      "kensRegexResponse.MatchLocation\032S\n\014Patte" +
+      "rnMatch\022C\n\005match\030\001 \003(\01324.edu.stanford.nl" +
+      "p.pipeline.TokensRegexResponse.Match\"\256\001\n" +
+      "\031DependencyEnhancerRequest\0225\n\010document\030\001" +
+      " \002(\0132#.edu.stanford.nlp.pipeline.Documen" +
+      "t\0227\n\010language\030\002 \001(\0162#.edu.stanford.nlp.p" +
+      "ipeline.LanguageH\000\022\032\n\020relativePronouns\030\003" +
+      " \001(\tH\000B\005\n\003ref\"\264\001\n\022FlattenedParseTree\022A\n\005" +
+      "nodes\030\001 \003(\01322.edu.stanford.nlp.pipeline." +
+      "FlattenedParseTree.Node\032[\n\004Node\022\022\n\010openN" +
+      "ode\030\001 \001(\010H\000\022\023\n\tcloseNode\030\002 \001(\010H\000\022\017\n\005valu" +
+      "e\030\003 \001(\tH\000\022\r\n\005score\030\004 \001(\001B\n\n\010contents\"\366\001\n" +
+      "\025EvaluateParserRequest\022N\n\010treebank\030\001 \003(\013" +
+      "2<.edu.stanford.nlp.pipeline.EvaluatePar" +
+      "serRequest.ParseResult\032\214\001\n\013ParseResult\022;" +
+      "\n\004gold\030\001 \002(\0132-.edu.stanford.nlp.pipeline" +
+      ".FlattenedParseTree\022@\n\tpredicted\030\002 \003(\0132-" +
+      ".edu.stanford.nlp.pipeline.FlattenedPars" +
+      "eTree\"E\n\026EvaluateParserResponse\022\n\n\002f1\030\001 " +
+      "\002(\001\022\017\n\007kbestF1\030\002 \001(\001\022\016\n\006treeF1\030\003 \003(\001\"\310\001\n" +
+      "\017TsurgeonRequest\022H\n\noperations\030\001 \003(\01324.e" +
+      "du.stanford.nlp.pipeline.TsurgeonRequest" +
+      ".Operation\022<\n\005trees\030\002 \003(\0132-.edu.stanford" +
+      ".nlp.pipeline.FlattenedParseTree\032-\n\tOper" +
+      "ation\022\016\n\006tregex\030\001 \002(\t\022\020\n\010tsurgeon\030\002 \003(\t\"" +
+      "P\n\020TsurgeonResponse\022<\n\005trees\030\001 \003(\0132-.edu" +
+      ".stanford.nlp.pipeline.FlattenedParseTre" +
+      "e\"\205\001\n\021MorphologyRequest\022F\n\005words\030\001 \003(\01327" +
+      ".edu.stanford.nlp.pipeline.MorphologyReq" +
+      "uest.TaggedWord\032(\n\nTaggedWord\022\014\n\004word\030\001 " +
+      "\002(\t\022\014\n\004xpos\030\002 \001(\t\"\232\001\n\022MorphologyResponse" +
+      "\022I\n\005words\030\001 \003(\0132:.edu.stanford.nlp.pipel" +
+      "ine.MorphologyResponse.WordTagLemma\0329\n\014W" +
+      "ordTagLemma\022\014\n\004word\030\001 \002(\t\022\014\n\004xpos\030\002 \001(\t\022" +
+      "\r\n\005lemma\030\003 \002(\t\"Z\n\032DependencyConverterReq" +
+      "uest\022<\n\005trees\030\001 \003(\0132-.edu.stanford.nlp.p" +
+      "ipeline.FlattenedParseTree\"\220\002\n\033Dependenc" +
+      "yConverterResponse\022`\n\013conversions\030\001 \003(\0132" +
+      "K.edu.stanford.nlp.pipeline.DependencyCo" +
+      "nverterResponse.DependencyConversion\032\216\001\n" +
+      "\024DependencyConversion\0229\n\005graph\030\001 \002(\0132*.e" +
+      "du.stanford.nlp.pipeline.DependencyGraph" +
+      "\022;\n\004tree\030\002 \001(\0132-.edu.stanford.nlp.pipeli" +
+      "ne.FlattenedParseTree*\243\001\n\010Language\022\013\n\007Un" +
+      "known\020\000\022\007\n\003Any\020\001\022\n\n\006Arabic\020\002\022\013\n\007Chinese\020" +
+      "\003\022\013\n\007English\020\004\022\n\n\006German\020\005\022\n\n\006French\020\006\022\n" +
+      "\n\006Hebrew\020\007\022\013\n\007Spanish\020\010\022\024\n\020UniversalEngl" +
+      "ish\020\t\022\024\n\020UniversalChinese\020\n*h\n\tSentiment" +
+      "\022\023\n\017STRONG_NEGATIVE\020\000\022\021\n\rWEAK_NEGATIVE\020\001" +
+      "\022\013\n\007NEUTRAL\020\002\022\021\n\rWEAK_POSITIVE\020\003\022\023\n\017STRO" +
+      "NG_POSITIVE\020\004*\223\001\n\024NaturalLogicRelation\022\017" +
+      "\n\013EQUIVALENCE\020\000\022\026\n\022FORWARD_ENTAILMENT\020\001\022" +
+      "\026\n\022REVERSE_ENTAILMENT\020\002\022\014\n\010NEGATION\020\003\022\017\n" +
+      "\013ALTERNATION\020\004\022\t\n\005COVER\020\005\022\020\n\014INDEPENDENC" +
+      "E\020\006B*\n\031edu.stanford.nlp.pipelineB\rCoreNL" +
+      "PProtos"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -107067,13 +109327,25 @@ public final class CoreNLPProtos {
     internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor,
-        new java.lang.String[] { "Ssurgeon", "Graph", "Sentence", });
+        new java.lang.String[] { "Ssurgeon", "Graph", "Sentence", "Table", });
     internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor =
       internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor.getNestedTypes().get(0);
     internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Ssurgeon_descriptor,
         new java.lang.String[] { "Semgrex", "Operation", "Id", "Notes", "Language", });
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_descriptor.getNestedTypes().get(1);
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_descriptor,
+        new java.lang.String[] { "Name", "Entry", });
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_descriptor =
+      internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_descriptor.getNestedTypes().get(0);
+    internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_edu_stanford_nlp_pipeline_SsurgeonRequest_Table_Entry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
     internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_descriptor =
       getDescriptor().getMessageTypes().get(26);
     internal_static_edu_stanford_nlp_pipeline_SsurgeonResponse_fieldAccessorTable = new

@@ -777,6 +777,16 @@ message SsurgeonRequest {
     optional string          language    = 5;
   }
 
+  // A table for the remap operation, from each key to its value
+  message Table {
+    message Entry {
+      optional string        key         = 1;
+      optional string        value       = 2;
+    }
+    optional string          name        = 1;
+    repeated Entry           entry       = 2;
+  }
+
   repeated Ssurgeon          ssurgeon    = 1;
   // One basic graph per sentence, with its tokens in graph.token
   repeated DependencyGraph   graph       = 2;
@@ -785,6 +795,9 @@ message SsurgeonRequest {
   // SemgrexRequest uses, so a sentence built for one can be sent to
   // the other
   repeated SemgrexRequest.Dependencies sentence = 3;
+  // The tables which the remap operations of every Ssurgeon in the
+  // request can use, by name
+  repeated Table             table       = 4;
 }
 
 message SsurgeonResponse {
