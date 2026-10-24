@@ -3,11 +3,14 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -39,6 +42,15 @@ abstract class GraphRelation implements Serializable {
   final String name;
   final String edgeName;
 
+  /**
+   * The regex groups of the relation which set variables, as in
+   * {@code >/([cn]subj)/#1%etype}: each group number with the name of its
+   * variable.  Empty for a relation with none.
+   */
+  final List<Pair<Integer, String>> varGroups;
+  /** The pattern the groups come from, or null if there are no groups */
+  private final Pattern capturePattern;
+
   //"<" | ">" | ">>" | "<<" | "<#" | ">#" | ":" | "@">
 
 
@@ -49,10 +61,32 @@ abstract class GraphRelation implements Serializable {
   abstract Iterator<IndexedWord> searchNodeIterator(IndexedWord node, SemanticGraph sg);
 
   private GraphRelation(String symbol, String type, String name, String edgeName) {
+    this(symbol, type, name, edgeName, Collections.emptyList());
+  }
+
+  /**
+   * Creates a relation whose regex groups may set variables.
+   *
+   * @throws SemgrexParseException if a group number is not a group of the relation's pattern
+   */
+  private GraphRelation(String symbol, String type, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
     this.symbol = symbol;
     this.type   = getPattern(type);
     this.rawType = type;
     this.edgeName = edgeName;
+    this.varGroups = Collections.unmodifiableList(new ArrayList<>(varGroups));
+    if (this.varGroups.isEmpty()) {
+      this.capturePattern = null;
+    } else {
+      this.capturePattern = capturePattern(type);
+      int groupCount = capturePattern.matcher("").groupCount();
+      for (Pair<Integer, String> varGroup : this.varGroups) {
+        if (varGroup.first() < 0 || varGroup.first() > groupCount) {
+          throw new SemgrexParseException("Relation " + symbol + (type == null ? "" : type) + " has no group " + varGroup.first() +
+                                          " for the variable " + varGroup.second());
+        }
+      }
+    }
     if (name != null && edgeName != null && !name.equals(edgeName)) {
       throw new SemgrexParseException("GraphRelation had both = and ~ set, but the names were different!  " + this.toString());
     }
@@ -75,6 +109,43 @@ abstract class GraphRelation implements Serializable {
     this(symbol, null);
   }
 
+  /**
+   * A pattern which matches the same relations as the relation's type,
+   * with the groups the type has, for capturing them.
+   */
+  private static Pattern capturePattern(String type) {
+    if (type == null || type.isEmpty()) {
+      return Pattern.compile(".*");
+    } else if (type.matches("/.*/")) {
+      return Pattern.compile(type.substring(1, type.length() - 1));
+    } else {
+      return Pattern.compile(Pattern.quote(type));
+    }
+  }
+
+  /**
+   * The variables the relation's regex groups set for an edge with the given relation.
+   *
+   * @param relation the relation of the edge, as it is written, such as {@code nsubj:pass}
+   * @return each variable with the string its group matched, which is null
+   *   for a group which matched nothing, or null if the relation does not
+   *   match, or there is no relation to match
+   */
+  List<Pair<String, String>> captures(String relation) {
+    if (relation == null) {
+      return null;
+    }
+    Matcher matcher = capturePattern.matcher(relation);
+    if (!matcher.matches()) {
+      return null;
+    }
+    List<Pair<String, String>> captures = new ArrayList<>();
+    for (Pair<Integer, String> varGroup : varGroups) {
+      captures.add(new Pair<>(varGroup.second(), matcher.group(varGroup.first())));
+    }
+    return captures;
+  }
+
   @Override
   public String toString() {
     return toString(null);
@@ -84,6 +155,9 @@ abstract class GraphRelation implements Serializable {
     StringBuilder result = new StringBuilder();
     result.append(symbol);
     result.append((rawType != null) ? rawType : "");
+    for (Pair<Integer, String> varGroup : varGroups) {
+      result.append("#").append(varGroup.first()).append("%").append(varGroup.second());
+    }
     // The graphName used for the relation is kept on the NodePattern,
     // so it may be passed in from the containing NodePattern as part
     // of the toString()
@@ -243,8 +317,8 @@ abstract class GraphRelation implements Serializable {
   // GOVERNOR graph relation: ">" ===============================================
 
   static private class GOVERNOR extends GraphRelation {
-    GOVERNOR(String reln, String name, String edgeName) {
-      super(">", reln, name, edgeName);
+    GOVERNOR(String reln, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
+      super(">", reln, name, edgeName, varGroups);
     }
 
     @Override
@@ -282,8 +356,8 @@ abstract class GraphRelation implements Serializable {
   };
 
   static private class GOVERNOR_RIGHT extends GraphRelation {
-    GOVERNOR_RIGHT(String reln, String name, String edgeName) {
-      super(">++", reln, name, edgeName);
+    GOVERNOR_RIGHT(String reln, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
+      super(">++", reln, name, edgeName, varGroups);
     }
 
 
@@ -324,8 +398,8 @@ abstract class GraphRelation implements Serializable {
   }
 
   static private class GOVERNOR_LEFT extends GraphRelation {
-    GOVERNOR_LEFT(String reln, String name, String edgeName) {
-      super(">--", reln, name, edgeName);
+    GOVERNOR_LEFT(String reln, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
+      super(">--", reln, name, edgeName, varGroups);
     }
 
 
@@ -368,8 +442,8 @@ abstract class GraphRelation implements Serializable {
   // DEPENDENT graph relation: "<" ===============================================
 
   static private class DEPENDENT extends GraphRelation {
-    DEPENDENT(String reln, String name, String edgeName) {
-      super("<", reln, name, edgeName);
+    DEPENDENT(String reln, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
+      super("<", reln, name, edgeName, varGroups);
     }
 
     @Override
@@ -408,8 +482,8 @@ abstract class GraphRelation implements Serializable {
 
 
   static private class DEPENDENT_RIGHT extends GraphRelation {
-    DEPENDENT_RIGHT(String reln, String name, String edgeName) {
-      super("<++", reln, name, edgeName);
+    DEPENDENT_RIGHT(String reln, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
+      super("<++", reln, name, edgeName, varGroups);
     }
 
     @Override
@@ -450,8 +524,8 @@ abstract class GraphRelation implements Serializable {
 
 
   static private class DEPENDENT_LEFT extends GraphRelation {
-    DEPENDENT_LEFT(String reln, String name, String edgeName) {
-      super("<--", reln, name, edgeName);
+    DEPENDENT_LEFT(String reln, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
+      super("<--", reln, name, edgeName, varGroups);
     }
 
 
@@ -834,8 +908,8 @@ abstract class GraphRelation implements Serializable {
    * In other words, this can take the place of a disjunction over &lt; and &gt;
    */
   static private class CONNECTED extends GraphRelation {
-    CONNECTED(String reln, String name, String edgeName) {
-      super("<>", reln, name, edgeName);
+    CONNECTED(String reln, String name, String edgeName, List<Pair<Integer, String>> varGroups) {
+      super("<>", reln, name, edgeName, varGroups);
     }
 
 
@@ -1199,6 +1273,29 @@ abstract class GraphRelation implements Serializable {
                                           String type,
                                           String name,
                                           String edgeName) {
+    return getRelation(reln, type, name, edgeName, Collections.emptyList());
+  }
+
+  /**
+   * Creates a relation whose regex groups may set variables, as in
+   * {@code >/([cn]subj)/#1%etype}.  Only a relation which can name its
+   * edge, such as {@code >} or {@code <}, can have them, as the groups
+   * come from the relation of that edge.
+   *
+   * @param reln the relation's symbol, such as {@code >}
+   * @param type the relation's type, such as {@code nsubj} or {@code /([cn]subj)/}, or null for any
+   * @param name the name of the relation, written with {@code ~}, or null
+   * @param edgeName the name of the edge, written with {@code =}, or null
+   * @param varGroups each group number with the name of the variable it sets
+   * @return the relation
+   * @throws SemgrexParseException if the relation is unknown, or cannot have a named edge or
+   *   groups which set variables but is given them, or a group number is not a group of the type
+   */
+  public static GraphRelation getRelation(String reln,
+                                          String type,
+                                          String name,
+                                          String edgeName,
+                                          List<Pair<Integer, String>> varGroups) {
     if (reln == null && type == null)
       return null;
     if (!isKnownRelation(reln)) {
@@ -1206,22 +1303,25 @@ abstract class GraphRelation implements Serializable {
     }
     switch (reln) {
       case ">":
-        return new GOVERNOR(type, name, edgeName);
+        return new GOVERNOR(type, name, edgeName, varGroups);
       case ">++":
-        return new GOVERNOR_RIGHT(type, name, edgeName);
+        return new GOVERNOR_RIGHT(type, name, edgeName, varGroups);
       case ">--":
-        return new GOVERNOR_LEFT(type, name, edgeName);
+        return new GOVERNOR_LEFT(type, name, edgeName, varGroups);
       case "<":
-        return new DEPENDENT(type, name, edgeName);
+        return new DEPENDENT(type, name, edgeName, varGroups);
       case "<++":
-        return new DEPENDENT_RIGHT(type, name, edgeName);
+        return new DEPENDENT_RIGHT(type, name, edgeName, varGroups);
       case "<--":
-        return new DEPENDENT_LEFT(type, name, edgeName);
+        return new DEPENDENT_LEFT(type, name, edgeName, varGroups);
       case "<>":
-        return new CONNECTED(type, name, edgeName);
+        return new CONNECTED(type, name, edgeName, varGroups);
     }
     if (edgeName != null) {
       throw new SemgrexParseException("Relation " + reln + " does not allow for named edges");
+    }
+    if (!varGroups.isEmpty()) {
+      throw new SemgrexParseException("Relation " + reln + " has no single edge to take the groups " + varGroups + " from");
     }
     switch (reln) {
       case ">>":
@@ -1323,7 +1423,8 @@ abstract class GraphRelation implements Serializable {
     final GraphRelation relation = (GraphRelation) o;
 
     if (!comparisonSymbol().equals(relation.comparisonSymbol()) ||
-        !type.equals(relation.type)) {
+        !type.equals(relation.type) ||
+        !varGroups.equals(relation.varGroups)) {
       return false;
     }
 

@@ -3653,4 +3653,19 @@ public class SsurgeonTest {
     // with three names, all is well
     Ssurgeon.readFromEditText(text.replace("=x", "=e").replace("-edge x", "-edge e"), "UniversalEnglish");
   }
+
+  /** A regex group of a relation sets a variable, as one of a node's attribute does */
+  @Test
+  public void relationGroupVariable() {
+    String text = String.join(newline,
+                              "{}=head >/([cn]subj)(:pass)?/#1%etype {}=subject",
+                              "editNode -node subject -updateMorphoFeatures Subj=${etype}");
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(text, "UniversalEnglish").get(0);
+    // That he left was noticed
+    SemanticGraph sg = SemanticGraph.valueOf("[noticed-5 csubj:pass> [left-3 mark> That-1 nsubj> he-2] aux:pass> was-4]", Language.UniversalEnglish);
+    SemanticGraph edited = pattern.iterate(sg).first;
+    assertEquals("csubj", edited.getNodeByIndex(3).get(CoreAnnotations.CoNLLUFeats.class).get("Subj"));
+    assertEquals("nsubj", edited.getNodeByIndex(2).get(CoreAnnotations.CoNLLUFeats.class).get("Subj"));
+    assertNull(edited.getNodeByIndex(1).get(CoreAnnotations.CoNLLUFeats.class));
+  }
 }
