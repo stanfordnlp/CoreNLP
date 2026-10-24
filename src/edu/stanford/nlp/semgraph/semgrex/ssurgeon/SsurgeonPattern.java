@@ -522,8 +522,18 @@ public class SsurgeonPattern {
   public static final String PRED_ID_ATTR = "id";
   /** XML element for a pattern's notes */
   public static final String NOTES_ELEM_TAG = "notes";
-  /** XML element for one edit when reading patterns; the writer instead puts all of the edits in one such element */
+  /** XML element for one edit of a pattern */
   public static final String EDIT_LIST_ELEM_TAG = "edit-list";
+  /** XML element for a table which remap edits can use, with its name in a {@code name} attribute */
+  public static final String TABLE_TAG = "table";
+  /** XML element for one entry of a table, with {@code key} and {@code value} attributes */
+  public static final String TABLE_ENTRY_TAG = "entry";
+  /** XML attribute giving the name of a table */
+  public static final String TABLE_NAME_ATTR = "name";
+  /** XML attribute giving the key of a table entry */
+  public static final String TABLE_KEY_ATTR = "key";
+  /** XML attribute giving the value of a table entry */
+  public static final String TABLE_VALUE_ATTR = "value";
   /** XML attribute giving the position of a pattern or edit when writing */
   public static final String ORDINAL_ATTR = "ordinal";
 
