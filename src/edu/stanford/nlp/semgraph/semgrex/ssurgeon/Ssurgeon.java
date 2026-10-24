@@ -60,18 +60,23 @@ import edu.stanford.nlp.util.logging.Redwood;
     <language>...</language>
     <edit-list>...</edit-list>
   </ssurgeon-pattern>
+  <table name="...">
+    <entry key="..." value="..."/>
+  </table>
 </ssurgeon-pattern-list>
 }
 </pre>
- * The {@code id} is the id of the Ssurgeon operation. <br>
+ * The {@code uid} is the id of the Ssurgeon operation. <br>
  * The {@code notes} are comments on the Ssurgeon. <br>
  * The {@code semgrex} is a Semgrex pattern to use when matching for this operation. <br>
- * The {@code edit-list} is the actual Ssurgeon operation to execute. <br>
+ * Each {@code edit-list} is one Ssurgeon operation to execute, in order. <br>
  * The {@code language} is an optional field to determine what
  * language formalism to use when making new dependencies.  By default
  * it will be English for SD when using the Java API, although most
  * people probably want UniversalEnglish for UD (including non-English
  * UD datasets) <br>
+ * Each {@code table} is a table for {@code remap}, which any pattern of
+ * the list can use, as {@link SsurgeonTable} describes. <br>
  *<br>
  * Below, edge means an edge in the Semgrex results, and node refers to a matched word.
  *<br>
@@ -253,7 +258,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *</p><p>
  * {@code remap} looks up a variable of the match in a table, for the edits after it. <br>
  * {@code -var} is the variable to look up, such as one the Semgrex pattern captured with {@code #0%lemma}. <br>
- * {@code -table} is the table, defined in the same edit file with a {@code table} block. <br>
+ * {@code -table} is the table, defined in the same edit file or XML pattern list. <br>
  * {@code -to} is the variable to set to the result.  The default is the variable looked up. <br>
  *   If the table has no entry for the variable, the result is unset, so an edit which uses it does nothing.
  *   This changes nothing in the graphs, so it does not count as a change by itself.  For example, to fix
@@ -997,8 +1002,9 @@ public class Ssurgeon  {
   //}
 
   /**
-   * Given a target filepath and a list of Ssurgeon patterns, writes them out as XML forms.
-   * Errors are logged rather than thrown.
+   * Given a target filepath and a list of Ssurgeon patterns, writes them out as XML forms,
+   * along with the tables their {@code remap} edits use.
+   * Errors, such as two different tables with the same name, are logged rather than thrown.
    *
    * @param tgtFile The file to write
    * @param patterns The patterns to write
@@ -1049,6 +1055,30 @@ public class Ssurgeon  {
   }
 
 
+  /**
+   * The tables the {@code remap} edits of the patterns use, by name, in the order they are first used.
+   *
+   * @param patterns the patterns
+   * @return the tables
+   * @throws IllegalArgumentException if two different tables have the same name, as
+   *   one pattern list cannot hold them both
+   */
+  static Map<String, SsurgeonTable> tablesUsed(List<SsurgeonPattern> patterns) {
+    Map<String, SsurgeonTable> tables = new LinkedHashMap<>();
+    for (SsurgeonPattern pattern : patterns) {
+      for (SsurgeonEdit edit : pattern.getEditScript()) {
+        if (edit instanceof Remap) {
+          SsurgeonTable table = ((Remap) edit).table;
+          SsurgeonTable previous = tables.putIfAbsent(table.getName(), table);
+          if (previous != null && !previous.equals(table)) {
+            throw new IllegalArgumentException("The patterns use two different tables named " + table.getName());
+          }
+        }
+      }
+    }
+    return tables;
+  }
+
   private static Document createPatternXMLDoc(List<SsurgeonPattern> patterns) {
     try {
       DocumentBuilderFactory dbf = XMLUtils.safeDocumentBuilderFactory();
@@ -1056,6 +1086,18 @@ public class Ssurgeon  {
       Document domDoc = db.newDocument();
       Element rootElt = domDoc.createElement(SsurgeonPattern.ELT_LIST_TAG);
       domDoc.appendChild(rootElt);
+      // the tables the patterns use go in the list, for the reader to give back to them
+      for (SsurgeonTable table : tablesUsed(patterns).values()) {
+        Element tableElt = domDoc.createElement(SsurgeonPattern.TABLE_TAG);
+        tableElt.setAttribute(SsurgeonPattern.TABLE_NAME_ATTR, table.getName());
+        for (Map.Entry<String, String> entry : table.entries().entrySet()) {
+          Element entryElt = domDoc.createElement(SsurgeonPattern.TABLE_ENTRY_TAG);
+          entryElt.setAttribute(SsurgeonPattern.TABLE_KEY_ATTR, entry.getKey());
+          entryElt.setAttribute(SsurgeonPattern.TABLE_VALUE_ATTR, entry.getValue());
+          tableElt.appendChild(entryElt);
+        }
+        rootElt.appendChild(tableElt);
+      }
       int ordinal = 1;
       for (SsurgeonPattern pattern : patterns) {
         Element patElt = domDoc.createElement(SsurgeonPattern.SSURGEON_ELEM_TAG);
@@ -1285,20 +1327,24 @@ public class Ssurgeon  {
 
   /**
    * Reads the SsurgeonPatterns in an XML document.  Any word list resources
-   * are added to this Ssurgeon.
+   * are added to this Ssurgeon.  The tables are read first, so a pattern
+   * can use any table in the document, before or after it.
    *
    * @param doc The XML document
    * @return The patterns, in the order they appear
+   * @throws SsurgeonParseException if a pattern or a table cannot be read,
+   *   or two tables have the same name
    */
   public List<SsurgeonPattern> readFromDocument(Document doc) {
     List<SsurgeonPattern> retList = new ArrayList<>();
+    Map<String, SsurgeonTable> tables = readTables(doc);
 
     NodeList patternNodes = doc.getElementsByTagName(SsurgeonPattern.SSURGEON_ELEM_TAG);
     for (int i=0; i<patternNodes.getLength(); i++) {
       Node node = patternNodes.item(i);
       if (node.getNodeType() == Node.ELEMENT_NODE) {
         Element elt = (Element) node;
-        SsurgeonPattern pattern = ssurgeonPatternFromXML(elt);
+        SsurgeonPattern pattern = ssurgeonPatternFromXML(elt, tables);
         retList.add(pattern);
       }
     }
@@ -1314,6 +1360,45 @@ public class Ssurgeon  {
     }
 
     return retList;
+  }
+
+  /**
+   * Reads the tables of an XML document.
+   *
+   * @param doc The XML document
+   * @return The tables, by name
+   * @throws SsurgeonParseException if a table has no name, an entry has no
+   *   key or value, a key has two values, the entries form a cycle, or two
+   *   tables have the same name
+   */
+  private static Map<String, SsurgeonTable> readTables(Document doc) {
+    Map<String, SsurgeonTable> tables = new LinkedHashMap<>();
+    NodeList tableNodes = doc.getElementsByTagName(SsurgeonPattern.TABLE_TAG);
+    for (int i = 0; i < tableNodes.getLength(); ++i) {
+      Element tableElt = (Element) tableNodes.item(i);
+      String name = tableElt.getAttribute(SsurgeonPattern.TABLE_NAME_ATTR);
+      if (name.isEmpty()) {
+        throw new SsurgeonParseException("A table needs a " + SsurgeonPattern.TABLE_NAME_ATTR);
+      }
+      Map<String, String> entries = new LinkedHashMap<>();
+      NodeList entryNodes = tableElt.getElementsByTagName(SsurgeonPattern.TABLE_ENTRY_TAG);
+      for (int j = 0; j < entryNodes.getLength(); ++j) {
+        Element entryElt = (Element) entryNodes.item(j);
+        if (!entryElt.hasAttribute(SsurgeonPattern.TABLE_KEY_ATTR) || entryElt.getAttribute(SsurgeonPattern.TABLE_KEY_ATTR).isEmpty() ||
+            !entryElt.hasAttribute(SsurgeonPattern.TABLE_VALUE_ATTR)) {
+          throw new SsurgeonParseException("Each entry of table " + name + " needs a " + SsurgeonPattern.TABLE_KEY_ATTR +
+                                           " and a " + SsurgeonPattern.TABLE_VALUE_ATTR);
+        }
+        SsurgeonTable.addEntry(name, entries,
+                               entryElt.getAttribute(SsurgeonPattern.TABLE_KEY_ATTR),
+                               entryElt.getAttribute(SsurgeonPattern.TABLE_VALUE_ATTR));
+      }
+      SsurgeonTable table = new SsurgeonTable(name, entries);
+      if (tables.put(name, table) != null) {
+        throw new SsurgeonParseException("There are two tables named " + name);
+      }
+    }
+    return tables;
   }
 
   /**
@@ -1348,8 +1433,23 @@ public class Ssurgeon  {
    * @return The new pattern
    * @throws SsurgeonParseException if an edit or predicate cannot be parsed
    */
-  @SuppressWarnings("unchecked")
   public static SsurgeonPattern ssurgeonPatternFromXML(Element elt) {
+    return ssurgeonPatternFromXML(elt, Collections.emptyMap());
+  }
+
+  /**
+   * Given the root Element for a SsurgeonPattern (SSURGEON_ELEM_TAG), converts
+   * it into its corresponding SsurgeonPattern object, with the tables its
+   * {@code remap} edits can use.
+   *
+   * @param elt The element to convert
+   * @param tables The tables a {@code remap} can name, by name
+   * @return The new pattern
+   * @throws SsurgeonParseException if an edit or predicate cannot be parsed, or an edit
+   *   names a table which is not given
+   */
+  @SuppressWarnings("unchecked")
+  public static SsurgeonPattern ssurgeonPatternFromXML(Element elt, Map<String, SsurgeonTable> tables) {
     String uid = getTagText(elt, SsurgeonPattern.UID_ELEM_TAG);
     String notes = getTagText(elt, SsurgeonPattern.NOTES_ELEM_TAG);
     String semgrexString = getTagText(elt, SsurgeonPattern.SEMGREX_ELEM_TAG);
@@ -1384,7 +1484,7 @@ public class Ssurgeon  {
 
         Element editElt = (Element) node;
         String editVal = getEltText(editElt);
-        retPattern.addEdit(Ssurgeon.parseEditLine(editVal, attributeArgs, retPattern.getLanguage(), knownEdges));
+        retPattern.addEdit(Ssurgeon.parseEditLine(editVal, attributeArgs, retPattern.getLanguage(), knownEdges, tables));
       }
     }
 

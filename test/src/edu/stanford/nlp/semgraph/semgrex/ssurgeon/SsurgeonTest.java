@@ -2,6 +2,8 @@ package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +18,7 @@ import java.util.TreeSet;
 import org.junit.Test;
 
 import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -66,11 +69,13 @@ public class SsurgeonTest {
     // pattern: an addEdge earlier in the list introduces a name that a
     // reattachNamedEdge later in the list is allowed to use.
     Set<String> knownEdges = new HashSet<>(pattern.getSemgrexPattern().getKnownEdges());
+    // a remap names its table, which has to be given back to it
+    Map<String, SsurgeonTable> tables = Ssurgeon.tablesUsed(Collections.singletonList(pattern));
     for (SsurgeonEdit edit : pattern.getEditScript()) {
       String printed = edit.toEditString();
       SsurgeonEdit reparsed;
       try {
-        reparsed = Ssurgeon.parseEditLine(printed, new HashMap<>(), pattern.getLanguage(), knownEdges);
+        reparsed = Ssurgeon.parseEditLine(printed, new HashMap<>(), pattern.getLanguage(), knownEdges, tables);
       } catch (SsurgeonParseException e) {
         throw new AssertionError("Could not reparse the printed form of an edit: '" + printed + "'", e);
       }
@@ -3514,5 +3519,122 @@ public class SsurgeonTest {
     assertFalse(marks(or, "big", "car"));
 
     assertThrows(SsurgeonParseException.class, () -> wordlistPattern("<and></and>"));
+  }
+
+  /** An XML pattern list with a remap of the verb lemmas, and the given tables after it */
+  private static String remapXML(String... tables) {
+    List<String> lines = new ArrayList<>(Arrays.asList(
+      "<ssurgeon-pattern-list>",
+      "  <ssurgeon-pattern>",
+      "    <uid>120</uid>",
+      "    <notes>Fix the verb lemmas the table lists</notes>",
+      "    <language>UniversalEnglish</language>",
+      "    <semgrex>" + XMLUtils.escapeXML("{cpos:VERB;lemma:__#0%lemma}=verb") + "</semgrex>",
+      "    <edit-list>remap -var lemma -table lemma_mapping</edit-list>",
+      "    <edit-list>editNode -node verb -lemma ${lemma}</edit-list>",
+      "  </ssurgeon-pattern>"));
+    lines.addAll(Arrays.asList(tables));
+    lines.add("</ssurgeon-pattern-list>");
+    return String.join(newline, lines);
+  }
+
+  /** A table in an XML pattern list can be used by a pattern before it */
+  @Test
+  public void readXMLTable() {
+    String doc = remapXML("  <table name=\"lemma_mapping\">",
+                          "    <entry key=\"estudir\" value=\"estudiar\"/>",
+                          "    <entry key=\"var\" value=\"variar\"/>",
+                          "  </table>");
+    SsurgeonPattern pattern = readFromString(doc).get(0);
+    SsurgeonTable table = ((Remap) pattern.getEditScript().get(0)).table;
+    assertEquals("lemma_mapping", table.getName());
+    assertEquals("variar", table.get("var"));
+
+    SemanticGraph edited = pattern.iterate(spanishVerbs()).first;
+    assertEquals("estudiar", edited.getNodeByIndex(2).lemma());
+    assertEquals("comer", edited.getNodeByIndex(4).lemma());
+  }
+
+  /** Tables in XML which are malformed, or would keep iterate going forever, are errors when they are read */
+  @Test
+  public void readXMLTableErrors() {
+    String entry = "<entry key=\"a\" value=\"b\"/>";
+    // no name, an entry with no key or no value, a key with two values, a cycle
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table>" + entry + "</table>")));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table name=\"lemma_mapping\"><entry value=\"b\"/></table>")));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table name=\"lemma_mapping\"><entry key=\"\" value=\"b\"/></table>")));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table name=\"lemma_mapping\"><entry key=\"a\"/></table>")));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table name=\"lemma_mapping\">" + entry + "<entry key=\"a\" value=\"c\"/></table>")));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table name=\"lemma_mapping\">" + entry + "<entry key=\"b\" value=\"a\"/></table>")));
+    // two tables of one name, and no table of the name the remap uses
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table name=\"lemma_mapping\">" + entry + "</table>",
+                                                                                              "<table name=\"lemma_mapping\">" + entry + "</table>")));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.inst().readFromString(remapXML("<table name=\"other\">" + entry + "</table>")));
+    // an entry given twice, and a value which is empty, are fine
+    Ssurgeon.inst().readFromString(remapXML("<table name=\"lemma_mapping\">" + entry + entry + "<entry key=\"c\" value=\"\"/></table>"));
+  }
+
+  /**
+   * The tables the patterns use are written along with them, once each,
+   * and read back the same, whatever characters are in them
+   */
+  @Test
+  public void writeAndReadTables() throws IOException {
+    String text = String.join(newline,
+                              "table odd",
+                              "a \"b\" <c>\td & e",
+                              "",
+                              LEMMA_TABLE,
+                              "",
+                              "{cpos:VERB;lemma:__#0%lemma}=verb",
+                              "remap -var lemma -table lemma_mapping",
+                              "editNode -node verb -lemma ${lemma}",
+                              "",
+                              "{word:__#0%word}=word",
+                              "remap -var word -table odd -to fixed",
+                              "remap -var lemma -table lemma_mapping",
+                              "",
+                              "{word:dog}=dog",
+                              "editNode -node dog -lemma dog");
+    List<SsurgeonPattern> patterns = Ssurgeon.readFromEditText(text, "UniversalEnglish");
+    assertEquals(3, patterns.size());
+
+    File file = File.createTempFile("tables", ".xml");
+    file.deleteOnExit();
+    Ssurgeon.writeToFile(file, patterns);
+    String xml = IOUtils.slurpFile(file.getPath(), "utf-8");
+    // each table once, and nothing for a pattern with no remap
+    assertEquals(2, xml.split("<" + SsurgeonPattern.TABLE_TAG + " ", -1).length - 1);
+    assertFalse(Ssurgeon.writeToString(patterns.get(2)).contains("<" + SsurgeonPattern.TABLE_TAG));
+
+    List<SsurgeonPattern> read = Ssurgeon.inst().readFromFile(file);
+    assertEquals(3, read.size());
+    for (SsurgeonPattern pattern : read) {
+      checkEditStringRoundTrip(pattern);
+    }
+    assertEquals(Ssurgeon.tablesUsed(patterns), Ssurgeon.tablesUsed(read));
+    assertEquals("d & e", ((Remap) read.get(1).getEditScript().get(0)).table.get("a \"b\" <c>"));
+    // the two patterns which use lemma_mapping get the same one back
+    assertSame(((Remap) read.get(0).getEditScript().get(0)).table, ((Remap) read.get(1).getEditScript().get(1)).table);
+    assertEquals("estudiar", read.get(0).iterate(spanishVerbs()).first.getNodeByIndex(2).lemma());
+  }
+
+  /** One pattern list cannot hold two different tables of the same name, so it is not written */
+  @Test
+  public void writeConflictingTables() throws IOException {
+    String pattern = String.join(newline, "", "{lemma:__#0%lemma}=verb", "remap -var lemma -table t", "editNode -node verb -lemma ${lemma}");
+    List<SsurgeonPattern> patterns = new ArrayList<>();
+    patterns.addAll(Ssurgeon.readFromEditText("table t\na\tb" + newline + pattern, "UniversalEnglish"));
+    patterns.addAll(Ssurgeon.readFromEditText("table t\na\tc" + newline + pattern, "UniversalEnglish"));
+    assertThrows(IllegalArgumentException.class, () -> Ssurgeon.tablesUsed(patterns));
+
+    File file = File.createTempFile("conflict", ".xml");
+    assertTrue(file.delete());
+    Ssurgeon.writeToFile(file, patterns);
+    assertFalse(file.exists());
+
+    // the same table read twice is the same table, so that is fine
+    patterns.set(1, Ssurgeon.readFromEditText("table t\na\tb" + newline + pattern, "UniversalEnglish").get(0));
+    assertEquals(1, Ssurgeon.tablesUsed(patterns).size());
   }
 }

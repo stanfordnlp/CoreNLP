@@ -14,6 +14,14 @@ import java.util.Set;
  * {@code table name}, followed by one {@code key<TAB>value} line per
  * entry.  A key or value may contain spaces, so the tab is required.
  *<br>
+ * In an XML pattern list, a table is an element of the list:
+ *<pre>{@code
+ * <table name="lemma_mapping">
+ *   <entry key="estudir" value="estudiar"/>
+ *   <entry key="var" value="variar"/>
+ * </table>
+ * }</pre>
+ *<br>
  * The entries may form a chain, such as {@code a} to {@code b} and
  * {@code b} to {@code c}, which iterate follows to the end.  They may
  * not form a cycle, such as {@code a} to {@code b} and {@code b} to
@@ -64,12 +72,26 @@ public class SsurgeonTable {
       if (key.isEmpty()) {
         throw new SsurgeonParseException("Table " + name + " has a line with no key: |" + line + "|");
       }
-      String previous = entries.put(key, value);
-      if (previous != null && !previous.equals(value)) {
-        throw new SsurgeonParseException("Table " + name + " maps " + key + " to both " + previous + " and " + value);
-      }
+      addEntry(name, entries, key, value);
     }
     return new SsurgeonTable(name, entries);
+  }
+
+  /**
+   * Adds an entry to the entries of a table being read.  The same entry
+   * may be given twice, but not one key with two values.
+   *
+   * @param name the name of the table, for the error message
+   * @param entries the entries read so far
+   * @param key the key
+   * @param value its value
+   * @throws SsurgeonParseException if the key already has a different value
+   */
+  static void addEntry(String name, Map<String, String> entries, String key, String value) {
+    String previous = entries.put(key, value);
+    if (previous != null && !previous.equals(value)) {
+      throw new SsurgeonParseException("Table " + name + " maps " + key + " to both " + previous + " and " + value);
+    }
   }
 
   /** Rejects entries which lead back to a key already followed */
@@ -113,6 +135,27 @@ public class SsurgeonTable {
    */
   public Map<String, String> entries() {
     return entries;
+  }
+
+  /**
+   * Two tables are equal if they have the same name and the same entries,
+   * in any order.
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof SsurgeonTable)) {
+      return false;
+    }
+    SsurgeonTable other = (SsurgeonTable) o;
+    return name.equals(other.name) && entries.equals(other.entries);
+  }
+
+  @Override
+  public int hashCode() {
+    return name.hashCode() * 31 + entries.hashCode();
   }
 
   @Override
