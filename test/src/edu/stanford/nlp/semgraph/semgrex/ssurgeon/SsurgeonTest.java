@@ -3668,4 +3668,69 @@ public class SsurgeonTest {
     assertEquals("nsubj", edited.getNodeByIndex(2).get(CoreAnnotations.CoNLLUFeats.class).get("Subj"));
     assertNull(edited.getNodeByIndex(1).get(CoreAnnotations.CoNLLUFeats.class));
   }
+
+  /** The relations between the two words, in a graph */
+  private static List<String> relationsBetween(SemanticGraph sg, int gov, int dep) {
+    List<String> relations = new ArrayList<>();
+    for (SemanticGraphEdge edge : sg.getAllEdges(sg.getNodeByIndex(gov), sg.getNodeByIndex(dep))) {
+      relations.add(edge.getRelation().toString());
+    }
+    Collections.sort(relations);
+    return relations;
+  }
+
+  /** -reln can refer to a variable, so one edit makes both kinds of subject passive */
+  @Test
+  public void relabelRelationVariable() {
+    String text = String.join(newline,
+                              "{}=head >/aux:pass/ {} >/([cn]subj)/#1%etype=edge {}=subject",
+                              "RelabelNamedEdge -edge edge -reln ${etype}:pass");
+    SsurgeonPattern pattern = Ssurgeon.readFromEditText(text, "UniversalEnglish").get(0);
+    checkEditStringRoundTrip(pattern);
+    assertEquals("relabelNamedEdge\t-edge edge\t-reln ${etype}:pass\t", pattern.getEditScript().get(0).toEditString());
+
+    // The cake was eaten, That he left was noticed
+    SemanticGraph nsubj = SemanticGraph.valueOf("[eaten-4 nsubj> [cake-2 det> The-1] aux:pass> was-3]", Language.UniversalEnglish);
+    SemanticGraph csubj = SemanticGraph.valueOf("[noticed-5 csubj> [left-3 mark> That-1 nsubj> he-2] aux:pass> was-4]", Language.UniversalEnglish);
+    Pair<SemanticGraph, Boolean> result = pattern.iterate(nsubj);
+    assertTrue(result.second);
+    assertEquals(Arrays.asList("nsubj:pass"), relationsBetween(result.first, 4, 2));
+    // nsubj:pass is not a match for /([cn]subj)/, so that is the end of it
+    assertFalse(pattern.iterate(result.first).second);
+    SemanticGraph edited = pattern.iterate(csubj).first;
+    assertEquals(Arrays.asList("csubj:pass"), relationsBetween(edited, 5, 3));
+    // the nsubj of left has no aux:pass
+    assertEquals(Arrays.asList("nsubj"), relationsBetween(edited, 3, 2));
+  }
+
+  /** The relations of addEdge and addDep can refer to variables too, and one which is not set adds nothing */
+  @Test
+  public void addRelationVariable() {
+    String text = String.join(newline,
+                              "{}=head >/([cn]subj)/#1%etype ({}=subject !<</.subj:xsubj/@enhanced {})",
+                              "addEdge -gov head -dep subject -reln ${etype}:xsubj -graph enhanced",
+                              "",
+                              "{}=head >/([cn]subj)/#1%etype ({}=subject !> {word:indeed})",
+                              "addDep -gov subject -reln ${etype}:dep -word indeed -position +subject",
+                              "",
+                              "{}=head >/([cn]subj)/#1%etype {}=subject",
+                              "addEdge -gov head -dep subject -reln ${nothing}:xsubj");
+    List<SsurgeonPattern> patterns = Ssurgeon.readFromEditText(text, "UniversalEnglish");
+    for (SsurgeonPattern pattern : patterns) {
+      checkEditStringRoundTrip(pattern);
+    }
+
+    SemanticGraph sg = SemanticGraph.valueOf("[ate-2 nsubj> I-1]", Language.UniversalEnglish);
+    // the enhanced graph shares the words of the basic graph
+    SemgrexGraphs graphs = SemgrexGraphs.of(sg, new SemanticGraph(sg));
+    SemgrexGraphs edited = patterns.get(0).iterate(graphs).first;
+    assertEquals(Arrays.asList("nsubj", "nsubj:xsubj"), relationsBetween(edited.get(SemgrexGraphName.ENHANCED), 2, 1));
+    assertEquals(Arrays.asList("nsubj"), relationsBetween(edited.getDefault(), 2, 1));
+
+    SemanticGraph added = patterns.get(1).iterate(sg).first;
+    assertEquals("indeed", added.getNodeByIndex(2).word());
+    assertEquals(Arrays.asList("nsubj:dep"), relationsBetween(added, 1, 2));
+
+    assertFalse(patterns.get(2).iterate(sg).second);
+  }
 }

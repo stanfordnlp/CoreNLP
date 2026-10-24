@@ -168,11 +168,16 @@ import edu.stanford.nlp.util.logging.Redwood;
  *   {@code -removeMorphoFeatures ...} will remove this one morpho feature. <br>
  *   {@code -remove ...} will remove the attribute entirely, such as doing {@code -remove lemma} to remove the lemma.
  *</p><p>
- * The attribute values of {@code addDep} and {@code editNode}, and the features of {@code -updateMorphoFeatures},
+ * The attribute values of {@code addDep} and {@code editNode}, the features of {@code -updateMorphoFeatures},
+ *   and the {@code -reln} of {@code addDep}, {@code addEdge} and {@code relabelNamedEdge}
  *   can refer to variables of the match as {@code ${name}}.  A variable is set by a regex group the Semgrex
- *   pattern captures, written {@code #group%name} after the regex.  For example, to fix verb lemmas which
- *   end in -ir rather than -ar: <br>
+ *   pattern captures, written {@code #group%name} after the regex, or by {@code remap}.  For example, to fix
+ *   verb lemmas which end in -ir rather than -ar: <br>
  *   {@code {cpos:VERB;lemma:/(.*)ir/#1%stem}=verb} with {@code editNode -node verb -lemma ${stem}ar} <br>
+ *   A relation's type can capture groups the same way, which with {@code -reln} makes the subjects of
+ *   passive verbs passive: <br>
+ *   {@code {}=head >/aux:pass/ {} >/([cn]subj)/#1%etype=edge {}} with
+ *   {@code relabelNamedEdge -edge edge -reln ${etype}:pass} <br>
  *   If a variable is not set, the edit does nothing.  {@code $$} is a literal {@code $}, so {@code $${name}}
  *   is the text {@code ${name}}, and any other {@code $}, such as in {@code US$}, is literal as well.
  *</p><p>
@@ -877,17 +882,17 @@ public class Ssurgeon  {
         if (argsBox.govNodeName != null && argsBox.reln == null) {
           throw new SsurgeonParseException("Relation not specified for AddDep");
         }
-        GrammaticalRelation reln = argsBox.reln == null ? null : GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new AddDep(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight, argsBox.name, argsBox.graph);
+        SsurgeonRelation reln = SsurgeonRelation.parse(argsBox.reln, language);
+        return AddDep.withRelation(argsBox.govNodeName, reln, argsBox.annotations, argsBox.position, argsBox.weight, argsBox.name, argsBox.graph);
       } else if (command.equalsIgnoreCase(AddEdge.LABEL)) {
         if (argsBox.reln == null) {
           throw new SsurgeonParseException("Relation not specified for AddEdge");
         }
-        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
+        SsurgeonRelation reln = SsurgeonRelation.parse(argsBox.reln, language);
         if (argsBox.edge != null) {
           knownEdges.add(argsBox.edge);
         }
-        return new AddEdge(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight, argsBox.edge, graph);
+        return AddEdge.withRelation(argsBox.govNodeName, argsBox.dep, reln, argsBox.weight, argsBox.edge, graph);
       } else if (command.equalsIgnoreCase(ReattachNamedEdge.LABEL)) {
         if (argsBox.edge == null) {
           throw new SsurgeonParseException("Edge not specified for ReattachNamedEdge");
@@ -935,8 +940,7 @@ public class Ssurgeon  {
         if (argsBox.reln == null) {
           throw new SsurgeonParseException("Relation not specified for RelabelNamedEdge");
         }
-        GrammaticalRelation reln = GrammaticalRelation.valueOf(language, argsBox.reln);
-        return new RelabelNamedEdge(argsBox.edge, reln);
+        return RelabelNamedEdge.withRelation(argsBox.edge, SsurgeonRelation.parse(argsBox.reln, language));
       } else if (command.equalsIgnoreCase(RemoveEdge.LABEL)) {
         GrammaticalRelation reln = null;
         if (argsBox.reln != null) {

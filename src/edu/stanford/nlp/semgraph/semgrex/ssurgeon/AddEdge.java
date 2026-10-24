@@ -33,8 +33,8 @@ public class AddEdge extends SsurgeonEdit {
   protected final String govName;
   /** Name of the dependent in this reln, in match */
   protected final String depName;
-  /** Type of relation to add between these edges */
-  protected final GrammaticalRelation relation;
+  /** Type of relation to add between these edges, which may depend on the match */
+  protected final SsurgeonRelation relation;
   /** Weight of the new edge */
   protected final double weight;
   /** Name to give the new edge in the match, or null */
@@ -90,6 +90,27 @@ public class AddEdge extends SsurgeonEdit {
    * @param graph the graph to add the edge to
    */
   public AddEdge(String govName, String depName, GrammaticalRelation relation, double weight, String edgeName, SemgrexGraphName graph) {
+    this(govName, depName, SsurgeonRelation.of(relation), weight, edgeName, graph);
+  }
+
+  /**
+   * Creates an AddEdge whose relation may refer to the variables of the match.
+   * This is a factory rather than a constructor, so a null relation given
+   * to a public constructor is not ambiguous.
+   *
+   * @param govName name of the governor node in the match
+   * @param depName name of the dependent node in the match
+   * @param relation the relation of the new edge
+   * @param weight the weight of the new edge
+   * @param edgeName name to give the new edge in the match, or null
+   * @param graph the graph to add the edge to
+   * @return the edit
+   */
+  static AddEdge withRelation(String govName, String depName, SsurgeonRelation relation, double weight, String edgeName, SemgrexGraphName graph) {
+    return new AddEdge(govName, depName, relation, weight, edgeName, graph);
+  }
+
+  private AddEdge(String govName, String depName, SsurgeonRelation relation, double weight, String edgeName, SemgrexGraphName graph) {
     this.govName = govName;
     this.depName = depName;
     this.relation = relation;
@@ -162,7 +183,8 @@ public class AddEdge extends SsurgeonEdit {
    * a new edge is not added.
    *<br>
    * Nor is one added if either node is not in the graph, such as an empty
-   * word when adding to the basic graph, or a word an earlier edit deleted.
+   * word when adding to the basic graph, or a word an earlier edit deleted,
+   * or if the relation refers to a variable which is not set.
    */
   @Override
   public boolean evaluate(SemgrexGraphs graphs, SemgrexMatch sm) {
@@ -170,6 +192,10 @@ public class AddEdge extends SsurgeonEdit {
     IndexedWord govNode = sm.getNode(govName);
     IndexedWord depNode =  sm.getNode(depName);
     if (sg == null || govNode == null || depNode == null || !sg.containsVertex(govNode) || !sg.containsVertex(depNode)) {
+      return false;
+    }
+    GrammaticalRelation relation = this.relation.get(sm);
+    if (relation == null) {
       return false;
     }
     SemanticGraphEdge existingEdge = sg.getEdge(govNode, depNode, relation);
