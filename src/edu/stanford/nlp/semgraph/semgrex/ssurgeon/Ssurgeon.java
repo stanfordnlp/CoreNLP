@@ -1305,7 +1305,7 @@ public class Ssurgeon  {
 
     NodeList resourceNodes = doc.getElementsByTagName(SsurgeonPattern.RESOURCE_TAG);
     for (int i=0; i < resourceNodes.getLength(); i++) {
-      Node node = patternNodes.item(i);
+      Node node = resourceNodes.item(i);
       if (node.getNodeType() == Node.ELEMENT_NODE) {
         Element resourceElt = (Element) node;
         SsurgeonWordlist wlRsrc = new SsurgeonWordlist(resourceElt);
@@ -1403,7 +1403,8 @@ public class Ssurgeon  {
    *
    * @param elt The element describing the predicate
    * @return The predicate
-   * @throws SsurgeonParseException if the element is not a known predicate
+   * @throws SsurgeonParseException if the element is not a known predicate,
+   *   or is an and or an or with no predicates in it
    */
   public static SsurgPred assemblePredFromXML(Element elt) {
     String eltName = elt.getTagName();
@@ -1411,16 +1412,18 @@ public class Ssurgeon  {
       case SsurgeonPattern.PREDICATE_AND_TAG:
         SsurgAndPred andPred = new SsurgAndPred();
         for (Element childElt : getChildElements(elt)) {
-          SsurgPred childPred = assemblePredFromXML(childElt);
-          andPred.add(childPred);
+          andPred.add(assemblePredFromXML(childElt));
+        }
+        if (!andPred.isEmpty()) {
           return andPred;
         }
         break;
       case SsurgeonPattern.PREDICATE_OR_TAG:
         SsurgOrPred orPred = new SsurgOrPred();
         for (Element childElt : getChildElements(elt)) {
-          SsurgPred childPred = assemblePredFromXML(childElt);
-          orPred.add(childPred);
+          orPred.add(assemblePredFromXML(childElt));
+        }
+        if (!orPred.isEmpty()) {
           return orPred;
         }
         break;

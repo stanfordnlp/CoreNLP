@@ -3467,4 +3467,52 @@ public class SsurgeonTest {
     assertEquals("cảm ơn", table.get("cam on"));
     assertNull(table.get("xin"));
   }
+
+  /** A pattern list whose patterns test the nodes against word lists, with the given predicate */
+  private static SsurgeonPattern wordlistPattern(String predicate) {
+    String doc = String.join(newline,
+                             "<ssurgeon-pattern-list>",
+                             "  <resource id=\"test_colors\"><word>red</word><word>blue</word></resource>",
+                             "  <resource id=\"test_animals\"><word>dog</word></resource>",
+                             "  <ssurgeon-pattern>",
+                             "    <uid>0</uid>",
+                             "    <notes>Mark nouns with an adjective, if the predicate passes</notes>",
+                             "    <semgrex>" + XMLUtils.escapeXML("{}=noun >amod {}=adj") + "</semgrex>",
+                             "    <edit-list>editNode -node noun -lemma marked</edit-list>",
+                             "    <predicate>" + predicate + "</predicate>",
+                             "  </ssurgeon-pattern>",
+                             "</ssurgeon-pattern-list>");
+    return readFromString(doc).get(0);
+  }
+
+  /** Whether the pattern marks the noun of an adjective and a noun */
+  private static boolean marks(SsurgeonPattern pattern, String adj, String noun) {
+    SemanticGraph sg = SemanticGraph.valueOf("[" + noun + "-2 amod> " + adj + "-1]");
+    return "marked".equals(pattern.iterate(sg).first.getNodeByIndex(2).lemma());
+  }
+
+  /**
+   * The word lists of an XML pattern list are read, and an and or an or
+   * tests every predicate in it, not just the first
+   */
+  @Test
+  public void readXMLPredicates() {
+    SsurgeonPattern and = wordlistPattern("<and>" +
+                                          "<wordlist-test id=\"1\" resourceID=\"test_colors\" type=\"word\">adj</wordlist-test>" +
+                                          "<wordlist-test id=\"2\" resourceID=\"test_animals\" type=\"word\">noun</wordlist-test>" +
+                                          "</and>");
+    assertTrue(marks(and, "red", "dog"));
+    assertFalse(marks(and, "red", "car"));
+    assertFalse(marks(and, "big", "dog"));
+
+    SsurgeonPattern or = wordlistPattern("<or>" +
+                                         "<wordlist-test id=\"1\" resourceID=\"test_animals\" type=\"word\">noun</wordlist-test>" +
+                                         "<wordlist-test id=\"2\" resourceID=\"test_colors\" type=\"word\">adj</wordlist-test>" +
+                                         "</or>");
+    assertTrue(marks(or, "big", "dog"));
+    assertTrue(marks(or, "red", "car"));
+    assertFalse(marks(or, "big", "car"));
+
+    assertThrows(SsurgeonParseException.class, () -> wordlistPattern("<and></and>"));
+  }
 }

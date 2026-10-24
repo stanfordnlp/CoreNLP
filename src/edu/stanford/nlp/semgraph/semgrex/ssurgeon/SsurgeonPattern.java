@@ -227,6 +227,9 @@ public class SsurgeonPattern {
    * The graph is always copied, although operations which change the
    * text or otherwise edit a word node will affect the original graph.
    *<br>
+   * A match which fails the pattern's predicate test, if it has one, is
+   * skipped.
+   *<br>
    * It's not clear what to do with a multiple edit pattern.
    * Currently we iterate through multiple patterns.  If any of them fire,
    * we rerun the semgrex and restart.
@@ -299,6 +302,9 @@ public class SsurgeonPattern {
     SemgrexMatcher matcher = semgrexPattern.matcher(graphs);
     boolean anyChanges = false;
     while (matcher.find()) {
+      if (predicateTest != null && !predicateTest.test(matcher)) {
+        continue;
+      }
       boolean edited = false;
       // the edits share a copy of the match, so a name or variable one
       // of them sets is seen by the rest, and the matcher's search,
