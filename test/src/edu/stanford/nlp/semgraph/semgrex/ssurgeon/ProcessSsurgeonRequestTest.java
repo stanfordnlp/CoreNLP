@@ -291,4 +291,84 @@ public class ProcessSsurgeonRequestTest {
     e = assertThrows(RuntimeException.class, () -> ProcessSsurgeonRequest.processRequest(buildSentenceRequest(operations, buildSentence(WANT_TO_GO, null, true), buildSentence(EMPTY_WORD, null, true))));
     assertTrue(e.getMessage(), e.getMessage().contains("sentence 1 of the request"));
   }
+
+  /** "Juan estudió y comió", with the invented lemma estudir for the first verb */
+  private static final String ESTUDIO = String.join("\n",
+    "# text = Juan estudió y comió",
+    "1\tJuan\tJuan\tPROPN\t_\t_\t2\tnsubj\t2:nsubj\t_",
+    "2\testudió\testudir\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "3\ty\ty\tCCONJ\t_\t_\t4\tcc\t4:cc\t_",
+    "4\tcomió\tcomer\tVERB\t_\t_\t2\tconj\t2:conj\t_",
+    "");
+
+  /** A table with the given name and entries, given as key, value, key, value... */
+  private static SsurgeonRequest.Table buildTable(String name, String ... entries) {
+    SsurgeonRequest.Table.Builder builder = SsurgeonRequest.Table.newBuilder();
+    builder.setName(name);
+    for (int i = 0; i < entries.length; i += 2) {
+      builder.addEntry(SsurgeonRequest.Table.Entry.newBuilder().setKey(entries[i]).setValue(entries[i + 1]));
+    }
+    return builder.build();
+  }
+
+  /** The remap operations of a request use the request's tables */
+  @Test
+  public void testSentenceRemap() throws IOException {
+    List<SsurgeonRequest.Ssurgeon> operations = buildOperationList(buildOperation("120", "fix the verb lemmas the table lists",
+                                                                                  "{cpos:VERB;lemma:__#0%lemma}=verb",
+                                                                                  "remap -var lemma -table lemma_mapping",
+                                                                                  "editNode -node verb -lemma ${lemma}"));
+    SsurgeonRequest request = buildSentenceRequest(operations, buildSentence(ESTUDIO, "gsd-1", true), buildSentence(WANT_TO_GO, "test-1", true))
+      .toBuilder().addTable(buildTable("lemma_mapping", "estudir", "estudiar", "var", "variar")).build();
+    SsurgeonResponse response = ProcessSsurgeonRequest.processRequest(request);
+    assertEquals(2, response.getSentenceResultCount());
+
+    SsurgeonResponse.SsurgeonResult result = response.getSentenceResult(0);
+    assertTrue(result.getChanged());
+    List<CoreLabel> tokens = tokensOf(result.getSentence());
+    assertEquals("estudiar", tokens.get(1).lemma());
+    assertEquals("comer", tokens.get(3).lemma());
+    // the graphs are built over the same tokens
+    SemanticGraph basic = ProtobufAnnotationSerializer.fromProto(result.getSentence().getGraph(), tokens, null);
+    assertEquals("estudiar", basic.getNodeByIndex(2).lemma());
+
+    // nothing in the other sentence is in the table
+    assertFalse(response.getSentenceResult(1).getChanged());
+  }
+
+  /** A value with characters XML would otherwise change comes through as it was sent */
+  @Test
+  public void testTableCharacters() {
+    String value = "a \"b\" 'c' <d> & e\tf\ng";
+    List<SsurgeonRequest.Ssurgeon> operations = buildOperationList(buildOperation("1", "copy a word through a table into its lemma",
+                                                                                  "{word:__#0%word}=w",
+                                                                                  "remap -var word -table odd",
+                                                                                  "editNode -node w -lemma ${word}"));
+    SsurgeonRequest request = buildRequest(operations, buildGraphs("[A-1 obj> B-2]"))
+      .toBuilder().addTable(buildTable("odd", "B", value)).build();
+    SsurgeonResponse response = ProcessSsurgeonRequest.processRequest(request);
+    assertTrue(response.getResult(0).getChanged());
+    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+    List<CoreLabel> tokens = response.getResult(0).getGraph().getTokenList().stream().map(serializer::fromProto).collect(Collectors.toList());
+    assertEquals(value, tokens.get(1).lemma());
+  }
+
+  /** A table which cannot be read, or a remap of a table the request has not got, fails the request */
+  @Test
+  public void testTableErrors() {
+    List<SsurgeonRequest.Ssurgeon> operations = buildOperationList(buildOperation("1", "copy a word through a table into its lemma",
+                                                                                  "{word:__#0%word}=w",
+                                                                                  "remap -var word -table t",
+                                                                                  "editNode -node w -lemma ${word}"));
+    SsurgeonRequest request = buildRequest(operations, buildGraphs("[A-1 obj> B-2]"));
+    // no table, the wrong table, a table with no name, an entry with no value, two tables of one name
+    assertThrows(SsurgeonParseException.class, () -> ProcessSsurgeonRequest.processRequest(request));
+    assertThrows(SsurgeonParseException.class, () -> ProcessSsurgeonRequest.processRequest(request.toBuilder().addTable(buildTable("u", "A", "a")).build()));
+    assertThrows(SsurgeonParseException.class, () -> ProcessSsurgeonRequest.processRequest(request.toBuilder().addTable(buildTable("t", "A", "a").toBuilder().clearName()).build()));
+    SsurgeonRequest.Table noValue = buildTable("t").toBuilder().addEntry(SsurgeonRequest.Table.Entry.newBuilder().setKey("A")).build();
+    assertThrows(SsurgeonParseException.class, () -> ProcessSsurgeonRequest.processRequest(request.toBuilder().addTable(noValue).build()));
+    assertThrows(SsurgeonParseException.class, () -> ProcessSsurgeonRequest.processRequest(request.toBuilder().addTable(buildTable("t", "A", "a")).addTable(buildTable("t", "B", "b")).build()));
+    // and with the table, it works
+    assertTrue(ProcessSsurgeonRequest.processRequest(request.toBuilder().addTable(buildTable("t", "A", "a")).build()).getResult(0).getChanged());
+  }
 }

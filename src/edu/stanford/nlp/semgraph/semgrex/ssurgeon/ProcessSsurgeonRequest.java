@@ -42,6 +42,9 @@ import edu.stanford.nlp.util.XMLUtils;
  * tokens, in {@code graph}, or as a SemgrexRequest.Dependencies with
  * its tokens, its basic graph, and optionally its enhanced graph, in
  * {@code sentence}.  The edits apply to every graph a sentence has.
+ *<br>
+ * The tables of the request, in {@code table}, can be used by the
+ * {@code remap} operations of any of its Ssurgeons.
  */
 public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
   /** Creates a processor; there is no state to initialize. */
@@ -51,9 +54,10 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
    * Read each operation, then read each graph and each sentence.  For
    * each, apply each operation and append the result to the output.
    *
-   * @param request the Ssurgeon operations and the graphs and sentences to apply them to
+   * @param request the Ssurgeon operations, the tables they use, and the graphs and sentences to apply them to
    * @return one result per input graph, in order, with the edited graph and whether any operation
    *   changed it, and likewise one sentence result per input sentence, with the edited sentence
+   * @throws SsurgeonParseException if an operation or a table cannot be read
    * @throws RuntimeException naming the pattern and the sentence, if an operation fails on a sentence
    */
   public static CoreNLPProtos.SsurgeonResponse processRequest(CoreNLPProtos.SsurgeonRequest request) {
@@ -77,6 +81,25 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
         xml.append("  <edit-list>" + XMLUtils.escapeXML(op) + "</edit-list>\n");
       }
       xml.append("  </ssurgeon-pattern>\n");
+    }
+    for (CoreNLPProtos.SsurgeonRequest.Table table : request.getTableList()) {
+      xml.append("  <" + SsurgeonPattern.TABLE_TAG);
+      if (table.hasName()) {
+        xml.append(attribute(SsurgeonPattern.TABLE_NAME_ATTR, table.getName()));
+      }
+      xml.append(">\n");
+      // a missing key or value is left out, for the reader to report
+      for (CoreNLPProtos.SsurgeonRequest.Table.Entry entry : table.getEntryList()) {
+        xml.append("    <" + SsurgeonPattern.TABLE_ENTRY_TAG);
+        if (entry.hasKey()) {
+          xml.append(attribute(SsurgeonPattern.TABLE_KEY_ATTR, entry.getKey()));
+        }
+        if (entry.hasValue()) {
+          xml.append(attribute(SsurgeonPattern.TABLE_VALUE_ATTR, entry.getValue()));
+        }
+        xml.append("/>\n");
+      }
+      xml.append("  </" + SsurgeonPattern.TABLE_TAG + ">\n");
     }
     xml.append("</ssurgeon-pattern-list>\n");
     List<SsurgeonPattern> patterns = inst.readFromString(xml.toString());
@@ -157,6 +180,16 @@ public class ProcessSsurgeonRequest extends ProcessProtobufRequest {
       builder.setSentenceID(request.getSentenceID());
     }
     return builder.build();
+  }
+
+  /**
+   * An XML attribute, with a space before it.  A tab or line break in the
+   * value is written as a character reference, as an XML reader would
+   * otherwise turn it into a space.
+   */
+  private static String attribute(String name, String value) {
+    String escaped = XMLUtils.escapeXML(value).replace("\t", "&#9;").replace("\n", "&#10;").replace("\r", "&#13;");
+    return " " + name + "=\"" + escaped + "\"";
   }
 
   /** A sentence of the request as it would be named in a complaint about it */
