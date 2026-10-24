@@ -51,7 +51,8 @@ public class AddDep extends SsurgeonEdit {
   final Map<String, SsurgeonTemplate> attributeTemplates;
   /** The attribute values, if none of them refer to variables, or else null */
   final Map<String, String> literalAttributes;
-  final GrammaticalRelation relation;
+  /** The relation from the governor to the new node, which may depend on the match, or null if there is no governor */
+  final SsurgeonRelation relation;
   final String govNodeName;
   final String position;
   final double weight;
@@ -77,6 +78,30 @@ public class AddDep extends SsurgeonEdit {
    *   if the position is invalid; or if the attributes can't be used for a new node
    */
   public AddDep(String govNodeName, GrammaticalRelation relation, Map<String, String> attributes, String position, double weight, String nodeName, SemgrexGraphName graph) {
+    this(govNodeName, SsurgeonRelation.of(relation), attributes, position, weight, nodeName, graph);
+  }
+
+  /**
+   * Creates an AddDep whose relation may refer to the variables of the match.
+   * This is a factory rather than a constructor, so a null relation given
+   * to the public constructor is not ambiguous.
+   *
+   * @param govNodeName the name of the matched node which governs the new node,
+   *   or null to add the node with no edges
+   * @param relation the relation from the governor to the new node, or null if there is no governor
+   * @param attributes the attributes of the new node; the map is copied
+   * @param position where to put the new node, or null for the end of the sentence
+   * @param weight the weight of the new edge
+   * @param nodeName the name to give the new node in the match, or null for no name
+   * @param graph the graph which gets the new edge, or null for every graph which has the governor
+   * @return the edit
+   * @throws SsurgeonParseException as the public constructor does
+   */
+  static AddDep withRelation(String govNodeName, SsurgeonRelation relation, Map<String, String> attributes, String position, double weight, String nodeName, SemgrexGraphName graph) {
+    return new AddDep(govNodeName, relation, attributes, position, weight, nodeName, graph);
+  }
+
+  private AddDep(String govNodeName, SsurgeonRelation relation, Map<String, String> attributes, String position, double weight, String nodeName, SemgrexGraphName graph) {
     if (position != null) {
       if (!position.startsWith("-") && !position.startsWith("+")) {
         throw new SsurgeonParseException("Unknown position " + position + " in AddDep operation");
@@ -173,6 +198,9 @@ public class AddDep extends SsurgeonEdit {
    * optional relation and name it as this edit does.  Otherwise each new
    * match adds another.
    *
+   * If an attribute value or the relation refers to a variable
+   * which is not set, nothing is added.
+   *
    * @throws SsurgeonRuntimeException if the position is directly before an empty word,
    *   or an attribute value with variables comes out as one the attribute cannot take
    */
@@ -182,8 +210,8 @@ public class AddDep extends SsurgeonEdit {
       // the match already has this node, so there is nothing to fill in
       return false;
     }
-    // the values are worked out before anything moves, so an unset
-    // variable leaves the sentence as it was
+    // the values and the relation are worked out before anything moves,
+    // so an unset variable leaves the sentence as it was
     final Map<String, String> values;
     if (literalAttributes != null) {
       values = literalAttributes;
@@ -197,6 +225,10 @@ public class AddDep extends SsurgeonEdit {
       } catch (SsurgeonParseException e) {
         throw new SsurgeonRuntimeException("AddDep could not set the attributes " + values, e);
       }
+    }
+    GrammaticalRelation relation = this.relation == null ? null : this.relation.get(sm);
+    if (this.relation != null && relation == null) {
+      return false;
     }
     IndexedWord govNode = null;
     List<SemanticGraph> edgeGraphs = new ArrayList<>();
