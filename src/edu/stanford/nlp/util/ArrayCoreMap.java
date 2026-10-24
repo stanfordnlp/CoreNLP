@@ -83,13 +83,35 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
    * Copy constructor.
    * @param other The ArrayCoreMap to copy. It may not be null.
    */
-  @SuppressWarnings("unchecked")
   public ArrayCoreMap(CoreMap other) {
+    set(other);
+  }
+
+  /**
+   * Replaces the contents with a shallow copy of the other CoreMap.
+   * @param other The CoreMap to copy. It may not be null.
+   */
+  @SuppressWarnings("unchecked")
+  protected final void set(CoreMap other) {
+    if (other instanceof ArrayCoreMap) {
+      ArrayCoreMap o = (ArrayCoreMap) other;
+      if (keys == null || keys.length != o.size) {
+        keys = Arrays.copyOf(o.keys, o.size);
+        values = Arrays.copyOf(o.values, o.size);
+      } else {
+        System.arraycopy(o.keys, 0, keys, 0, o.size);
+        System.arraycopy(o.values, 0, values, 0, o.size);
+      }
+      size = o.size;
+      return;
+    }
     Set<Class<?>> otherKeys = other.keySet();
 
     size = otherKeys.size();
-    keys = new Class[size];
-    values = new Object[size];
+    if (keys == null || keys.length != size) {
+      keys = new Class[size];
+      values = new Object[size];
+    }
 
     int i = 0;
     for (Class key : otherKeys) {

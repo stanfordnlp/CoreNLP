@@ -1,0 +1,204 @@
+package edu.stanford.nlp.ling;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import edu.stanford.nlp.util.CoreMap;
+
+/**
+ * Tests for CoreLabel copy constructors and correctness.
+ */
+public class CoreLabelTest {
+
+  private CoreLabel createSampleLabel() {
+    CoreLabel label = new CoreLabel();
+    label.setWord("Stanford");
+    label.setValue("Stanford");
+    label.setTag("NNP");
+    label.setNER("ORGANIZATION");
+    label.setLemma("Stanford");
+    label.setBeginPosition(0);
+    label.setEndPosition(8);
+    label.setIndex(1);
+    label.setSentIndex(0);
+    label.setDocID("doc-1");
+    label.setBefore(" ");
+    label.setAfter(" ");
+    return label;
+  }
+
+  @Test
+  public void testCoreLabelCopyConstructor() {
+    CoreLabel orig = createSampleLabel();
+    CoreLabel copy = new CoreLabel(orig);
+
+    Assert.assertEquals(orig.size(), copy.size());
+    Assert.assertEquals(orig, copy);
+    Assert.assertEquals("Stanford", copy.word());
+    Assert.assertEquals("NNP", copy.tag());
+    Assert.assertEquals("ORGANIZATION", copy.ner());
+    Assert.assertEquals("Stanford", copy.lemma());
+    Assert.assertEquals(0, copy.beginPosition());
+    Assert.assertEquals(8, copy.endPosition());
+    Assert.assertEquals(1, copy.index());
+    Assert.assertEquals(0, copy.sentIndex());
+    Assert.assertEquals("doc-1", copy.docID());
+
+    // Verify independence
+    copy.setWord("Harvard");
+    copy.setTag("NN");
+    Assert.assertEquals("Harvard", copy.word());
+    Assert.assertEquals("NN", copy.tag());
+    Assert.assertEquals("Stanford", orig.word());
+    Assert.assertEquals("NNP", orig.tag());
+    Assert.assertFalse(orig.equals(copy));
+  }
+
+  @Test
+  public void testCoreLabelFromCoreMap() {
+    CoreLabel orig = createSampleLabel();
+    CoreMap asCoreMap = orig;
+    CoreLabel copy = new CoreLabel(asCoreMap);
+
+    Assert.assertEquals(orig.size(), copy.size());
+    Assert.assertEquals(orig, copy);
+    Assert.assertEquals("ORGANIZATION", copy.ner());
+
+    // Verify independence
+    copy.setNER("LOCATION");
+    Assert.assertEquals("LOCATION", copy.ner());
+    Assert.assertEquals("ORGANIZATION", orig.ner());
+  }
+
+  @Test
+  public void testCoreLabelFromLabel() {
+    CoreLabel orig = createSampleLabel();
+
+    // From CoreLabel as Label
+    CoreLabel fromCoreLabel = new CoreLabel((Label) orig);
+    Assert.assertEquals(orig.size(), fromCoreLabel.size());
+    Assert.assertEquals(orig, fromCoreLabel);
+
+    // From IndexedWord as Label
+    IndexedWord iw = new IndexedWord(orig);
+    CoreLabel fromIndexedWord = new CoreLabel(iw);
+    Assert.assertEquals(orig.size(), fromIndexedWord.size());
+    Assert.assertEquals("Stanford", fromIndexedWord.word());
+    Assert.assertEquals("ORGANIZATION", fromIndexedWord.ner());
+
+    // From plain Word as Label
+    Word word = new Word("testWord");
+    CoreLabel fromWord = new CoreLabel(word);
+    Assert.assertEquals("testWord", fromWord.word());
+    Assert.assertEquals("testWord", fromWord.value());
+    Assert.assertNull(fromWord.ner());
+
+    CoreLabel fromStringLabel = new CoreLabel(new StringLabel("value"));
+    Assert.assertEquals(1, fromStringLabel.size());
+    Assert.assertEquals("value", fromStringLabel.value());
+    Assert.assertNull(fromStringLabel.word());
+
+    CoreLabel fromCategoryWordTag = new CoreLabel(new CategoryWordTag("category", "word", "tag"));
+    Assert.assertEquals(2, fromCategoryWordTag.size());
+    Assert.assertEquals("category", fromCategoryWordTag.value());
+    Assert.assertEquals("word", fromCategoryWordTag.word());
+    Assert.assertNull(fromCategoryWordTag.tag());
+
+    fromIndexedWord.setWord("Harvard");
+    Assert.assertEquals("Stanford", iw.word());
+    orig.remove(CoreAnnotations.NamedEntityTagAnnotation.class);
+    Assert.assertEquals("ORGANIZATION", fromCoreLabel.ner());
+    Assert.assertEquals("ORGANIZATION", fromIndexedWord.ner());
+  }
+
+  @Test
+  public void testCoreLabelFromLabelWithNullValues() {
+    CoreLabel fromStringLabel = new CoreLabel(new StringLabel((String) null));
+    Assert.assertEquals(1, fromStringLabel.size());
+    Assert.assertTrue(fromStringLabel.containsKey(CoreAnnotations.ValueAnnotation.class));
+    Assert.assertNull(fromStringLabel.value());
+
+    CoreLabel fromWord = new CoreLabel(new Word((String) null));
+    Assert.assertEquals(2, fromWord.size());
+    Assert.assertTrue(fromWord.containsKey(CoreAnnotations.TextAnnotation.class));
+    Assert.assertTrue(fromWord.containsKey(CoreAnnotations.ValueAnnotation.class));
+    Assert.assertNull(fromWord.word());
+    Assert.assertNull(fromWord.value());
+
+    CoreLabel orig = new CoreLabel();
+    orig.set(CoreAnnotations.NamedEntityTagAnnotation.class, null);
+    CoreLabel copy = new CoreLabel((Label) orig);
+    Assert.assertEquals(orig, copy);
+    Assert.assertTrue(copy.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class));
+
+    CoreLabel empty = new CoreLabel((Label) new CoreLabel());
+    Assert.assertEquals(0, empty.size());
+    empty.setWord("word");
+    Assert.assertEquals("word", empty.word());
+  }
+
+  @Test
+  public void testCoreLabelFromLabelWithOverriddenSize() {
+    CoreLabel orig = new CoreLabel() {
+      @Override
+      public int size() {
+        return 0;
+      }
+    };
+    orig.setWord("Stanford");
+    orig.setValue("value");
+    CoreLabel copy = new CoreLabel((Label) orig);
+    Assert.assertEquals(2, copy.size());
+    Assert.assertEquals("Stanford", copy.word());
+    Assert.assertEquals("value", copy.value());
+
+    CoreLabel fromCoreMap = new CoreLabel((CoreMap) orig);
+    Assert.assertEquals(2, fromCoreMap.size());
+    Assert.assertEquals(copy, fromCoreMap);
+  }
+
+  @Test
+  public void testCoreLabelFromLabelDoesNotCallOverriddenSet() {
+    CoreLabel copy = new CoreLabel((Label) new Word("Stanford")) {
+      @Override
+      public <VALUE> VALUE set(Class<? extends Key<VALUE>> key, VALUE value) {
+        throw new AssertionError("set called during construction");
+      }
+    };
+    Assert.assertEquals("Stanford", copy.word());
+    Assert.assertEquals("Stanford", copy.value());
+  }
+
+  @Test
+  public void testCopyDoesNotShareStorage() {
+    CoreLabel orig = createSampleLabel();
+    int origSize = orig.size();
+    CoreLabel copy = new CoreLabel(orig);
+    copy.set(CoreAnnotations.ShapeAnnotation.class, "Xxxxx");
+    Assert.assertEquals(origSize, orig.size());
+    Assert.assertNull(orig.get(CoreAnnotations.ShapeAnnotation.class));
+    orig.remove(CoreAnnotations.NamedEntityTagAnnotation.class);
+    Assert.assertEquals("ORGANIZATION", copy.ner());
+    Assert.assertEquals(copy, new CoreLabel(copy));
+  }
+
+  @Test
+  public void testCopyDoesNotNotifyListener() {
+    CoreLabel orig = createSampleLabel();
+    IndexedWord iw = new IndexedWord(orig);
+    java.util.List<Class<?>> seen = new java.util.ArrayList<>();
+    java.util.function.Consumer<Class<? extends edu.stanford.nlp.util.TypesafeMap.Key<?>>> saved =
+        edu.stanford.nlp.util.ArrayCoreMap.listener;
+    edu.stanford.nlp.util.ArrayCoreMap.listener = seen::add;
+    try {
+      new CoreLabel(orig);
+      new CoreLabel((CoreMap) orig);
+      new CoreLabel((Label) orig);
+      new CoreLabel(iw);
+      new edu.stanford.nlp.util.ArrayCoreMap((CoreMap) orig);
+    } finally {
+      edu.stanford.nlp.util.ArrayCoreMap.listener = saved;
+    }
+    Assert.assertTrue(seen.isEmpty());
+  }
+}

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 
 import edu.stanford.nlp.trees.ud.CoNLLUFeatures;
 import edu.stanford.nlp.util.ArrayCoreMap;
@@ -60,7 +59,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    * @param label The CoreLabel to copy
    */
   public CoreLabel(CoreLabel label) {
-    this((CoreMap) label);
+    super(label);
   }
 
   /**
@@ -71,13 +70,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    */
   @SuppressWarnings({"unchecked"})
   public CoreLabel(CoreMap label) {
-    super(label.size());
-    Consumer<Class<? extends Key<?>>> savedListener = ArrayCoreMap.listener;  // don't listen to the clone operation
-    ArrayCoreMap.listener = null;
-    for (Class key : label.keySet()) {
-      set(key, label.get(key));
-    }
-    ArrayCoreMap.listener = savedListener;
+    super(label);
   }
 
   /**
@@ -92,26 +85,19 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    *
    * @param label Basis for this label
    */
-  @SuppressWarnings("unchecked")
   public CoreLabel(Label label) {
-    super(0);
+    super(label instanceof CoreMap ? ((CoreMap) label).size() :
+        label instanceof IndexedWord ? ((IndexedWord) label).backingLabel().size() :
+        label instanceof HasWord ? 2 : 1);
     if (label instanceof CoreMap) {
-      CoreMap cl = (CoreMap) label;
-      setCapacity(cl.size());
-      for (Class key : cl.keySet()) {
-        set(key, cl.get(key));
-      }
+      super.set((CoreMap) label);
     } else if (label instanceof IndexedWord) {
-      CoreMap cl = ((IndexedWord) label).backingLabel();
-      setCapacity(cl.size());
-      for (Class key : cl.keySet()) {
-        set(key, cl.get(key));
-      }
+      super.set(((IndexedWord) label).backingLabel());
     } else {
       if (label instanceof HasWord) {
-         setWord(((HasWord)label).word());
+        super.set(CoreAnnotations.TextAnnotation.class, ((HasWord) label).word());
       }
-      setValue(label.value());
+      super.set(CoreAnnotations.ValueAnnotation.class, label.value());
     }
   }
 
