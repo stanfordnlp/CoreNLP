@@ -358,12 +358,19 @@ SemgrexPattern Relation() : {
         Token graph = null;
 	Token name = null;
 	Token edgeName = null;
+	Token groupNum;
+	Token groupVar;
+	List<Pair<Integer,String>> varGroups = new ArrayList<Pair<Integer,String>>();
 	SemgrexPattern node;
 	boolean pC = false;
 } {
 	(
 	( ( ( (numArg = identifier() ("," numArg2 = identifier())?)? rel = <RELATION>
 		(relnType = identifier() | relnType = <REGEX>)?)
+                ( ( "#" groupNum = identifier() "%" groupVar = identifier() ) {
+                    varGroups.add(new Pair<Integer,String>(Integer.parseInt(groupNum.image),groupVar.image));
+                    knownVarGroups.add(groupVar.image);
+                  } )*
                 (( ("@") graph = identifier() ) )?
                 (( ("~") name = identifier() ) )?
                 (( ("=") edgeName = identifier() ) )? )
@@ -383,7 +390,10 @@ SemgrexPattern Relation() : {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                                              relnType != null ? relnType.image : null,
                                              name != null ? name.image : null,
-                                             edgeName != null ? edgeName.image : null);
+                                             edgeName != null ? edgeName.image : null,
+                                             varGroups);
+          } else if (!varGroups.isEmpty()) {
+            throw new SemgrexParseException("Relation " + rel.image + " with a range has no single edge to take the groups " + varGroups + " from");
           } else if (numArg2 == null) {
             reln = GraphRelation.getRelation(rel != null ? rel.image : null,
                                              relnType != null ? relnType.image : null,

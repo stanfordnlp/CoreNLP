@@ -691,6 +691,27 @@ public class NodePattern extends SemgrexPattern  {
           }
         }
 
+        if (!myNode.reln.varGroups.isEmpty()) {
+          // the relation's regex groups set variables from the relation of
+          // the edge to the candidate, which have to agree with the variables
+          // already set, the same as the groups of the node's own attributes
+          String candidateReln = ((GraphRelation.SearchNodeIterator) nodeMatchCandidateIterator).getReln();
+          List<Pair<String, String>> captures = myNode.reln.captures(candidateReln);
+          boolean agrees = captures != null;
+          if (agrees) {
+            for (Pair<String, String> capture : captures) {
+              if (!checkVarMatch(capture.first(), capture.second(), variableStrings, tempVariableStrings)) {
+                agrees = false;
+                break;
+              }
+            }
+          }
+          if (!agrees) {
+            nextMatch = nodeMatchCandidateIterator.next();
+            continue;
+          }
+        }
+
         nextMatch = nodeMatchCandidateIterator.next();
         // log.info("going to next match: " + nextMatch.word() + " " +
         // myNode.descString + " " + myNode.isLink);

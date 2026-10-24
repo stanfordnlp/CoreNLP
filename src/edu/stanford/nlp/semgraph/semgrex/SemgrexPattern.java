@@ -300,6 +300,19 @@ import edu.stanford.nlp.util.logging.Redwood;
  * For example, a pattern which looks for the same word occurring twice in a row is
  *
  * {@code {word:__#1%w} . {word:__#1%w}}
+ * <p>
+ * The type of a relation can assign its groups the same way, from the
+ * relation of the edge it matched.  The groups come right after the type,
+ * before any {@code @graph} or {@code =edge}:
+ *<br>
+ * {@code {}=head >/aux:pass/ {} >/([cn]subj)/#1%etype=edge {}=subject}
+ *<br>
+ * sets {@code etype} to {@code nsubj} or {@code csubj}.  Group 0 is the
+ * whole relation, so {@code >#0%rel} sets {@code rel} to the relation of
+ * any edge.  Only a relation with a single edge between its two nodes,
+ * the same relations which can name their edge, can assign groups.
+ * <p>
+ * A node, a variable group, and an edge may not share a name.
  *
  * <h2>TODO</h2>
  * At present a Semgrex pattern will match only once at a root node, even if there is more than one way of satisfying
