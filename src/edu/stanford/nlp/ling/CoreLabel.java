@@ -85,23 +85,20 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    *
    * @param label Basis for this label
    */
-  @SuppressWarnings("unchecked")
   public CoreLabel(Label label) {
-    this(asCoreMap(label));
-  }
-
-  private static CoreMap asCoreMap(Label label) {
+    super(label instanceof CoreMap ? ((CoreMap) label).size() :
+        label instanceof IndexedWord ? ((IndexedWord) label).backingLabel().size() :
+        label instanceof HasWord ? 2 : 1);
     if (label instanceof CoreMap) {
-      return (CoreMap) label;
+      super.set((CoreMap) label);
     } else if (label instanceof IndexedWord) {
-      return ((IndexedWord) label).backingLabel();
+      super.set(((IndexedWord) label).backingLabel());
+    } else {
+      if (label instanceof HasWord) {
+        super.set(CoreAnnotations.TextAnnotation.class, ((HasWord) label).word());
+      }
+      super.set(CoreAnnotations.ValueAnnotation.class, label.value());
     }
-    CoreLabel cl = new CoreLabel();
-    if (label instanceof HasWord) {
-      cl.setWord(((HasWord) label).word());
-    }
-    cl.setValue(label.value());
-    return cl;
   }
 
   /**

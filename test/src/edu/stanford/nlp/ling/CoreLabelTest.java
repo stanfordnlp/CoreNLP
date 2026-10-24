@@ -92,6 +92,81 @@ public class CoreLabelTest {
     Assert.assertEquals("testWord", fromWord.word());
     Assert.assertEquals("testWord", fromWord.value());
     Assert.assertNull(fromWord.ner());
+
+    CoreLabel fromStringLabel = new CoreLabel(new StringLabel("value"));
+    Assert.assertEquals(1, fromStringLabel.size());
+    Assert.assertEquals("value", fromStringLabel.value());
+    Assert.assertNull(fromStringLabel.word());
+
+    CoreLabel fromCategoryWordTag = new CoreLabel(new CategoryWordTag("category", "word", "tag"));
+    Assert.assertEquals(2, fromCategoryWordTag.size());
+    Assert.assertEquals("category", fromCategoryWordTag.value());
+    Assert.assertEquals("word", fromCategoryWordTag.word());
+    Assert.assertNull(fromCategoryWordTag.tag());
+
+    fromIndexedWord.setWord("Harvard");
+    Assert.assertEquals("Stanford", iw.word());
+    orig.remove(CoreAnnotations.NamedEntityTagAnnotation.class);
+    Assert.assertEquals("ORGANIZATION", fromCoreLabel.ner());
+    Assert.assertEquals("ORGANIZATION", fromIndexedWord.ner());
+  }
+
+  @Test
+  public void testCoreLabelFromLabelWithNullValues() {
+    CoreLabel fromStringLabel = new CoreLabel(new StringLabel((String) null));
+    Assert.assertEquals(1, fromStringLabel.size());
+    Assert.assertTrue(fromStringLabel.containsKey(CoreAnnotations.ValueAnnotation.class));
+    Assert.assertNull(fromStringLabel.value());
+
+    CoreLabel fromWord = new CoreLabel(new Word((String) null));
+    Assert.assertEquals(2, fromWord.size());
+    Assert.assertTrue(fromWord.containsKey(CoreAnnotations.TextAnnotation.class));
+    Assert.assertTrue(fromWord.containsKey(CoreAnnotations.ValueAnnotation.class));
+    Assert.assertNull(fromWord.word());
+    Assert.assertNull(fromWord.value());
+
+    CoreLabel orig = new CoreLabel();
+    orig.set(CoreAnnotations.NamedEntityTagAnnotation.class, null);
+    CoreLabel copy = new CoreLabel((Label) orig);
+    Assert.assertEquals(orig, copy);
+    Assert.assertTrue(copy.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class));
+
+    CoreLabel empty = new CoreLabel((Label) new CoreLabel());
+    Assert.assertEquals(0, empty.size());
+    empty.setWord("word");
+    Assert.assertEquals("word", empty.word());
+  }
+
+  @Test
+  public void testCoreLabelFromLabelWithOverriddenSize() {
+    CoreLabel orig = new CoreLabel() {
+      @Override
+      public int size() {
+        return 0;
+      }
+    };
+    orig.setWord("Stanford");
+    orig.setValue("value");
+    CoreLabel copy = new CoreLabel((Label) orig);
+    Assert.assertEquals(2, copy.size());
+    Assert.assertEquals("Stanford", copy.word());
+    Assert.assertEquals("value", copy.value());
+
+    CoreLabel fromCoreMap = new CoreLabel((CoreMap) orig);
+    Assert.assertEquals(2, fromCoreMap.size());
+    Assert.assertEquals(copy, fromCoreMap);
+  }
+
+  @Test
+  public void testCoreLabelFromLabelDoesNotCallOverriddenSet() {
+    CoreLabel copy = new CoreLabel((Label) new Word("Stanford")) {
+      @Override
+      public <VALUE> VALUE set(Class<? extends Key<VALUE>> key, VALUE value) {
+        throw new AssertionError("set called during construction");
+      }
+    };
+    Assert.assertEquals("Stanford", copy.word());
+    Assert.assertEquals("Stanford", copy.value());
   }
 
   @Test
@@ -110,13 +185,16 @@ public class CoreLabelTest {
   @Test
   public void testCopyDoesNotNotifyListener() {
     CoreLabel orig = createSampleLabel();
+    IndexedWord iw = new IndexedWord(orig);
     java.util.List<Class<?>> seen = new java.util.ArrayList<>();
     java.util.function.Consumer<Class<? extends edu.stanford.nlp.util.TypesafeMap.Key<?>>> saved =
         edu.stanford.nlp.util.ArrayCoreMap.listener;
     edu.stanford.nlp.util.ArrayCoreMap.listener = seen::add;
     try {
+      new CoreLabel(orig);
       new CoreLabel((CoreMap) orig);
       new CoreLabel((Label) orig);
+      new CoreLabel(iw);
       new edu.stanford.nlp.util.ArrayCoreMap((CoreMap) orig);
     } finally {
       edu.stanford.nlp.util.ArrayCoreMap.listener = saved;
