@@ -67,13 +67,37 @@ public class RootPattern extends SemgrexPattern  {
     return child.postprocessMatches(matches, keepEmptyMatches);
   }
 
+  /**
+   * Wraps the pattern the parser built, with the names it found.
+   *<br>
+   * A node, a regex group, and an edge may not share a name, as in
+   * {@code {lemma:/(.*)/#1%foo} >nsubj=foo {}}.  Such names have nothing
+   * to do with each other, but sharing one suggests otherwise, and a tool
+   * which looks the name up, such as {@code ::uniq foo}, would find only
+   * one of them.
+   *
+   * @throws SemgrexParseException if two of a node, a regex group, and an edge have the same name
+   */
   RootPattern(SemgrexPattern child, Set<String> knownVariables, Set<String> knownVarGroups, Set<String> knownEdges) {
     if (child == null) {
       throw new IllegalArgumentException("Cannot wrap a null SemgrexPattern");
     }
+    checkNames(knownVariables, "a node", knownVarGroups, "a regex group");
+    checkNames(knownVariables, "a node", knownEdges, "an edge");
+    checkNames(knownVarGroups, "a regex group", knownEdges, "an edge");
     this.child = child;
     this.knownVariables = Collections.unmodifiableSet(knownVariables);
     this.knownVarGroups = Collections.unmodifiableSet(knownVarGroups);
     this.knownEdges = Collections.unmodifiableSet(knownEdges);
+  }
+
+  /** Rejects a name which is in both sets */
+  private static void checkNames(Set<String> first, String firstKind, Set<String> second, String secondKind) {
+    for (String name : first) {
+      if (second.contains(name)) {
+        throw new SemgrexParseException("Semgrex pattern uses " + name + " as the name of both " + firstKind + " and " + secondKind +
+                                        ", which is very confusing, as the two have nothing to do with each other.  Please rename one of them");
+      }
+    }
   }
 }
