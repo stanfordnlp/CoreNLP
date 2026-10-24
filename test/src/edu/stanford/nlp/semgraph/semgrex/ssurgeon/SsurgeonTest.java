@@ -3590,7 +3590,7 @@ public class SsurgeonTest {
                               "remap -var lemma -table lemma_mapping",
                               "editNode -node verb -lemma ${lemma}",
                               "",
-                              "{word:__#0%word}=word",
+                              "{word:__#0%word}=node",
                               "remap -var word -table odd -to fixed",
                               "remap -var lemma -table lemma_mapping",
                               "",
@@ -3636,5 +3636,21 @@ public class SsurgeonTest {
     // the same table read twice is the same table, so that is fine
     patterns.set(1, Ssurgeon.readFromEditText("table t\na\tb" + newline + pattern, "UniversalEnglish").get(0));
     assertEquals(1, Ssurgeon.tablesUsed(patterns).size());
+  }
+
+  /**
+   * Semgrex does not allow a node, a regex group, and an edge to share a
+   * name, so neither does an Ssurgeon pattern
+   */
+  @Test
+  public void sharedNames() {
+    String text = String.join(newline,
+                              "{cpos:VERB;lemma:/(.*)/#1%x}=verb >/[cn]subj/=x {}",
+                              "relabelNamedEdge -edge x -reln dep");
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText(text, "UniversalEnglish"));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText(text.replace("#1%x", "").replace("=verb", "=x"), "UniversalEnglish"));
+    assertThrows(SsurgeonParseException.class, () -> Ssurgeon.readFromEditText(text.replace("=x", "=e").replace("-edge x", "-edge e").replace("=verb", "=x"), "UniversalEnglish"));
+    // with three names, all is well
+    Ssurgeon.readFromEditText(text.replace("=x", "=e").replace("-edge x", "-edge e"), "UniversalEnglish");
   }
 }
