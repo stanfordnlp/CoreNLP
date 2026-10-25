@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.*;
@@ -867,7 +868,7 @@ public abstract class SemgrexPattern implements Serializable  {
 
   /** How {@link #main} prints the matches it finds. */
   public enum OutputFormat {
-    /** Log each matching graph as a list of dependencies, followed by the matched nodes and variables */
+    /** Log each matching graph as a list of dependencies, followed by the matched nodes, edges, and variables */
     LIST,
     /** Print the line number of each matching sentence and the file it came from */
     OFFSET,
@@ -956,10 +957,37 @@ public abstract class SemgrexPattern implements Serializable  {
   }
 
   /**
+   * The named edges of a match, sorted by name, each written as
+   * {@code reln(gov, dep)}, such as {@code aux(yendo-12, fue-11)}.  An edge
+   * from a graph other than the basic graph has the graph after its
+   * relation, such as {@code nsubj:xsubj@enhanced(ir-4, Juan-1)}.
+   *
+   * @param match the match
+   * @return each edge name with its edge as written
+   */
+  static List<Pair<String, String>> matchEdges(SemgrexMatch match) {
+    List<String> names = new ArrayList<>(match.getEdgeNames());
+    Collections.sort(names);
+    List<Pair<String, String>> edges = new ArrayList<>();
+    for (String name : names) {
+      SemanticGraphEdge edge = match.getEdge(name);
+      SemgrexGraphName graph = match.getEdgeGraph(name);
+      StringBuilder written = new StringBuilder(edge.getRelation().toString());
+      if (graph != null && graph != SemgrexGraphName.BASIC) {
+        written.append("@").append(graph.lowerName);
+      }
+      written.append("(").append(edge.getGovernor().toString(CoreLabel.OutputFormat.VALUE_INDEX));
+      written.append(", ").append(edge.getDependent().toString(CoreLabel.OutputFormat.VALUE_INDEX)).append(")");
+      edges.add(new Pair<>(name, written.toString()));
+    }
+    return edges;
+  }
+
+  /**
    * The comment {@link #main} writes for a match in CoNLL-U: the pattern,
    * the word it matched at, its named nodes as {@code name:word-index},
-   * and the variables it set as {@code %name:value}, such as
-   * {@code %cpos:AUX}.
+   * its named edges as {@code =name:reln(gov, dep)}, and the variables it
+   * set as {@code %name:value}, such as {@code %cpos:AUX}.
    *
    * @param semgrexName the pattern, as written in the comment
    * @param match the match
@@ -976,6 +1004,12 @@ public abstract class SemgrexPattern implements Serializable  {
       comment.append(name);
       comment.append(":");
       comment.append(match.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
+    }
+    for (Pair<String, String> edge : matchEdges(match)) {
+      comment.append("  =");
+      comment.append(edge.first());
+      comment.append(":");
+      comment.append(edge.second());
     }
     for (Pair<String, String> variable : matchVariables(match)) {
       comment.append("  %");
@@ -1091,6 +1125,9 @@ public abstract class SemgrexPattern implements Serializable  {
           Collections.sort(nodeNames);
           for (String name : nodeNames) {
             log.info("  " + name + ": " + matcher.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
+          }
+          for (Pair<String, String> edge : matchEdges(matcher)) {
+            log.info("  =" + edge.first() + ": " + edge.second());
           }
           for (Pair<String, String> variable : matchVariables(matcher)) {
             log.info("  %" + variable.first() + ": " + variable.second());

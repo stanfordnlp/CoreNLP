@@ -2089,8 +2089,9 @@ public class SemgrexTest {
   }
 
   /**
-   * The CoNLL-U comment for a match lists the variables it set after its
-   * named nodes, and leaves out a variable whose group matched nothing
+   * The CoNLL-U comment for a match lists its named nodes, its named
+   * edges, and the variables it set, and leaves out a variable whose
+   * group matched nothing
    */
   @Test
   public void testMatchComment() {
@@ -2111,6 +2112,23 @@ public class SemgrexTest {
     String name = pattern.toString().trim();
     assertEquals("# semgrex pattern = |" + name + "| matched at fue-1  ger:yendo-2  verb:fue-1  %cpos:AUX",
                  SemgrexPattern.matchComment(name, match));
+
+    pattern = compile("{cpos:AUX}=verb <aux=edge {}");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    name = pattern.toString().trim();
+    assertEquals("# semgrex pattern = |" + name + "| matched at fue-1  verb:fue-1  =edge:aux(yendo-2, fue-1)",
+                 SemgrexPattern.matchComment(name, new SemgrexMatch(pattern, matcher)));
+
+    // an edge of the enhanced graph says so
+    SemanticGraph enhanced = new SemanticGraph(graph);
+    enhanced.addEdge(graph.getNodeByIndex(2), fue, UniversalEnglishGrammaticalRelations.valueOf("aux:pass"), 1.0, false);
+    pattern = compile("{} </aux:pass/@enhanced=edge {}");
+    matcher = pattern.matcher(SemgrexGraphs.of(graph, enhanced));
+    assertTrue(matcher.find());
+    name = pattern.toString().trim();
+    assertEquals("# semgrex pattern = |" + name + "| matched at fue-1  =edge:aux:pass@enhanced(yendo-2, fue-1)",
+                 SemgrexPattern.matchComment(name, new SemgrexMatch(pattern, matcher)));
   }
 
   public static void outputBatchResults(SemgrexPattern pattern, List<CoreMap> sentences) {
