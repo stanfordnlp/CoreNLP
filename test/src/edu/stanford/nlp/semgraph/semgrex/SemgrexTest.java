@@ -1799,6 +1799,23 @@ public class SemgrexTest {
   }
 
   /**
+   * A node, a regex group, and an edge may not share a name, whether or
+   * not the pattern asks for a uniq of it
+   */
+  @Test
+  public void testOverlappingNames() {
+    assertThrows(SemgrexParseException.class, () -> SemgrexPattern.compile("{word:__#1%foo}=foo"));
+    assertThrows(SemgrexParseException.class, () -> SemgrexPattern.compile("{word:__#1%foo} <=foo {}"));
+    assertThrows(SemgrexParseException.class, () -> SemgrexPattern.compile("{word:__}=foo <=foo {}"));
+    // a regex group of a relation is a regex group too
+    assertThrows(SemgrexParseException.class, () -> SemgrexPattern.compile("{}=foo >#0%foo {}"));
+    assertThrows(SemgrexParseException.class, () -> SemgrexPattern.compile("{} >#0%foo=foo {}"));
+    // a name used twice for the same kind of thing is a backreference, which is fine
+    SemgrexPattern.compile("{word:__#1%foo} . {word:__#1%foo}");
+    SemgrexPattern.compile("{}=foo > {} : {} > {}=foo");
+  }
+
+  /**
    * Test that a simple uniq expression is correctly parsed
    */
   @Test
@@ -1985,6 +2002,90 @@ public class SemgrexTest {
     assertTrue(matcher.find());
     assertEquals("Bill", matcher.variableStrings.getString("name"));
     assertFalse(matcher.find());
+  }
+
+  /** The value of a variable in each match, in the order of the matches */
+  private static List<String> variableValues(List<SemgrexMatch> matches, String variable) {
+    List<String> values = new ArrayList<>();
+    for (SemgrexMatch match : matches) {
+      values.add(match.getVariableString(variable));
+    }
+    return values;
+  }
+
+  /**
+   * The type of a relation can assign its regex groups to variables, from
+   * the relation of the edge it matched
+   */
+  @Test
+  public void testRelationVariableGroups() {
+    String passive = "{}=head >/aux:pass/ {} >/([cn]subj)/#1%etype=edge {}=subject";
+    List<SemgrexMatch> matches = runTest(passive, "[eaten nsubj>[cake det>The] aux:pass>was]", "eaten");
+    assertEquals(Arrays.asList("nsubj"), variableValues(matches, "etype"));
+    assertEquals("nsubj", matches.get(0).getEdge("edge").getRelation().toString());
+    matches = runTest(passive, "[noticed csubj>[left mark>That nsubj>he] aux:pass>was]", "noticed");
+    assertEquals(Arrays.asList("csubj"), variableValues(matches, "etype"));
+
+    // group 0 is the whole relation, for a named relation or for any relation
+    matches = runTest("{} >nsubj#0%rel {}", "[eaten nsubj>[cake det>The] aux:pass>was]", "eaten");
+    assertEquals(Arrays.asList("nsubj"), variableValues(matches, "rel"));
+    matches = runTest("{word:eaten} >#0%rel {}", "[eaten nsubj>[cake det>The] aux:pass>was]", "eaten", "eaten");
+    assertEquals(new HashSet<>(Arrays.asList("nsubj", "aux:pass")), new HashSet<>(variableValues(matches, "rel")));
+    // a group which matched nothing is not set
+    matches = runTest("{} >/nsubj(:pass)?/#1%sub {}", "[eaten nsubj>cake]", "eaten");
+    assertEquals(Collections.singletonList(null), variableValues(matches, "sub"));
+  }
+
+  /**
+   * A regex group of a relation has to agree with the other groups of the
+   * same name, those of other relations and those of nodes, and when the
+   * rest of the pattern fails, the match goes on without it
+   */
+  @Test
+  public void testRelationVariableGroupsAgree() {
+    // each pair of edges with the same relation, which is each edge with itself
+    String graph = "[ate nsubj>I obj>cake obl>fork]";
+    List<SemgrexMatch> matches = runTest("{}=h >/(.*)/#1%r {}=x >/(.*)/#1%r {}=y", graph, "ate", "ate", "ate");
+    for (SemgrexMatch match : matches) {
+      assertEquals(match.getNode("x"), match.getNode("y"));
+    }
+
+    // the node's lemma and the relation of its edge
+    SemanticGraph sg = SemanticGraph.valueOf("[obj obj>b nsubj>c]");
+    sg.getFirstRoot().setLemma("obj");
+    matches = runTest("{lemma:/(.*)/#1%x} >/(.*)/#1%x {}=dep", sg, "obj");
+    assertEquals("b", matches.get(0).getNode("dep").word());
+
+    // only the nsubj leads to a word with a det, and the group is what that edge set
+    matches = runTest("{}=h >/(.*)/#1%r ({} >det {})", "[eaten nsubj>[cake det>The] aux:pass>was]", "eaten");
+    assertEquals(Arrays.asList("nsubj"), variableValues(matches, "r"));
+  }
+
+  /** A regex group of a relation works on the enhanced graph */
+  @Test
+  public void testRelationVariableGroupsEnhanced() {
+    SemanticGraph basic = SemanticGraph.valueOf("[want-2 nsubj> I-1 xcomp> go-3]");
+    SemanticGraph enhanced = new SemanticGraph(basic);
+    enhanced.addEdge(basic.getNodeByIndex(3), basic.getNodeByIndex(1),
+                     UniversalEnglishGrammaticalRelations.valueOf("nsubj:xsubj"), 1.0, false);
+    SemgrexMatcher matcher = SemgrexPattern.compile("{word:go} >/nsubj:(.*)/#1%sub@enhanced {}").matcher(SemgrexGraphs.of(basic, enhanced));
+    assertTrue(matcher.find());
+    assertEquals("xsubj", matcher.getVariableString("sub"));
+    assertFalse(matcher.find());
+  }
+
+  /**
+   * Only a relation with a single edge between its nodes can assign groups,
+   * and only the groups its type has
+   */
+  @Test
+  public void testRelationVariableGroupErrors() {
+    for (String pattern : new String[] { "{} >>#0%x {}", "{} <<#0%x {}", "{} $+#0%x {}", "{} .#0%x {}",
+                                         "{} 2,3>>#0%x {}", "{} >/nsubj/#1%x {}", "{} >/(nsubj)/#2%x {}" }) {
+      assertThrows(pattern, SemgrexParseException.class, () -> SemgrexPattern.compile(pattern));
+    }
+    // the groups are written back where they were
+    comparePatternToString("{}=head >/aux:pass/ {} >/([cn]subj)/#1%etype@enhanced=edge {}=subject");
   }
 
   public static void outputBatchResults(SemgrexPattern pattern, List<CoreMap> sentences) {
