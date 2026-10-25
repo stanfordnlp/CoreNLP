@@ -867,7 +867,7 @@ public abstract class SemgrexPattern implements Serializable  {
 
   /** How {@link #main} prints the matches it finds. */
   public enum OutputFormat {
-    /** Log each matching graph as a list of dependencies, followed by the matched nodes */
+    /** Log each matching graph as a list of dependencies, followed by the matched nodes and variables */
     LIST,
     /** Print the line number of each matching sentence and the file it came from */
     OFFSET,
@@ -935,6 +935,57 @@ public abstract class SemgrexPattern implements Serializable  {
     return comments;
   }
 
+  /**
+   * The variables a match set, sorted by name, each with its string.
+   * A variable whose group matched nothing is left out.
+   *
+   * @param match the match
+   * @return each variable name with its string
+   */
+  static List<Pair<String, String>> matchVariables(SemgrexMatch match) {
+    List<String> names = new ArrayList<>(match.getVariableNames());
+    Collections.sort(names);
+    List<Pair<String, String>> variables = new ArrayList<>();
+    for (String name : names) {
+      String value = match.getVariableString(name);
+      if (value != null) {
+        variables.add(new Pair<>(name, value));
+      }
+    }
+    return variables;
+  }
+
+  /**
+   * The comment {@link #main} writes for a match in CoNLL-U: the pattern,
+   * the word it matched at, its named nodes as {@code name:word-index},
+   * and the variables it set as {@code %name:value}, such as
+   * {@code %cpos:AUX}.
+   *
+   * @param semgrexName the pattern, as written in the comment
+   * @param match the match
+   * @return the comment
+   */
+  static String matchComment(String semgrexName, SemgrexMatch match) {
+    StringBuilder comment = new StringBuilder();
+    comment.append("# semgrex pattern = |" + semgrexName + "| matched at " + match.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
+
+    List<String> nodeNames = new ArrayList<>(match.getNodeNames());
+    Collections.sort(nodeNames);
+    for (String name : nodeNames) {
+      comment.append("  ");
+      comment.append(name);
+      comment.append(":");
+      comment.append(match.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
+    }
+    for (Pair<String, String> variable : matchVariables(match)) {
+      comment.append("  %");
+      comment.append(variable.first());
+      comment.append(":");
+      comment.append(variable.second());
+    }
+    return comment.toString();
+  }
+
   /** Logs the command line arguments {@link #main} accepts. */
   public static void help() {
     log.info("Possible arguments for SemgrexPattern:");
@@ -945,8 +996,9 @@ public abstract class SemgrexPattern implements Serializable  {
     log.info("  Files may also be named after the flags, with no flag of their own.");
     log.info(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
     log.info(EXTRAS + ": whether or not to use extras");
-    log.info(OUTPUT_FORMAT_OPTION + ": output format of matches. list or offset. 'list' prints the graph as a list of dependencies, "
-                         + "'offset' prints the filename and the line offset in the ConLL-U file.");
+    log.info(OUTPUT_FORMAT_OPTION + ": output format of matches. list, offset, or conllu. 'list' prints the graph as a list of dependencies, "
+                         + "'offset' prints the filename and the line offset in the ConLL-U file, "
+                         + "and 'conllu' prints the sentence in CoNLL-U with each match as a comment.");
     log.info();
     log.info(PATTERN + " is required");
   }
@@ -1040,6 +1092,9 @@ public abstract class SemgrexPattern implements Serializable  {
           for (String name : nodeNames) {
             log.info("  " + name + ": " + matcher.getNode(name).toString(CoreLabel.OutputFormat.VALUE_INDEX));
           }
+          for (Pair<String, String> variable : matchVariables(matcher)) {
+            log.info("  %" + variable.first() + ": " + variable.second());
+          }
         }
       } else if (outputFormat == OutputFormat.OFFSET) {
         if (graph == null || graph.vertexListSorted().isEmpty()) {
@@ -1056,20 +1111,7 @@ public abstract class SemgrexPattern implements Serializable  {
           comments.addAll(graph.getComments());
         }
         for (SemgrexMatch matcher : sentenceMatches.second()) {
-          StringBuilder comment = new StringBuilder();
-          comment.append("# semgrex pattern = |" + semgrexName + "| matched at " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
-
-          List<String> nodeNames = new ArrayList<>();
-          nodeNames.addAll(matcher.getNodeNames());
-          Collections.sort(nodeNames);
-          for (String name : nodeNames) {
-            IndexedWord node = matcher.getNode(name);
-            comment.append("  ");
-            comment.append(name);
-            comment.append(":");
-            comment.append(node.toString(CoreLabel.OutputFormat.VALUE_INDEX));
-          }
-          comments.add(comment.toString());
+          comments.add(matchComment(semgrexName, matcher));
         }
         comments.addAll(highlightComments(sentenceMatches.second()));
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);

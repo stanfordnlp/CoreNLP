@@ -2088,6 +2088,31 @@ public class SemgrexTest {
     comparePatternToString("{}=head >/aux:pass/ {} >/([cn]subj)/#1%etype@enhanced=edge {}=subject");
   }
 
+  /**
+   * The CoNLL-U comment for a match lists the variables it set after its
+   * named nodes, and leaves out a variable whose group matched nothing
+   */
+  @Test
+  public void testMatchComment() {
+    // fue yendo, with fue as an AUX of ir
+    SemanticGraph graph = SemanticGraph.valueOf("[yendo-2 aux> fue-1]");
+    IndexedWord fue = graph.getNodeByIndex(1);
+    fue.setLemma("ir");
+    fue.set(CoreAnnotations.CoarseTagAnnotation.class, "AUX");
+    CoNLLUFeatures feats = new CoNLLUFeatures();
+    feats.put("VerbForm", "Ger");
+    graph.getNodeByIndex(2).set(CoreAnnotations.CoNLLUFeats.class, feats);
+
+    SemgrexPattern pattern = compile("{lemma:/ser|ir(x)?/#1%x;cpos:__#1%cpos}=verb . {morphofeatures:{VerbForm:Ger}}=ger");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    SemgrexMatch match = new SemgrexMatch(pattern, matcher);
+    assertFalse(matcher.find());
+    String name = pattern.toString().trim();
+    assertEquals("# semgrex pattern = |" + name + "| matched at fue-1  ger:yendo-2  verb:fue-1  %cpos:AUX",
+                 SemgrexPattern.matchComment(name, match));
+  }
+
   public static void outputBatchResults(SemgrexPattern pattern, List<CoreMap> sentences) {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = pattern.matchSentences(sentences, false);
     for (Pair<CoreMap, List<SemgrexMatch>> sentenceMatch : matches) {
