@@ -54,6 +54,13 @@ import edu.stanford.nlp.util.logging.Redwood;
  * For example, words marked with {@code SpaceAfter=no} will have a blank {@code after} attribute.
  * {@code {after://}} will search for this.
  * <br>
+ * The value {@code __} matches any value, so {@code {lemma:__}} matches
+ * any word with a lemma.
+ * <br>
+ * Inside {@code (?i:...)}, attribute values are compared without regard
+ * to case, so {@code (?i:{word:bill})} matches "Bill" as well as "bill".
+ * The types of relations are always compared with case.
+ * <br>
  * It is now also possible to negate individual attributes in Semgrex with {@code !:}
  * For example, this expression will search for a NOUN which is not "boy":
  * {@code {lemma!:boy;pos:NOUN}}
@@ -80,35 +87,35 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <h2>Relations</h2>
  *
  * Relations are defined by a symbol representing the type of relationship and a
- * string or regular expression representing the value of the relationship. A
- * relationship string of {@code %} means any relationship.  It is
- * also OK simply to omit the relationship symbol altogether.
+ * string or regular expression representing the value of the relationship.
+ * The value can be left out to match any relationship, as in {@code {} > {}}.
  * <p>
  * Currently supported node relations and their symbols:
  *
  * <table border = "1">
  * <tr><th>Symbol<th>Meaning
- * <tr><td>A &lt;reln B <td> A is the dependent of a relation reln with B
- * <tr><td>A &gt;reln B <td>A is the governor of a relation reln with B
- * <tr><td>A &lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following {@code dep->gov} paths
- * <tr><td>A &gt;&gt;reln B <td>A is the governor of a relation reln in a chain to B following {@code gov->dep} paths
+ * <tr><td>{@code A <reln B} <td>A is the dependent of a relation reln with B
+ * <tr><td>{@code A >reln B} <td>A is the governor of a relation reln with B
+ * <tr><td>{@code A <<reln B} <td>A is the dependent of a relation reln in a chain to B following {@code dep->gov} paths
+ * <tr><td>{@code A >>reln B} <td>A is the governor of a relation reln in a chain to B following {@code gov->dep} paths
  * <tr><td>{@code A x,y<<reln B} <td>A is the dependent of a relation reln in a chain to B following {@code dep->gov} paths between distances of x and y
  * <tr><td>{@code A x,y>>reln B} <td>A is the governor of a relation reln in a chain to B following {@code gov->dep} paths between distances of x and y
- * <tr><td>A &lt;&gt;reln B <td> A is connected (either dependent or governor) via relation reln with B
- * <tr><td>A == B <td>A and B are the same nodes in the same graph
- * <tr><td>A . B <td>A immediately precedes B, i.e. A.index() == B.index() - 1
- * <tr><td>A - B <td>A immediately succeeds B, i.e. A.index() == B.index() + 1
- * <tr><td>A .. B <td>A precedes B, i.e. {@code A.index() < B.index()}
- * <tr><td>A -- B <td>A succeeds B, i.e. {@code A.index() > B.index()}
- * <tr><td>A $+ B <td>B is a right immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() - 1
- * <tr><td>A $- B <td>B is a left immediate sibling of A, i.e. A and B have the same parent and A.index() == B.index() + 1
- * <tr><td>A $++ B <td>B is a right sibling of A, i.e. A and B have the same parent and {@code A.index() < B.index()}
- * <tr><td>A $-- B <td>B is a left sibling of A, i.e. A and B have the same parent and {@code A.index() > B.index()}
- * <tr><td>A &lt;++ B <td>B is a right governor of A
- * <tr><td>A &lt;-- B <td>B is a left governor of A
- * <tr><td>A &lt;++ B <td>B is a right dependent of A
- * <tr><td>A &lt;-- B <td>B is a left dependent of A
- * <tr><td>A @ B <td>A is aligned to B (this is only used when you have two dependency graphs which are aligned)
+ * <tr><td>{@code A x<<reln B}, {@code A x>>reln B} <td>the same, at a distance of exactly x
+ * <tr><td>{@code A <>reln B} <td>A is connected (either dependent or governor) via relation reln with B
+ * <tr><td>{@code A == B} <td>A and B are the same nodes in the same graph
+ * <tr><td>{@code A . B} <td>A immediately precedes B, i.e. {@code A.index() == B.index() - 1}
+ * <tr><td>{@code A - B} <td>A immediately succeeds B, i.e. {@code A.index() == B.index() + 1}
+ * <tr><td>{@code A .. B} <td>A precedes B, i.e. {@code A.index() < B.index()}
+ * <tr><td>{@code A -- B} <td>A succeeds B, i.e. {@code A.index() > B.index()}
+ * <tr><td>{@code A $+ B} <td>B is a right immediate sibling of A, i.e. A and B have the same parent and {@code A.index() == B.index() - 1}
+ * <tr><td>{@code A $- B} <td>B is a left immediate sibling of A, i.e. A and B have the same parent and {@code A.index() == B.index() + 1}
+ * <tr><td>{@code A $++ B} <td>B is a right sibling of A, i.e. A and B have the same parent and {@code A.index() < B.index()}
+ * <tr><td>{@code A $-- B} <td>B is a left sibling of A, i.e. A and B have the same parent and {@code A.index() > B.index()}
+ * <tr><td>{@code A <++ B} <td>B is a right governor of A
+ * <tr><td>{@code A <-- B} <td>B is a left governor of A
+ * <tr><td>{@code A >++ B} <td>B is a right dependent of A
+ * <tr><td>{@code A >-- B} <td>B is a left dependent of A
+ * <tr><td>{@code A @ B} <td>A is aligned to B (this is only used when you have two dependency graphs which are aligned)
  * <tr><td>{@code A >reln@graph B} <td>the relation is searched for in the named graph of the sentence, such as {@code >nsubj@enhanced}; see below
  * <caption>Currently supported node relations</caption>
  * </table>
@@ -121,17 +128,13 @@ import edu.stanford.nlp.util.logging.Redwood;
  * governor of a nsubj relation with a node that is itself the
  * governor of dobj relation, you should use parentheses and write: "{@code {} >nsubj ({} >dobj {})}".
  * <p>
- * If a relation type is specified for the {@code <<} relation, the
- * relation type is only used for the first relation in the sequence.
- * Therefore, if B depends on A with the relation type foo, the
- * pattern {@code {} <<foo {}} will then match B and
- * everything that depends on B.
- * <p>
- * Similarly, if a relation type is specified for the {@code >>}
- * relation, the relation type is only used for the last relation in
- * the sequence.  Therefore, if A governs B with the relation type
- * foo, the pattern {@code {} >>foo {}} will then match A
- * and all of the nodes which have a sequence leading to A.
+ * If a relation type is specified for {@code A <<reln B} or
+ * {@code A >>reln B}, it is only checked on the edge of the chain which
+ * touches B.  The other edges of the chain can be anything.  Therefore,
+ * if C depends on B with the relation type foo, {@code {}=a <<foo {}=b}
+ * matches with C or anything below C as {@code a}, and B as {@code b}.
+ * Likewise, {@code {}=a >>foo {}=b} matches with B or anything above B
+ * as {@code a}, and C as {@code b}.
  *
  *
  * <h2>Searching more than one graph</h2>
@@ -180,14 +183,16 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * <h2>Boolean relational operators</h2>
  *
- * Relations can be combined using the '&amp;' and '|' operators, negated with
- * the '!' operator, and made optional with the '?' operator.
+ * Relations written one after another must all be satisfied.  They can be
+ * combined with the '|' operator instead, negated with the '!' operator, and
+ * made optional with the '?' operator.  The {@code &} operator is no longer
+ * allowed, as writing the relations one after another means the same thing.
  * <p>
  * Relations can be grouped using brackets '[' and ']'.  So the
  * expression
  *
  * <blockquote>
- *{@code {} [<subj {} | <agent {}] & @ {} }
+ *{@code {} [<subj {} | <agent {}] @ {} }
  * </blockquote>
  *
  * matches a node that is either the dep of a subj or agent relationship and
@@ -234,7 +239,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * argument "noun" (<i>not</i> "=noun").  Note that you are not allowed to
  * name a node that is under the scope of a negation operator (the semantics
  * would be unclear, since you can't store a node that never gets matched to).
- * Trying to do so will cause a {@link ParseException} to be thrown. Named nodes
+ * Trying to do so will cause a {@link SemgrexParseException} to be thrown. Named nodes
  * <i>can be put within the scope of an optionality operator</i>.
  * <p>
  * Named nodes that refer back to previously named nodes need not have a node
@@ -263,24 +268,27 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  * <h2>Naming relations</h2>
  *
- * It is also possible to name relations.  For example, you can write the pattern
- * {@code {idx:1} >=reln {idx:2}}  The name of the relation will then
+ * It is also possible to name relations with {@code ~}.  For example, you can write the pattern
+ * {@code {idx:1} >~reln {idx:2}}  The name of the relation will then
  * be stored in the matcher and can be extracted with {@code getRelnString("reln")}.
  * If the relation is later referenced a second time, the type of
  * relation must be the same, or the potential match will not be
  * accepted.
  * <p>
- * In the case of ancestor and descendant relations, the <b>last</b>
- * relation in the sequence of relations is the name used.
+ * In the case of {@code <<} and {@code >>}, the name is given the relation
+ * of the edge of the chain which touches B, the same edge whose type is
+ * checked.
  *
  *
  * <h2>Naming edges</h2>
  *
- * It is also possible to name edges themselves.  The following
+ * It is also possible to name edges themselves, with {@code =}.  The following
  * pattern will iterate through the edges from the root:
- * {@code {$} >~edge {}}
+ * {@code {$} >=edge {}}
  * The edge itself is now stored with the matcher and can
- * be extracted with {@code getEdge("edge")}.  If the edge is
+ * be extracted with {@code getEdge("edge")}, and its relation with
+ * {@code getRelnString("edge")}, as an edge's name also names its
+ * relation.  If the edge is
  * later referenced a second time, the exact edge must be the same, or
  * the potential match will not be accepted.
  * <br>
