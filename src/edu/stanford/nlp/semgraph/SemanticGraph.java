@@ -819,13 +819,16 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Returns the <em>first</em> {@link edu.stanford.nlp.ling.IndexedWord
-   * IndexedWord} in this {@code SemanticGraph} having the given integer index,
-   * or throws {@code IllegalArgumentException} if no such node is found.
+   * Returns the word in this {@code SemanticGraph} with the given index,
+   * or throws {@code IllegalArgumentException} if there is none.
+   *<br>
+   * This is the word itself, never an empty word such as 4.1 or a copy
+   * of a word, which have the same index.
+   * {@link #getNodeByIndexAndCopyCount} finds a copy.
    *
    * @param index the index to look for
-   * @return the first vertex with that index
-   * @throws IllegalArgumentException if no vertex has that index
+   * @return the word with that index
+   * @throws IllegalArgumentException if no word has that index
    */
   public IndexedWord getNodeByIndex(int index) throws IllegalArgumentException {
     IndexedWord node = getNodeByIndexSafe(index);
@@ -836,15 +839,15 @@ public class SemanticGraph implements Serializable  {
   }
 
   /**
-   * Same as above, but returns {@code null} if the index does not exist
-   * (instead of throwing an exception).
+   * Same as {@link #getNodeByIndex}, but returns {@code null} if there is
+   * no word with the index, rather than throwing an exception.
    *
    * @param index the index to look for
-   * @return the first vertex with that index, or null if there is none
+   * @return the word with that index, or null if there is none
    */
   public IndexedWord getNodeByIndexSafe(int index) {
     for (IndexedWord vertex : vertexSet()) {
-      if (vertex.index() == index) {
+      if (vertex.index() == index && vertex.getEmptyIndex() == 0 && vertex.copyCount() == 0) {
         return vertex;
       }
     }

@@ -12,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.Generics;
 
@@ -561,5 +563,43 @@ public class SemanticGraphTest {
                        "</dependencies>\n");
 
     Assert.assertEquals(text, expected);
+  }
+
+  /** A word for a graph, with an index and an empty index, which is 0 for an ordinary word */
+  private static IndexedWord makeWord(String word, int index, int emptyIndex) {
+    CoreLabel label = new CoreLabel();
+    label.setWord(word);
+    label.setValue(word);
+    label.setIndex(index);
+    if (emptyIndex != 0) {
+      label.set(CoreAnnotations.EmptyIndexAnnotation.class, emptyIndex);
+    }
+    return new IndexedWord(label);
+  }
+
+  /**
+   * getNodeByIndex finds the word with the index, not an empty word or a
+   * copy of the word, which have the same index, whichever was added first
+   */
+  @Test
+  public void testGetNodeByIndexFindsTheWord() {
+    IndexedWord word = makeWord("se", 4, 0);
+    IndexedWord empty = makeWord("_", 4, 1);
+    IndexedWord copy = word.makeSoftCopy(1);
+
+    SemanticGraph sg = new SemanticGraph();
+    sg.addVertex(empty);
+    sg.addVertex(copy);
+    sg.addVertex(word);
+    Assert.assertSame(word, sg.getNodeByIndex(4));
+    Assert.assertSame(word, sg.getNodeByIndexSafe(4));
+    Assert.assertSame(copy, sg.getNodeByIndexAndCopyCount(4, 1));
+
+    // an index with only an empty word, such as 0.1, has no word
+    SemanticGraph onlyEmpty = new SemanticGraph();
+    onlyEmpty.addVertex(makeWord("_", 0, 1));
+    onlyEmpty.addVertex(makeWord("se", 1, 0));
+    Assert.assertNull(onlyEmpty.getNodeByIndexSafe(0));
+    Assert.assertThrows(IllegalArgumentException.class, () -> onlyEmpty.getNodeByIndex(0));
   }
 }
