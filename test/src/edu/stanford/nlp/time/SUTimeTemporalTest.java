@@ -79,7 +79,7 @@ public class SUTimeTemporalTest {
   }
 
   private static PartialTime time(Object... fieldsAndValues) {
-    return new PartialTime(partial(fieldsAndValues));
+    return new PartialTime(SUTime.fromJodaPartial(partial(fieldsAndValues)));
   }
 
   /** Assert the ISO rendering, which is also what toString gives. */
@@ -170,7 +170,7 @@ public class SUTimeTemporalTest {
 
   @Test
   public void testQuarterPartial() {
-    PartialTime q3 = new PartialTime(partial(YEAR, 2017).with(JodaTimeUtils.QuarterOfYear, 3));
+    PartialTime q3 = new PartialTime(SUTime.fromJodaPartial(partial(YEAR, 2017).with(JodaTimeUtils.QuarterOfYear, 3)));
     // QUIRK: the ISO rendering drops the quarter entirely and reports the bare year,
     // while the TIMEX value keeps it. The two disagree about what this temporal is.
     assertIso("2017", q3);
@@ -182,7 +182,7 @@ public class SUTimeTemporalTest {
 
   @Test
   public void testHalfYearPartial() {
-    PartialTime h2 = new PartialTime(partial(YEAR, 2017).with(JodaTimeUtils.HalfYearOfYear, 2));
+    PartialTime h2 = new PartialTime(SUTime.fromJodaPartial(partial(YEAR, 2017).with(JodaTimeUtils.HalfYearOfYear, 2)));
     // Same divergence as the quarter case above.
     assertIso("2017", h2);
     assertEquals("2017-H2", h2.getTimexValue());
@@ -192,7 +192,7 @@ public class SUTimeTemporalTest {
   @Test
   public void testDecadePartial() {
     PartialTime nineties =
-            new PartialTime(partial(CENTURY, 19).with(JodaTimeUtils.DecadeOfCentury, 9));
+            new PartialTime(SUTime.fromJodaPartial(partial(CENTURY, 19).with(JodaTimeUtils.DecadeOfCentury, 9)));
     assertIso("199X", nineties);
     assertEquals("199X", nineties.getTimexValue());
     assertEquals("P10Y", nineties.getGranularity().getTimexValue());
@@ -211,16 +211,15 @@ public class SUTimeTemporalTest {
   }
 
   @Test
-  public void testRangeOfAnEmptyPartialThrows() {
-    // QUIRK: an empty partial has no most-specific field, and getRange dereferences it
-    // without checking. Everything else on an empty PartialTime works ("XXXX"), so this
-    // is an unguarded path rather than a deliberate rejection.
-    try {
-      time().getRange();
-      fail("expected getRange on an empty partial to throw");
-    } catch (NullPointerException expected) {
-      // current behaviour
-    }
+  public void testRangeOfAnEmptyPartial() {
+    // QUIRK: an empty partial has no most-specific field, so there is nothing to take a
+    // granularity from, and the range comes back with its end before its start. Nothing
+    // guards the path; it is reachable only by building an empty PartialTime directly,
+    // never from text, which is why the golden file does not notice it.
+    PartialTime empty = time();
+    assertEquals("XXXX", empty.getTimexValue());
+    assertEquals("PXX", empty.getGranularity().getTimexValue());
+    assertEquals("0000-01-01/-0001-12-31", empty.getRange().toISOString());
   }
 
   // ---------------------------------------------------------------- IsoDate

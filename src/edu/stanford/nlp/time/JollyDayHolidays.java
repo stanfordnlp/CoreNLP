@@ -10,14 +10,14 @@ import de.jollyday.parameter.UrlManagerParameter;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.Partial;
+import org.threeten.extra.PartialTemporal;
 
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.lang.reflect.Method;
 // import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 /**
@@ -248,12 +248,11 @@ public class JollyDayHolidays implements Env.Binder {
     }
 
     /** A holiday's date is fully specified, so it maps onto a year/month/day partial. */
-    private static Partial toPartial(java.time.LocalDate date) {
-      return new Partial(
-          new DateTimeFieldType[] { DateTimeFieldType.year(),
-                                    DateTimeFieldType.monthOfYear(),
-                                    DateTimeFieldType.dayOfMonth() },
-          new int[] { date.getYear(), date.getMonthValue(), date.getDayOfMonth() });
+    private static PartialTemporal toPartial(java.time.LocalDate date) {
+      return PartialTemporal.empty()
+          .withField(ChronoField.YEAR, date.getYear())
+          .withField(ChronoField.MONTH_OF_YEAR, date.getMonthValue())
+          .withField(ChronoField.DAY_OF_MONTH, date.getDayOfMonth());
     }
 
     private SUTime.Time resolveWithYear(int year) {
@@ -272,10 +271,10 @@ public class JollyDayHolidays implements Env.Binder {
 
     @Override
     public SUTime.Time resolve(SUTime.Time t, int flags) {
-      Partial p = (t != null)? t.getJodaTimePartial():null;
+      PartialTemporal p = (t != null)? t.getPartialTemporal():null;
       if (p != null) {
-        if (JodaTimeUtils.hasField(p, DateTimeFieldType.year())) {
-          int year = p.get(DateTimeFieldType.year());
+        if (PartialTemporalUtils.hasField(p, ChronoField.YEAR)) {
+          int year = (int) p.getLong(ChronoField.YEAR);
           SUTime.Time resolved = resolveWithYear(year);
           if (resolved != null) {
             return resolved;

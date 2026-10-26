@@ -3,6 +3,8 @@ package edu.stanford.nlp.time;
 import org.threeten.extra.PartialTemporal;
 import org.threeten.extra.TemporalFields;
 
+import java.time.DateTimeException;
+import java.time.temporal.ValueRange;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalField;
@@ -41,9 +43,33 @@ public final class PartialTemporalUtils {
     return partial != null && partial.isSupported(field);
   }
 
+  /**
+   * Check {@code value} against the range of {@code field} and throw if it falls outside.
+   *
+   * <p>{@link PartialTemporal#withField} accepts any value, so a day of the month of 32 or
+   * a week of 54 would be stored and only go wrong later. SUTime relies on the value being
+   * rejected: one of its loops walks a day of the month forward a week at a time and stops
+   * when the day runs off the end of the month.
+   *
+   * <p>The range used is the field's own, so a day of the month is checked against 1 to 31
+   * rather than against the length of a particular month.
+   */
+  public static long checkValue(TemporalField field, long value) {
+    ValueRange range = field.range();
+    if (!range.isValidValue(value)) {
+      throw new DateTimeException("Value " + value + " for " + field
+              + " must be in the range " + range);
+    }
+    return value;
+  }
+
   /** Set a field, treating a null partial as empty. */
   public static PartialTemporal setField(PartialTemporal partial, TemporalField field, long value) {
-    return (partial == null ? PartialTemporal.empty() : partial).withField(field, value);
+    checkValue(field, value);
+    if (partial == null) {
+      return PartialTemporal.of(field, value);
+    }
+    return partial.withField(field, value);
   }
 
   public static boolean hasYYYYMMDD(PartialTemporal partial) {
@@ -109,7 +135,18 @@ public final class PartialTemporalUtils {
     if (partial == null || partial.size() == 0) {
       return null;
     }
-    TemporalUnit unit = getMostSpecific(partial).getBaseUnit();
+    return periodOfOne(getMostSpecific(partial).getBaseUnit());
+  }
+
+  /**
+   * A period of one of {@code unit}, or null if no period can express it. A unit coarser
+   * than any period field is given in the coarsest field that holds it, so a century is
+   * {@code P100Y} and a quarter is {@code P3M}; a half day has no such expression.
+   */
+  public static SUTimePeriod periodOfOne(TemporalUnit unit) {
+    if (unit == null) {
+      return null;
+    }
     if (SUTimePeriod.isSupportedUnit(unit)) {
       return SUTimePeriod.of(unit, 1);
     }
@@ -119,6 +156,9 @@ public final class PartialTemporalUtils {
     if (ChronoUnit.DECADES.equals(unit)) {
       return SUTimePeriod.ofYears(10);
     }
+    if (ChronoUnit.MILLENNIA.equals(unit)) {
+      return SUTimePeriod.ofYears(1000);
+    }
     if (TemporalFields.HALF_YEARS.equals(unit)) {
       return SUTimePeriod.ofMonths(6);
     }
@@ -126,6 +166,23 @@ public final class PartialTemporalUtils {
       return SUTimePeriod.ofMonths(3);
     }
     return null;
+  }
+
+  /**
+   * The unit a field sits inside, which is what SUTime uses as the period of a time known
+   * only to that field: a month of the year sits inside a year, so a time known only to
+   * the month has a period of a year. A field that sits inside nothing, such as the year
+   * itself, gives its own unit instead.
+   */
+  public static TemporalUnit getEnclosingUnit(TemporalField field) {
+    if (field == null) {
+      return null;
+    }
+    TemporalUnit range = field.getRangeUnit();
+    if (range == null || range == ChronoUnit.FOREVER) {
+      return field.getBaseUnit();
+    }
+    return range;
   }
 
   /**
@@ -151,6 +208,51 @@ public final class PartialTemporalUtils {
       }
     }
     return unsupported;
+  }
+
+  /**
+   * Fold an am/pm marker and the hour beside it into an hour of the day, so that a time
+   * said as "1 pm" becomes hour 13. The marker is kept, since it is still what the text
+   * said, and the hour it applied to is replaced.
+   *
+   * <p>Which field carries the hour depends on how the text was written, and three of the
+   * four count differently: an hour of the am/pm half runs 0 to 11, a clock hour of that
+   * half runs 1 to 12 with 12 standing for the zero hour, and a clock hour of the day runs
+   * 1 to 24 with 24 standing for the zero hour.
+   */
+  private static PartialTemporal resolveHalfDay(PartialTemporal partial) {
+    if (!partial.isSupported(ChronoField.AMPM_OF_DAY)) {
+      return partial;
+    }
+    PartialTemporal result = partial;
+    long hour = -1;
+    if (result.isSupported(ChronoField.HOUR_OF_AMPM)) {
+      hour = result.getLong(ChronoField.HOUR_OF_AMPM);
+      result = result.withoutField(ChronoField.HOUR_OF_AMPM);
+    } else if (result.isSupported(ChronoField.CLOCK_HOUR_OF_AMPM)) {
+      hour = result.getLong(ChronoField.CLOCK_HOUR_OF_AMPM) % 12;
+      result = result.withoutField(ChronoField.CLOCK_HOUR_OF_AMPM);
+    } else if (result.isSupported(ChronoField.CLOCK_HOUR_OF_DAY)) {
+      hour = result.getLong(ChronoField.CLOCK_HOUR_OF_DAY) % 24;
+      result = result.withoutField(ChronoField.CLOCK_HOUR_OF_DAY);
+    } else if (result.isSupported(ChronoField.HOUR_OF_DAY)) {
+      hour = result.getLong(ChronoField.HOUR_OF_DAY);
+      result = result.withoutField(ChronoField.HOUR_OF_DAY);
+    }
+    if (hour < 0) {
+      return result;
+    }
+    if (result.getLong(ChronoField.AMPM_OF_DAY) == SUTime.HALFDAY_PM) {
+      if (hour < 12) {
+        hour += 12;
+      }
+    } else if (hour == 12) {
+      hour = 0;
+    }
+    if (hour < 24) {
+      return result.withField(ChronoField.HOUR_OF_DAY, hour);
+    }
+    return result.withField(ChronoField.CLOCK_HOUR_OF_DAY, hour);
   }
 
   /** The base units of every field present, coarsest first. */
@@ -216,7 +318,7 @@ public final class PartialTemporalUtils {
         result = result.withField(field, value);
       }
     }
-    return collapseCenturyAndYearOfCentury(result);
+    return resolveHalfDay(collapseCenturyAndYearOfCentury(result));
   }
 
   /**

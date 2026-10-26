@@ -46,7 +46,7 @@ public class TimeFormatter {
         // TODO: Allow specification of locale, pivot year (set2DigitYearStart) for interpreting 2 digit years
         String str = m.get(textAnnotationField);
         Date d = format.parse(str);
-        return new Expressions.PrimitiveValue("GroundedTime", new SUTime.GroundedTime(new Instant(d.getTime())));
+        return new Expressions.PrimitiveValue("GroundedTime", new SUTime.GroundedTime(java.time.Instant.ofEpochMilli(d.getTime())));
       } catch (java.text.ParseException ex) {
         return null;
       }
@@ -75,7 +75,8 @@ public class TimeFormatter {
         String str = m.get(textAnnotationField);
         // TODO: Allow specification of pivot year (withPivotYear) for interpreting 2 digit years
         DateTime d = formatter.parseDateTime(str);
-        return new Expressions.PrimitiveValue("GroundedTime", new SUTime.GroundedTime(d));
+        return new Expressions.PrimitiveValue("GroundedTime",
+                new SUTime.GroundedTime(java.time.Instant.ofEpochMilli(d.getMillis())));
       } catch (IllegalArgumentException ex) {
         return null;
       }
@@ -289,7 +290,7 @@ public class TimeFormatter {
         if (v != null) {
           Partial pt = new Partial();
           pt = JodaTimeUtils.setField(pt, dt, v);
-          t = t.intersect(new SUTime.PartialTime(pt));
+          t = t.intersect(new SUTime.PartialTime(SUTime.fromJodaPartial(pt)));
         } else {
           throw new IllegalArgumentException("Cannot interpret " + fieldValueStr + " for " + fieldType);
         }
@@ -545,7 +546,7 @@ public class TimeFormatter {
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
       int offset = parseOffsetMillis(fieldValueStr);
       DateTimeZone dtz = DateTimeZone.forOffsetMillis(offset);
-      return t.setTimeZone(dtz);
+      return t.setTimeZone(java.time.ZoneId.of(dtz.getID()));
     }
   }
 
@@ -609,7 +610,7 @@ public class TimeFormatter {
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
       if (fieldValueStr != null) {
         DateTimeZone dtz = parseDateTimeZone(fieldValueStr);
-        return t.setTimeZone(dtz);
+        return t.setTimeZone(java.time.ZoneId.of(dtz.getID()));
       }
       return t;
     }
@@ -679,7 +680,7 @@ public class TimeFormatter {
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
       if (fieldValueStr != null) {
         DateTimeZone dtz = parseDateTimeZone(fieldValueStr);
-        return t.setTimeZone(dtz);
+        return t.setTimeZone(java.time.ZoneId.of(dtz.getID()));
       }
       return t;
     }
