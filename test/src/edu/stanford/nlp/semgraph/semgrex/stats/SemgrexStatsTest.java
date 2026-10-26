@@ -733,6 +733,42 @@ public class SemgrexStatsTest {
     assertFalse(single.contains("stage 1"));
   }
 
+  /**
+   * The comment lines directly above a pattern label its stage in the
+   * report.  A comment separated from the pattern by a blank line, or one
+   * among the commands, is left out.
+   */
+  @Test
+  public void testStageCommentLabels() {
+    SemgrexStats stats = runScript(lines("# a header for the whole script",
+                                         "",
+                                         "# possessed words",
+                                         "#",
+                                         "# from nmod",
+                                         "pattern {}=word <nmod {}",
+                                         "# not a label",
+                                         "collect word as possessed",
+                                         "",
+                                         "pattern {}=word <=relation {}",
+                                         "count -restrict word=possessed word"));
+    assertEquals(Arrays.asList("possessed words", "", "from nmod"), stats.getStages().get(0).getLabels());
+    assertEquals(Collections.emptyList(), stats.getStages().get(1).getLabels());
+
+    List<String> report = Arrays.asList(stats.report().split("\\R"));
+    assertEquals(Arrays.asList("## stage 1", "## possessed words", "##", "## from nmod", "# collect word as possessed"),
+                 report.subList(0, 5));
+    assertFalse(report.toString(), report.contains("## a header for the whole script"));
+    assertFalse(report.toString(), report.contains("## not a label"));
+    int stage2 = report.indexOf("## stage 2");
+    assertTrue(report.toString(), report.get(stage2 + 1).startsWith("# count"));
+
+    // a script of one stage has no stage header, but keeps its label
+    report = Arrays.asList(runScript(lines("# relations",
+                                           "pattern {}=word <=relation {}",
+                                           "count relation")).report().split("\\R"));
+    assertEquals(Arrays.asList("## relations", "# count relation"), report.subList(0, 2));
+  }
+
   // ------------------------------------------------------------------
   // expanding the -conlluFile arguments
   // ------------------------------------------------------------------

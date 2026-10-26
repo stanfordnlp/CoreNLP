@@ -50,6 +50,11 @@ import edu.stanford.nlp.util.logging.Redwood;
  * pattern at the start of a line could not be told apart from a
  * comment.
  *<br>
+ * The comment lines directly above a {@code pattern} line, with no blank
+ * line between them, label its stage, and the report repeats them at
+ * the top of the stage's results as {@code ## } lines.  Other comments
+ * are left out of the report.
+ *<br>
  * A script with more than one stage runs one pass over the corpus per
  * stage, in order.  A later stage can be restricted to values gathered
  * by an earlier one, which is a question a single pattern cannot ask,
@@ -112,10 +117,22 @@ public class SemgrexStats {
   public static class Stage {
     private final SemgrexPattern pattern;
     private final List<SemgrexStat> stats;
+    private final List<String> labels;
 
-    Stage(SemgrexPattern pattern, List<SemgrexStat> stats) {
+    Stage(SemgrexPattern pattern, List<SemgrexStat> stats, List<String> labels) {
       this.pattern = pattern;
       this.stats = Collections.unmodifiableList(new ArrayList<>(stats));
+      this.labels = Collections.unmodifiableList(new ArrayList<>(labels));
+    }
+
+    /**
+     * Returns the label of this stage: the comment lines directly above its
+     * {@code pattern} line, without their {@code #}.
+     *
+     * @return An unmodifiable list of the lines, empty if the stage has no label
+     */
+    public List<String> getLabels() {
+      return labels;
     }
 
     /**
@@ -149,10 +166,19 @@ public class SemgrexStats {
 
     String report() {
       StringBuilder sb = new StringBuilder();
+      for (String label : labels) {
+        sb.append(COMMENT).append(COMMENT);
+        if (!label.isEmpty()) {
+          sb.append(" ").append(label);
+        }
+        sb.append(System.lineSeparator());
+      }
+      boolean first = true;
       for (SemgrexStat stat : stats) {
-        if (sb.length() > 0) {
+        if (!first) {
           sb.append(System.lineSeparator());
         }
+        first = false;
         sb.append(COMMENT).append(" ").append(stat.toString()).append(System.lineSeparator());
         sb.append(stat.report());
       }
@@ -332,7 +358,8 @@ public class SemgrexStats {
 
   /**
    * Parses the lines of a script.  Blank lines and comments are skipped;
-   * each {@code pattern} line starts a new stage.
+   * each {@code pattern} line starts a new stage, labelled by the comment
+   * lines directly above it.
    *
    * @param lines The lines of the script
    * @param bidiAllowed Whether commands may add Unicode bidi controls to their output
@@ -341,15 +368,21 @@ public class SemgrexStats {
    *   the first pattern, has a stage with no commands, or has a bad pattern or command
    */
   public static SemgrexStats parse(List<String> lines, boolean bidiAllowed) {
-    List<String> meaningful = new ArrayList<>();
+    // each command line, with the comment lines directly above it
+    List<Pair<String, List<String>>> meaningful = new ArrayList<>();
+    List<String> comments = new ArrayList<>();
     for (String line : lines) {
       // \r so that a script written on Windows doesn't produce a
       // pattern with an invisible character glued to the end of it
       String trimmed = line.replaceAll("\r$", "").trim();
-      if (trimmed.isEmpty() || trimmed.startsWith(COMMENT)) {
-        continue;
+      if (trimmed.isEmpty()) {
+        comments = new ArrayList<>();
+      } else if (trimmed.startsWith(COMMENT)) {
+        comments.add(trimmed.substring(COMMENT.length()).trim());
+      } else {
+        meaningful.add(new Pair<>(trimmed, comments));
+        comments = new ArrayList<>();
       }
-      meaningful.add(trimmed);
     }
 
     if (meaningful.isEmpty()) {
@@ -362,17 +395,20 @@ public class SemgrexStats {
     List<Stage> stages = new ArrayList<>();
     Context context = null;
     List<SemgrexStat> stats = new ArrayList<>();
+    List<String> labels = Collections.emptyList();
 
-    for (String line : meaningful) {
+    for (Pair<String, List<String>> meaningfulLine : meaningful) {
+      String line = meaningfulLine.first();
       Pair<String, String> split = splitCommand(line);
       String command = split.first();
       String rest = split.second();
 
       if (PATTERN_COMMAND.equals(command)) {
         if (context != null) {
-          stages.add(finishStage(context, stats));
+          stages.add(finishStage(context, stats, labels));
           stats = new ArrayList<>();
         }
+        labels = meaningfulLine.second();
         if (rest.isEmpty()) {
           throw new SemgrexParseException("A '" + PATTERN_COMMAND + "' line needs a semgrex pattern after it");
         }
@@ -390,16 +426,16 @@ public class SemgrexStats {
       stats.add(parseCommand(context, command, rest));
     }
 
-    stages.add(finishStage(context, stats));
+    stages.add(finishStage(context, stats, labels));
     return new SemgrexStats(stages);
   }
 
-  private static Stage finishStage(Context context, List<SemgrexStat> stats) {
+  private static Stage finishStage(Context context, List<SemgrexStat> stats, List<String> labels) {
     if (stats.isEmpty()) {
       throw new SemgrexParseException("A '" + PATTERN_COMMAND + "' line had no statistics commands after it.  " +
                                       "Known commands: " + knownCommands());
     }
-    return new Stage(context.getPattern(), stats);
+    return new Stage(context.getPattern(), stats, labels);
   }
 
   /**
@@ -510,7 +546,8 @@ public class SemgrexStats {
 
   /**
    * Formats the results of every stage.  When there is more than one
-   * stage, each is headed by a {@code ## stage N} line.
+   * stage, each is headed by a {@code ## stage N} line.  A stage with a
+   * label has it next, as {@code ## } lines.
    *
    * @return The report text
    */
