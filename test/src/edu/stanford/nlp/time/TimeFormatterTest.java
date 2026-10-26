@@ -11,6 +11,9 @@ import org.joda.time.format.DateTimeFormat;
 
 import org.junit.Test;
 
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
@@ -364,12 +367,12 @@ public class TimeFormatterTest {
     assertTrue(v.get() instanceof SUTime.PartialTime);
   }
 
-  // ------------------------------------------------------- joda extractor
+  // --------------------------------------------- DateTimeFormatter extractor
 
   @Test
-  public void testJodaExtractorProducesAGroundedTime() {
-    TimeFormatter.JodaDateTimeFormatExtractor ex = new TimeFormatter.JodaDateTimeFormatExtractor(
-            DateTimeFormat.forPattern("yyyy-MM-dd").withZoneUTC());
+  public void testFormatterExtractorProducesAGroundedTime() {
+    TimeFormatter.DateTimeFormatExtractor ex = new TimeFormatter.DateTimeFormatExtractor(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneOffset.UTC));
     Value v = ex.apply(textOf("2017-06-15"));
     assertNotNull(v);
     assertEquals("GroundedTime", v.getType());
@@ -378,33 +381,33 @@ public class TimeFormatterTest {
   }
 
   @Test
-  public void testJodaExtractorWithTime() {
-    TimeFormatter.JodaDateTimeFormatExtractor ex = new TimeFormatter.JodaDateTimeFormatExtractor(
-            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm").withZoneUTC());
+  public void testFormatterExtractorWithTime() {
+    TimeFormatter.DateTimeFormatExtractor ex = new TimeFormatter.DateTimeFormatExtractor(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneOffset.UTC));
     assertEquals("2017-06-15T10:30:00.000Z",
             ((SUTime.GroundedTime) ex.apply(textOf("2017-06-15 10:30")).get()).toISOString());
   }
 
   @Test
-  public void testJodaExtractorRejectsUnparseableText() {
-    TimeFormatter.JodaDateTimeFormatExtractor ex =
-            new TimeFormatter.JodaDateTimeFormatExtractor("yyyy-MM-dd");
+  public void testFormatterExtractorRejectsUnparseableText() {
+    TimeFormatter.DateTimeFormatExtractor ex =
+            new TimeFormatter.DateTimeFormatExtractor("yyyy-MM-dd");
     assertNull(ex.apply(textOf("nonsense")));
     assertNull(ex.apply(textOf("")));
   }
 
   @Test
-  public void testJodaExtractorFromPatternStringUsesTheDefaultZone() {
+  public void testFormatterExtractorFromPatternStringUsesTheDefaultZone() {
     // The String constructor takes whatever zone is current, so pin it for the assertion.
-    DateTimeZone previous = DateTimeZone.getDefault();
+    TimeZone previous = TimeZone.getDefault();
     try {
-      DateTimeZone.setDefault(DateTimeZone.UTC);
-      TimeFormatter.JodaDateTimeFormatExtractor ex =
-              new TimeFormatter.JodaDateTimeFormatExtractor("yyyy-MM-dd");
+      TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+      TimeFormatter.DateTimeFormatExtractor ex =
+              new TimeFormatter.DateTimeFormatExtractor("yyyy-MM-dd");
       assertEquals("2017-06-15T00:00:00.000Z",
               ((SUTime.GroundedTime) ex.apply(textOf("2017-06-15")).get()).toISOString());
     } finally {
-      DateTimeZone.setDefault(previous);
+      TimeZone.setDefault(previous);
     }
   }
 

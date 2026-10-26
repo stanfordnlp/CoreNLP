@@ -9,8 +9,23 @@ import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
-import org.joda.time.*;
-import org.joda.time.format.*;
+import org.threeten.extra.PartialTemporal;
+
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQueries;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalField;
+import java.time.temporal.ValueRange;
+import java.time.temporal.WeekFields;
 
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -26,6 +41,10 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class TimeFormatter {
+
+  private static final int MILLIS_PER_SECOND = 1000;
+  private static final int MILLIS_PER_MINUTE = 60 * MILLIS_PER_SECOND;
+  private static final int MILLIS_PER_HOUR = 60 * MILLIS_PER_MINUTE;
 
   private TimeFormatter() {} // static methods/classes
 
@@ -55,29 +74,48 @@ public class TimeFormatter {
   }
 
 
-  public static class JodaDateTimeFormatExtractor implements
+  /**
+   * Reads a time from text with a {@link DateTimeFormatter}, giving a grounded time.
+   *
+   * <p>A pattern that names no time of day is read as the start of the day, and one that
+   * names no zone is read in the zone the formatter carries, or the default zone if it
+   * carries none. Text the pattern does not match gives null rather than throwing.
+   */
+  public static class DateTimeFormatExtractor implements
           Function<CoreMap, Value> {
 
     private static final Class<CoreAnnotations.TextAnnotation> textAnnotationField = CoreAnnotations.TextAnnotation.class;
     private final DateTimeFormatter formatter;
 
-    public JodaDateTimeFormatExtractor(DateTimeFormatter formatter) {
+    public DateTimeFormatExtractor(DateTimeFormatter formatter) {
       this.formatter = formatter;
     }
 
-    public JodaDateTimeFormatExtractor(String pattern) {
-      this.formatter = DateTimeFormat.forPattern(pattern);
+    public DateTimeFormatExtractor(String pattern) {
+      this.formatter = DateTimeFormatter.ofPattern(pattern);
     }
 
     @Override
     public Value apply(CoreMap m) {
       try {
         String str = m.get(textAnnotationField);
-        // TODO: Allow specification of pivot year (withPivotYear) for interpreting 2 digit years
-        DateTime d = formatter.parseDateTime(str);
+        // TODO: Allow specification of pivot year for interpreting 2 digit years
+        TemporalAccessor parsed = formatter.parse(str);
+        LocalDate date = parsed.query(TemporalQueries.localDate());
+        if (date == null) {
+          return null;
+        }
+        LocalTime time = parsed.query(TemporalQueries.localTime());
+        if (time == null) {
+          time = LocalTime.MIDNIGHT;
+        }
+        ZoneId zone = parsed.query(TemporalQueries.zone());
+        if (zone == null) {
+          zone = ZoneId.systemDefault();
+        }
         return new Expressions.PrimitiveValue("GroundedTime",
-                new SUTime.GroundedTime(java.time.Instant.ofEpochMilli(d.getMillis())));
-      } catch (IllegalArgumentException ex) {
+                new SUTime.GroundedTime(ZonedDateTime.of(date, time, zone).toInstant()));
+      } catch (DateTimeException | IllegalArgumentException ex) {
         return null;
       }
     }
@@ -153,18 +191,14 @@ public class TimeFormatter {
         CustomDateFormatExtractor formatExtractor = new CustomDateFormatExtractor(expr, localeString);
         //SequenceMatchRules.Expression result = (SequenceMatchRules.Expression) attributes.get("result");
         updateExtractRule(r, env, formatExtractor.getTextPattern(), new ApplyActionWrapper<>(env, formatExtractor, action));
-      } else if ("org.joda.time.format.DateTimeFormat".equals(formatter)) {
+      } else if ("java.time.format.DateTimeFormatter".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        updateExtractRule(r, env, new ApplyActionWrapper<>(env, new JodaDateTimeFormatExtractor(expr), action));
-      } else if ("org.joda.time.format.ISODateTimeFormat".equals(formatter)) {
-        if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
-        try {
-          Method m = ISODateTimeFormat.class.getMethod(expr);
-          DateTimeFormatter dtf = (DateTimeFormatter) m.invoke(null);
-          updateExtractRule(r, env, new ApplyActionWrapper<>(env, new JodaDateTimeFormatExtractor(expr), action));
-        } catch (Exception ex) {
-          throw new RuntimeException("Error creating DateTimeFormatter", ex);
-        }
+        updateExtractRule(r, env, new ApplyActionWrapper<>(env, new DateTimeFormatExtractor(expr), action));
+      } else if ("org.joda.time.format.DateTimeFormat".equals(formatter)
+              || "org.joda.time.format.ISODateTimeFormat".equals(formatter)) {
+        throw new IllegalArgumentException("Formatter " + formatter + " is no longer available."
+                + " Use formatter = \"java.time.format.DateTimeFormatter\" with a"
+                + " java.time pattern, which differs from joda's in places.");
       } else if ("java.text.SimpleDateFormat".equals(formatter)) {
         if (r.annotationField == null) { r.annotationField = r.tokensAnnotationField;  }
         updateExtractRule(r, env, new ApplyActionWrapper<>(env, new JavaDateFormatExtractor(expr), action));
@@ -278,19 +312,18 @@ public class TimeFormatter {
 
   private abstract static class DateTimeFieldComponent extends FormatComponent {
 
-    DateTimeFieldType fieldType;
+    TemporalField fieldType;
 
     public Integer parseValue(String str) { return null; }
-    public DateTimeFieldType getDateTimeFieldType() { return fieldType; }
+    public TemporalField getDateTimeFieldType() { return fieldType; }
 
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
-      DateTimeFieldType dt = getDateTimeFieldType();
+      TemporalField dt = getDateTimeFieldType();
       if (fieldValueStr != null && dt != null) {
         Integer v = parseValue(fieldValueStr);
         if (v != null) {
-          Partial pt = new Partial();
-          pt = JodaTimeUtils.setField(pt, dt, v);
-          t = t.intersect(new SUTime.PartialTime(SUTime.fromJodaPartial(pt)));
+          PartialTemporal pt = PartialTemporalUtils.setField(null, dt, v);
+          t = t.intersect(new SUTime.PartialTime(pt));
         } else {
           throw new IllegalArgumentException("Cannot interpret " + fieldValueStr + " for " + fieldType);
         }
@@ -308,14 +341,13 @@ public class TimeFormatter {
     private final int minDigits;
     private final int maxDigits;
 
-    public NumericDateComponent(DateTimeFieldType fieldType, int minDigits, int maxDigits) {
+    public NumericDateComponent(TemporalField fieldType, int minDigits, int maxDigits) {
       this.fieldType = fieldType;
       this.minDigits = minDigits;
       this.maxDigits = maxDigits;
-      MutableDateTime dt = new MutableDateTime(0L, DateTimeZone.UTC);
-      MutableDateTime.Property property = dt.property(fieldType);
-      minValue = property.getMinimumValueOverall();
-      maxValue = property.getMaximumValueOverall();
+      ValueRange range = fieldType.range();
+      minValue = (int) Math.max(range.getMinimum(), Integer.MIN_VALUE);
+      maxValue = (int) Math.min(range.getMaximum(), Integer.MAX_VALUE);
     }
 
     protected StringBuilder appendRegex0(StringBuilder sb) {
@@ -353,7 +385,7 @@ public class TimeFormatter {
     int minDigits;
     int maxDigits;
 
-    public RelaxedNumericDateComponent(DateTimeFieldType[] fieldTypes, int minDigits, int maxDigits)
+    public RelaxedNumericDateComponent(TemporalField[] fieldTypes, int minDigits, int maxDigits)
     {
       this.minDigits = minDigits;
       this.maxDigits = maxDigits;
@@ -409,32 +441,40 @@ public class TimeFormatter {
 
     public TextDateComponent() {}
 
-    public TextDateComponent(DateTimeFieldType fieldType, Locale locale, Boolean isShort) {
+    public TextDateComponent(TemporalField fieldType, Locale locale, Boolean isShort) {
       this.fieldType = fieldType;
       this.locale = locale;
       this.isShort = isShort;
 
-      MutableDateTime dt = new MutableDateTime(0L, DateTimeZone.UTC);
-      MutableDateTime.Property property = dt.property(fieldType);
-      minValue = property.getMinimumValueOverall();
-      maxValue = property.getMaximumValueOverall();
+      ValueRange range = fieldType.range();
+      minValue = (int) range.getMinimum();
+      maxValue = (int) range.getMaximum();
       this.validValues = new ArrayList<>(maxValue - minValue + 1);
       this.valueMapping = Generics.newHashMap();
+      DateTimeFormatter shortText = textFormatter(fieldType, TextStyle.SHORT, locale);
+      DateTimeFormatter longText = textFormatter(fieldType, TextStyle.FULL, locale);
       for (int i = minValue; i <= maxValue; i++) {
-        property.set(i);
-        if (isShort != null) {
-          if (isShort) {
-            addValue(property.getAsShortText(locale), i);
-          } else {
-            addValue(property.getAsText(locale), i);
-          }
-        } else {
-          addValue(property.getAsShortText(locale), i);
-          addValue(property.getAsText(locale), i);
+        PartialTemporal value = PartialTemporal.of(fieldType, i);
+        if (isShort == null || isShort) {
+          addValue(value.format(shortText), i);
+        }
+        if (isShort == null || !isShort) {
+          addValue(value.format(longText), i);
         }
       }
       // Order by length for regex
       Collections.sort(validValues, STRING_LENGTH_REV_COMPARATOR);
+    }
+
+    /**
+     * A formatter for the text of one field in a locale. An era is always written in its
+     * short form, because that is the only form joda had for it, so a pattern asking for
+     * the long form still matches BC and AD rather than Before Christ and Anno Domini.
+     */
+    private static DateTimeFormatter textFormatter(TemporalField field, TextStyle style,
+                                                   Locale locale) {
+      TextStyle actual = (field == ChronoField.ERA) ? TextStyle.SHORT : style;
+      return new DateTimeFormatterBuilder().appendText(field, actual).toFormatter(locale);
     }
 
     public void addValue(String str, int v) {
@@ -507,17 +547,17 @@ public class TimeFormatter {
       }
       int pos = 1;
       // Parse hours
-      offset += DateTimeConstants.MILLIS_PER_HOUR * parseInteger(str, pos, 2);
+      offset += MILLIS_PER_HOUR * parseInteger(str, pos, 2);
       pos += 2;
       if (pos < str.length()) {
         // Parse minutes
         if (!Character.isDigit(str.charAt(pos))) { pos++; }
-        offset += DateTimeConstants.MILLIS_PER_MINUTE * parseInteger(str, pos, 2);
+        offset += MILLIS_PER_MINUTE * parseInteger(str, pos, 2);
         pos += 2;
         if (pos < str.length()) {
           // Parse seconds
           if (!Character.isDigit(str.charAt(pos))) { pos++; }
-          offset += DateTimeConstants.MILLIS_PER_SECOND * parseInteger(str, pos, 2);
+          offset += MILLIS_PER_SECOND * parseInteger(str, pos, 2);
           pos += 2;
           if (pos < str.length()) {
             // Parse fraction of seconds
@@ -545,8 +585,7 @@ public class TimeFormatter {
     }
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
       int offset = parseOffsetMillis(fieldValueStr);
-      DateTimeZone dtz = DateTimeZone.forOffsetMillis(offset);
-      return t.setTimeZone(java.time.ZoneId.of(dtz.getID()));
+      return t.setTimeZone(ZoneOffset.ofTotalSeconds(offset / 1000));
     }
   }
 
@@ -571,14 +610,14 @@ public class TimeFormatter {
   //  NameKey    PST (or PDT depending on input milliseconds)
   private static class TimeZoneIdComponent extends FormatComponent
   {
-    static final Map<String, DateTimeZone> timeZonesById;
+    static final Map<String, ZoneId> timeZonesById;
     static final List<String> timeZoneIds;
     static final String timeZoneIdsRegex;
     static {
-      timeZoneIds = new ArrayList<>(DateTimeZone.getAvailableIDs());
+      timeZoneIds = new ArrayList<>(ZoneId.getAvailableZoneIds());
       timeZonesById = Generics.newHashMap();
       for (String str:timeZoneIds) {
-        DateTimeZone dtz = DateTimeZone.forID(str);
+        ZoneId dtz = ZoneId.of(str);
         timeZonesById.put(str.toLowerCase(), dtz);
 //        System.out.println(str);
 //        long time = System.currentTimeMillis();
@@ -596,10 +635,9 @@ public class TimeFormatter {
     {
     }
 
-    private static DateTimeZone parseDateTimeZone(String str) {
+    private static ZoneId parseDateTimeZone(String str) {
       str = str.toLowerCase();
-      DateTimeZone v = timeZonesById.get(str);
-      return v;
+      return timeZonesById.get(str);
     }
 
     protected StringBuilder appendRegex0(StringBuilder sb) {
@@ -609,8 +647,8 @@ public class TimeFormatter {
 
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
       if (fieldValueStr != null) {
-        DateTimeZone dtz = parseDateTimeZone(fieldValueStr);
-        return t.setTimeZone(java.time.ZoneId.of(dtz.getID()));
+        ZoneId dtz = parseDateTimeZone(fieldValueStr);
+        return t.setTimeZone(dtz);
       }
       return t;
     }
@@ -620,7 +658,7 @@ public class TimeFormatter {
   {
     Locale locale;
 
-    static Map<Locale, CollectionValuedMap<String, DateTimeZone>> timeZonesByName = Generics.newHashMap();
+    static Map<Locale, CollectionValuedMap<String, ZoneId>> timeZonesByName = Generics.newHashMap();
     static Map<Locale, List<String>> timeZoneNames = Generics.newHashMap();
     static Map<Locale, String> timeZoneRegexes = Generics.newHashMap();
 
@@ -636,19 +674,14 @@ public class TimeFormatter {
     }
 
     private static void updateTimeZoneNames(Locale locale) {
-      int year = Year.now().getValue();
-      long time1 = new SUTime.IsoDate(year,1,1).getInstant().toEpochMilli();
-      long time2 = new SUTime.IsoDate(year,6,1).getInstant().toEpochMilli();
-      CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<>();
-      for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
-        // standard timezones
-        tzMap.add(dtz.getShortName(time1, locale).toLowerCase(), dtz);
-        tzMap.add(dtz.getName(time1, locale).toLowerCase(), dtz);
-        // Add about half a year to get day light savings timezones...
-        tzMap.add(dtz.getShortName(time2, locale).toLowerCase(), dtz);
-        tzMap.add(dtz.getName(time2, locale).toLowerCase(), dtz);
-//      tzMap.add(dtz.getNameKey(time).toLowerCase(), dtz);
-//      tzMap.add(dtz.getID().toLowerCase(), dtz);
+      CollectionValuedMap<String,ZoneId> tzMap = new CollectionValuedMap<>();
+      for (ZoneId dtz:TimeZoneIdComponent.timeZonesById.values()) {
+        TimeZone tz = TimeZone.getTimeZone(dtz);
+        // the standard names, and the daylight saving ones for zones that have them
+        tzMap.add(tz.getDisplayName(false, TimeZone.SHORT, locale).toLowerCase(), dtz);
+        tzMap.add(tz.getDisplayName(false, TimeZone.LONG, locale).toLowerCase(), dtz);
+        tzMap.add(tz.getDisplayName(true, TimeZone.SHORT, locale).toLowerCase(), dtz);
+        tzMap.add(tz.getDisplayName(true, TimeZone.LONG, locale).toLowerCase(), dtz);
       }
       // Order by length for regex
       List<String> tzNames = new ArrayList<>(tzMap.keySet());
@@ -661,12 +694,12 @@ public class TimeFormatter {
       }
     }
 
-    public DateTimeZone parseDateTimeZone(String str) {
+    public ZoneId parseDateTimeZone(String str) {
       // TODO: do something about these multiple timezones that match the same name...
       // pick one based on location
       str = str.toLowerCase();
-      CollectionValuedMap<String,DateTimeZone> tzMap = timeZonesByName.get(locale);
-      Collection<DateTimeZone> v = tzMap.get(str);
+      CollectionValuedMap<String,ZoneId> tzMap = timeZonesByName.get(locale);
+      Collection<ZoneId> v = tzMap.get(str);
       if (v == null || v.isEmpty()) return null;
       else return v.iterator().next();
     }
@@ -679,8 +712,8 @@ public class TimeFormatter {
 
     public SUTime.Temporal updateTemporal(SUTime.Temporal t, String fieldValueStr) {
       if (fieldValueStr != null) {
-        DateTimeZone dtz = parseDateTimeZone(fieldValueStr);
-        return t.setTimeZone(java.time.ZoneId.of(dtz.getID()));
+        ZoneId dtz = parseDateTimeZone(fieldValueStr);
+        return t.setTimeZone(dtz);
       }
       return t;
     }
@@ -725,13 +758,8 @@ public class TimeFormatter {
 
     boolean useRelaxedHour = true;
     Locale locale;
-    DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
     List<FormatComponent> pieces = new ArrayList<>();
     int curGroup = 0;
-
-    public DateTimeFormatter toFormatter() {
-      return builder.toFormatter();
-    }
 
     public String toTextRegex() {
       StringBuilder sb = new StringBuilder();
@@ -747,23 +775,23 @@ public class TimeFormatter {
       return Pattern.compile(toTextRegex(), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
     }
 
-    private void appendNumericFields(DateTimeFieldType[] fieldTypes, int digits) {
+    private void appendNumericFields(TemporalField[] fieldTypes, int digits) {
       appendNumericFields(fieldTypes, digits, digits);
     }
 
-    private void appendNumericFields(DateTimeFieldType[] fieldTypes, int minDigits, int maxDigits) {
+    private void appendNumericFields(TemporalField[] fieldTypes, int minDigits, int maxDigits) {
       appendComponent(new RelaxedNumericDateComponent(fieldTypes, minDigits, maxDigits), true);
     }
 
-    private void appendNumericField(DateTimeFieldType fieldType, int digits) {
+    private void appendNumericField(TemporalField fieldType, int digits) {
       appendNumericField(fieldType, digits, digits);
     }
 
-    private void appendNumericField(DateTimeFieldType fieldType, int minDigits, int maxDigits) {
+    private void appendNumericField(TemporalField fieldType, int minDigits, int maxDigits) {
       appendComponent(new NumericDateComponent(fieldType, minDigits, maxDigits), true);
     }
 
-    private void appendTextField(DateTimeFieldType fieldType, boolean isShort) {
+    private void appendTextField(TemporalField fieldType, boolean isShort) {
       appendComponent(new TextDateComponent(fieldType, locale, isShort), true);
     }
 
@@ -784,125 +812,96 @@ public class TimeFormatter {
     }
 
     protected void appendEraText() {
-      builder.appendEraText();
-      appendTextField(DateTimeFieldType.era(), false);
+      appendTextField(ChronoField.ERA, false);
     }
     protected void appendCenturyOfEra(int minDigits, int maxDigits) {
-      builder.appendCenturyOfEra(minDigits, maxDigits);
-      appendNumericField(DateTimeFieldType.centuryOfEra(), minDigits, maxDigits);
+      appendNumericField(SUTimeFields.CENTURY_OF_ERA, minDigits, maxDigits);
     }
     protected void appendYearOfEra(int minDigits, int maxDigits) {
-      builder.appendYearOfEra(minDigits, maxDigits);
-      appendNumericField(DateTimeFieldType.yearOfEra(), minDigits, maxDigits);
+      appendNumericField(ChronoField.YEAR_OF_ERA, minDigits, maxDigits);
     }
     protected void appendYear(int minDigits, int maxDigits) {
-      builder.appendYear(minDigits, maxDigits);
-      appendNumericField(DateTimeFieldType.year(), minDigits, maxDigits);
+      appendNumericField(ChronoField.YEAR, minDigits, maxDigits);
     }
     protected void appendTwoDigitYear(int pivot, boolean lenient) {
-      builder.appendTwoDigitYear(pivot, lenient);
-      appendNumericField(DateTimeFieldType.yearOfCentury(), 2);
+      appendNumericField(SUTimeFields.YEAR_OF_CENTURY, 2);
     }
     protected void appendWeekyear(int minDigits, int maxDigits) {
-      builder.appendWeekyear(minDigits, maxDigits);
-      appendNumericField(DateTimeFieldType.weekyear(), minDigits, maxDigits);
+      appendNumericField(WeekFields.ISO.weekBasedYear(), minDigits, maxDigits);
     }
     protected void appendTwoDigitWeekyear(int pivot, boolean lenient) {
-      builder.appendTwoDigitYear(pivot, lenient);
-      appendNumericField(DateTimeFieldType.yearOfCentury(), 2);
+      appendNumericField(SUTimeFields.YEAR_OF_CENTURY, 2);
     }
     protected void appendWeekOfWeekyear(int digits) {
-      builder.appendWeekOfWeekyear(digits);
-      appendNumericField(DateTimeFieldType.weekOfWeekyear(), digits);
+      appendNumericField(WeekFields.ISO.weekOfWeekBasedYear(), digits);
     }
 
     protected void appendMonthOfYear(int digits) {
-      builder.appendMonthOfYear(digits);
-      appendNumericField(DateTimeFieldType.monthOfYear(), digits);
+      appendNumericField(ChronoField.MONTH_OF_YEAR, digits);
     }
     protected void appendMonthOfYearShortText() {
-      builder.appendMonthOfYearShortText();
-      appendTextField(DateTimeFieldType.monthOfYear(), true);
+      appendTextField(ChronoField.MONTH_OF_YEAR, true);
     }
     protected void appendMonthOfYearText() {
-      builder.appendMonthOfYearText();
-      appendTextField(DateTimeFieldType.monthOfYear(), false);
+      appendTextField(ChronoField.MONTH_OF_YEAR, false);
     }
 
     protected void appendDayOfYear(int digits) {
-      builder.appendDayOfYear(digits);
-      appendNumericField(DateTimeFieldType.dayOfYear(), digits);
+      appendNumericField(ChronoField.DAY_OF_YEAR, digits);
     }
     protected void appendDayOfMonth(int digits) {
-      builder.appendDayOfMonth(digits);
-      appendNumericField(DateTimeFieldType.dayOfMonth(), digits);
+      appendNumericField(ChronoField.DAY_OF_MONTH, digits);
     }
     protected void appendDayOfWeek(int digits) {
-      builder.appendDayOfWeek(digits);
-      appendNumericField(DateTimeFieldType.dayOfWeek(), digits);
+      appendNumericField(ChronoField.DAY_OF_WEEK, digits);
     }
     protected void appendDayOfWeekText() {
-      builder.appendDayOfWeekText();
-      appendTextField(DateTimeFieldType.dayOfWeek(), false);
+      appendTextField(ChronoField.DAY_OF_WEEK, false);
     }
     protected void appendDayOfWeekShortText() {
-      builder.appendDayOfWeekShortText();
-      appendTextField(DateTimeFieldType.dayOfWeek(), true);
+      appendTextField(ChronoField.DAY_OF_WEEK, true);
     }
     protected void appendHalfdayOfDayText() {
-      builder.appendHalfdayOfDayText();
-      appendTextField(DateTimeFieldType.halfdayOfDay(), false);
+      appendTextField(ChronoField.AMPM_OF_DAY, false);
     }
     protected void appendClockhourOfDay(int digits) {
-      builder.appendClockhourOfDay(digits);
-      appendNumericField(DateTimeFieldType.clockhourOfDay(), digits);
+      appendNumericField(ChronoField.CLOCK_HOUR_OF_DAY, digits);
     }
     protected void appendClockhourOfHalfday(int digits) {
-      builder.appendClockhourOfHalfday(digits);
-      appendNumericField(DateTimeFieldType.clockhourOfHalfday(), digits);
+      appendNumericField(ChronoField.CLOCK_HOUR_OF_AMPM, digits);
     }
     protected void appendHourOfDay(int digits) {
       if (useRelaxedHour) {
-        builder.appendHourOfDay(digits);
-        appendNumericFields(new DateTimeFieldType[]{DateTimeFieldType.hourOfDay(), DateTimeFieldType.clockhourOfDay()}, digits);
+        appendNumericFields(new TemporalField[]{ChronoField.HOUR_OF_DAY, ChronoField.CLOCK_HOUR_OF_DAY}, digits);
       } else {
-        builder.appendHourOfDay(digits);
-        appendNumericField(DateTimeFieldType.hourOfDay(), digits);
+        appendNumericField(ChronoField.HOUR_OF_DAY, digits);
       }
     }
     protected void appendHourOfHalfday(int digits) {
-      builder.appendHourOfHalfday(digits);
-      appendNumericField(DateTimeFieldType.hourOfHalfday(), digits);
+      appendNumericField(ChronoField.HOUR_OF_AMPM, digits);
     }
     protected void appendMinuteOfHour(int digits) {
-      builder.appendMinuteOfHour(digits);
-      appendNumericField(DateTimeFieldType.minuteOfHour(), digits);
+      appendNumericField(ChronoField.MINUTE_OF_HOUR, digits);
     }
     protected void appendSecondOfMinute(int digits) {
-      builder.appendSecondOfMinute(digits);
-      appendNumericField(DateTimeFieldType.secondOfMinute(), digits);
+      appendNumericField(ChronoField.SECOND_OF_MINUTE, digits);
     }
     protected void appendFractionOfSecond(int minDigits, int maxDigits) {
-      builder.appendFractionOfSecond(minDigits, maxDigits);
-      appendNumericField(DateTimeFieldType.millisOfSecond(), minDigits, maxDigits);
+      appendNumericField(ChronoField.MILLI_OF_SECOND, minDigits, maxDigits);
     }
 
     protected void appendTimeZoneOffset(String zeroOffsetText, String zeroOffsetParseText, boolean showSeparators,
                                         int minFields, int maxFields) {
-      builder.appendTimeZoneOffset(zeroOffsetText, zeroOffsetParseText, showSeparators, minFields, maxFields);
       appendComponent(new TimeZoneOffsetComponent(zeroOffsetParseText), true);
     }
     protected void appendTimeZoneId() {
-      builder.appendTimeZoneId();
       appendComponent(new TimeZoneIdComponent(), true);
     }
     protected void appendTimeZoneName() {
-      builder.appendTimeZoneName();
       // TODO: TimeZoneName
       appendComponent(new TimeZoneComponent(locale), true);
     }
     protected void appendTimeZoneShortName() {
-      builder.appendTimeZoneShortName();
       // TODO: TimeZoneName
       appendComponent(new TimeZoneComponent(locale), true);
     }
@@ -921,14 +920,11 @@ public class TimeFormatter {
     protected void appendGroupEnd() { appendRegexPart(")"); }
 
     protected void appendLiteral(char c) {
-      builder.appendLiteral(c);
       appendLiteralField(String.valueOf(c));}
 
     protected void appendLiteral(String s) {
-      builder.appendLiteral(s);
       appendLiteralField(s); }
   }
-
   private static void parsePatternTo(FormatterBuilder builder, String pattern) {
     int length = pattern.length();
     int[] indexRef = new int[1];
@@ -973,12 +969,12 @@ public class TimeFormatter {
             // Use pivots which are compatible with SimpleDateFormat.
             switch (c) {
               case 'x':
-                builder.appendTwoDigitWeekyear(new DateTime().getWeekyear() - 30, lenientParse);
+                builder.appendTwoDigitWeekyear(LocalDate.now().get(WeekFields.ISO.weekBasedYear()) - 30, lenientParse);
                 break;
               case 'y':
               case 'Y':
               default:
-                builder.appendTwoDigitYear(new DateTime().getYear() - 30, lenientParse);
+                builder.appendTwoDigitYear(LocalDate.now().getYear() - 30, lenientParse);
                 break;
             }
           } else {
