@@ -13,6 +13,11 @@ import edu.stanford.nlp.util.StringUtils;
 // import edu.stanford.nlp.util.logging.Redwood;
 
 import org.joda.time.*;
+
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -587,7 +592,7 @@ public class SUTime  {
   }
   // Basic time units (durations)
 
-  public static final Duration YEAR = new DurationWithFields(Period.years(1)) {
+  public static final Duration YEAR = new DurationWithFields(SUTimePeriod.ofYears(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.year(), DateTimeFieldType.yearOfCentury(), DateTimeFieldType.yearOfEra() };
@@ -595,7 +600,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration DAY = new DurationWithFields(Period.days(1)) {
+  public static final Duration DAY = new DurationWithFields(SUTimePeriod.ofDays(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.dayOfMonth(), DateTimeFieldType.dayOfWeek(), DateTimeFieldType.dayOfYear() };
@@ -603,7 +608,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration WEEK = new DurationWithFields(Period.weeks(1)) {
+  public static final Duration WEEK = new DurationWithFields(SUTimePeriod.ofWeeks(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.weekOfWeekyear() };
@@ -611,9 +616,9 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration FORTNIGHT = new DurationWithFields(Period.weeks(2));
+  public static final Duration FORTNIGHT = new DurationWithFields(SUTimePeriod.ofWeeks(2));
 
-  public static final Duration MONTH = new DurationWithFields(Period.months(1)) {
+  public static final Duration MONTH = new DurationWithFields(SUTimePeriod.ofMonths(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.monthOfYear() };
@@ -623,7 +628,7 @@ public class SUTime  {
 
   // public static final Duration QUARTER = new DurationWithFields(new
   // Period(JodaTimeUtils.Quarters)) {
-  public static final Duration QUARTER = new DurationWithFields(Period.months(3)) {
+  public static final Duration QUARTER = new DurationWithFields(SUTimePeriod.ofMonths(3)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { JodaTimeUtils.QuarterOfYear };
@@ -631,7 +636,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration HALFYEAR = new DurationWithFields(Period.months(6)) {
+  public static final Duration HALFYEAR = new DurationWithFields(SUTimePeriod.ofMonths(6)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { JodaTimeUtils.HalfYearOfYear };
@@ -639,7 +644,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration MILLIS = new DurationWithFields(Period.millis(1)) {
+  public static final Duration MILLIS = new DurationWithFields(SUTimePeriod.ofMillis(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.millisOfSecond(), DateTimeFieldType.millisOfDay() };
@@ -647,7 +652,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration SECOND = new DurationWithFields(Period.seconds(1)) {
+  public static final Duration SECOND = new DurationWithFields(SUTimePeriod.ofSeconds(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.secondOfMinute(), DateTimeFieldType.secondOfDay() };
@@ -655,7 +660,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration MINUTE = new DurationWithFields(Period.minutes(1)) {
+  public static final Duration MINUTE = new DurationWithFields(SUTimePeriod.ofMinutes(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.minuteOfHour(), DateTimeFieldType.minuteOfDay() };
@@ -663,7 +668,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration HOUR = new DurationWithFields(Period.hours(1)) {
+  public static final Duration HOUR = new DurationWithFields(SUTimePeriod.ofHours(1)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.hourOfDay(), DateTimeFieldType.hourOfHalfday() };
@@ -671,11 +676,11 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration HALFHOUR = new DurationWithFields(Period.minutes(30));
+  public static final Duration HALFHOUR = new DurationWithFields(SUTimePeriod.ofMinutes(30));
 
-  public static final Duration QUARTERHOUR = new DurationWithFields(Period.minutes(15));
+  public static final Duration QUARTERHOUR = new DurationWithFields(SUTimePeriod.ofMinutes(15));
 
-  public static final Duration DECADE = new DurationWithFields(Period.years(10)) {
+  public static final Duration DECADE = new DurationWithFields(SUTimePeriod.ofYears(10)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { JodaTimeUtils.DecadeOfCentury };
@@ -683,7 +688,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration CENTURY = new DurationWithFields(Period.years(100)) {
+  public static final Duration CENTURY = new DurationWithFields(SUTimePeriod.ofYears(100)) {
     @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.centuryOfEra() };
@@ -691,7 +696,7 @@ public class SUTime  {
     private static final long serialVersionUID = 1;
   };
 
-  public static final Duration MILLENNIUM = new DurationWithFields(Period.years(1000));
+  public static final Duration MILLENNIUM = new DurationWithFields(SUTimePeriod.ofYears(1000));
 
   public static final Time TIME_REF = new RefTime("REF") {
     private static final long serialVersionUID = 1;
@@ -708,7 +713,7 @@ public class SUTime  {
   public static final Time TIME_FUTURE = createTemporal(StandardTemporalType.REFDATE, "FUTURE_REF", new InexactTime(new Range(TIME_NOW, TIME_UNKNOWN)));
 
   public static final Duration DURATION_UNKNOWN = new DurationWithFields();
-  public static final Duration DURATION_NONE = new DurationWithFields(Period.ZERO);
+  public static final Duration DURATION_NONE = new DurationWithFields(SUTimePeriod.ZERO);
 
   // Basic dates/times
 
@@ -1551,7 +1556,7 @@ public class SUTime  {
         Period p = g.getJodaTimePeriod();
         p = p.normalizedStandard();
         Period p2 = JodaTimeUtils.discardMoreSpecificFields(d.getJodaTimePeriod(), p.getFieldType(p.size() - 1), i1.getChronology());
-        return new DurationWithFields(p2);
+        return new DurationWithFields(fromJodaPeriod(p2));
       } else {
         return d;
       }
@@ -1830,7 +1835,7 @@ public class SUTime  {
           df = mostGeneral.getDurationType();
         }
         if (df != null) {
-          bd = new DurationWithFields(new Period().withField(df, 1));
+          bd = new DurationWithFields(fromJodaPeriod(new Period().withField(df, 1)));
         }
       }
 
@@ -3098,7 +3103,7 @@ public class SUTime  {
       // }
       if (df != null) {
         try {
-          return new DurationWithFields(new Period().withField(df, 1));
+          return new DurationWithFields(fromJodaPeriod(new Period().withField(df, 1)));
         } catch (Exception ex) {
           // TODO: Do something intelligent here
         }
@@ -3254,7 +3259,7 @@ public class SUTime  {
 //            }
 //          }
           if (!unsupported.equals(Period.ZERO)) {
-            t = new RelativeTime(p, new DurationWithFields(unsupported));
+            t = new RelativeTime(p, new DurationWithFields(fromJodaPeriod(unsupported)));
             t.approx = this.approx;
             t.mod = this.mod;
           } else {
@@ -3902,6 +3907,55 @@ public class SUTime  {
    * days)</li>
    * </ol>
    */
+  /**
+   * The eight period fields, joda's name for each alongside java.time's. These sit in a
+   * class of their own so that they are ready whenever a period is first converted,
+   * whatever order the constants in {@link SUTime} itself happen to be built in.
+   */
+  private static final class PeriodFields {
+    static final DurationFieldType[] JODA = {
+        DurationFieldType.years(), DurationFieldType.months(), DurationFieldType.weeks(),
+        DurationFieldType.days(), DurationFieldType.hours(), DurationFieldType.minutes(),
+        DurationFieldType.seconds(), DurationFieldType.millis(),
+    };
+    static final TemporalUnit[] JAVA = {
+        ChronoUnit.YEARS, ChronoUnit.MONTHS, ChronoUnit.WEEKS, ChronoUnit.DAYS,
+        ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS, ChronoUnit.MILLIS,
+    };
+  }
+
+  /**
+   * A field period as a joda period. This is here for the partial-date half of SUTime,
+   * which still works in joda, and goes away with it.
+   */
+  static Period toJodaPeriod(SUTimePeriod period) {
+    if (period == null) {
+      return null;
+    }
+    Period result = new Period();
+    for (int i = 0; i < PeriodFields.JAVA.length; i++) {
+      long value = period.get(PeriodFields.JAVA[i]);
+      if (value != 0) {
+        result = result.withField(PeriodFields.JODA[i], (int) value);
+      }
+    }
+    return result;
+  }
+
+  /** A joda period as a field period, for the same reason as above. */
+  static SUTimePeriod fromJodaPeriod(Period period) {
+    if (period == null) {
+      return null;
+    }
+    SUTimePeriod result = SUTimePeriod.ZERO;
+    for (int i = 0; i < PeriodFields.JODA.length; i++) {
+      if (period.isSupported(PeriodFields.JODA[i])) {
+        result = result.with(PeriodFields.JAVA[i], period.get(PeriodFields.JODA[i]));
+      }
+    }
+    return result;
+  }
+
   public abstract static class Duration extends Temporal implements FuzzyInterval.FuzzyComparable<Duration> {
 
     public Duration() {
@@ -3911,25 +3965,25 @@ public class SUTime  {
       super(d);
     }
 
-    public static Duration getDuration(ReadablePeriod p) {
+    public static Duration getDuration(SUTimePeriod p) {
       return new DurationWithFields(p);
     }
 
-    public static Duration getDuration(org.joda.time.Duration d) {
+    public static Duration getDuration(java.time.Duration d) {
       return new DurationWithMillis(d);
     }
 
-    public static Duration getInexactDuration(ReadablePeriod p) {
+    public static Duration getInexactDuration(SUTimePeriod p) {
       return new InexactDuration(p);
     }
 
-    public static Duration getInexactDuration(org.joda.time.Duration d) {
-      return new InexactDuration(d.toPeriod());
+    public static Duration getInexactDuration(java.time.Duration d) {
+      return new InexactDuration(SUTimePeriod.from(d));
     }
 
     // Returns the inexact version of the duration
     public InexactDuration makeInexact() {
-      return new InexactDuration(getJodaTimePeriod());
+      return new InexactDuration(getFieldPeriod());
     }
 
     public DateTimeFieldType[] getDateTimeFields() {
@@ -4028,16 +4082,37 @@ public class SUTime  {
       return TimexType.DURATION;
     }
 
-    public abstract Period getJodaTimePeriod();
+    /** How long this duration is, field by field, which is also its TIMEX3 value. */
+    public abstract SUTimePeriod getFieldPeriod();
 
-    public abstract org.joda.time.Duration getJodaTimeDuration();
+    /** How long this duration is as a single elapsed amount, measured from the epoch. */
+    public abstract java.time.Duration getElapsedDuration();
+
+    /** Builds a duration from a joda period, for the callers that still hold one. */
+    public static Duration getDuration(Period p) {
+      return new DurationWithFields(fromJodaPeriod(p));
+    }
+
+    /**
+     * The field period as a joda period. The partial-date half of SUTime still works in
+     * joda and asks durations for their period, so the two meet here until it is ported.
+     */
+    public Period getJodaTimePeriod() {
+      return toJodaPeriod(getFieldPeriod());
+    }
+
+    /** The elapsed duration as a joda duration, for the same reason as above. */
+    public org.joda.time.Duration getJodaTimeDuration() {
+      java.time.Duration d = getElapsedDuration();
+      return (d != null) ? org.joda.time.Duration.millis(d.toMillis()) : null;
+    }
 
     @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
       }
-      Period p = getJodaTimePeriod();
+      SUTimePeriod p = getFieldPeriod();
       String s = (p != null) ? p.toString() : "PXX";
       if ((flags & (FORMAT_ISO | FORMAT_TIMEX3_VALUE)) == 0) {
         String m = getMod();
@@ -4070,8 +4145,8 @@ public class SUTime  {
     // Rough approximate ordering of durations
     @Override
     public int compareTo(Duration d) {
-      org.joda.time.Duration d1 = getJodaTimeDuration();
-      org.joda.time.Duration d2 = d.getJodaTimeDuration();
+      java.time.Duration d1 = getElapsedDuration();
+      java.time.Duration d2 = d.getElapsedDuration();
       if (d1 == null && d2 == null) {
         return 0;
       } else if (d1 == null) {
@@ -4180,17 +4255,17 @@ public class SUTime  {
   public static class DurationWithFields extends Duration {
     // Use Inexact duration to be able to specify duration with uncertain number
     // Like a few years
-    ReadablePeriod period;
+    SUTimePeriod period;
 
     public DurationWithFields() {
       this.period = null;
     }
 
-    public DurationWithFields(ReadablePeriod period) {
+    public DurationWithFields(SUTimePeriod period) {
       this.period = period;
     }
 
-    public DurationWithFields(Duration d, ReadablePeriod period) {
+    public DurationWithFields(Duration d, SUTimePeriod period) {
       super(d);
       this.period = period;
     }
@@ -4199,92 +4274,77 @@ public class SUTime  {
     public Duration multiplyBy(int m) {
       if (m == 1 || period == null) {
         return this;
-      } else {
-        MutablePeriod p = period.toMutablePeriod();
-        for (int i = 0; i < period.size(); i++) {
-          p.setValue(i, period.getValue(i) * m);
-        }
-        return new DurationWithFields(p);
       }
+      return new DurationWithFields(period.multipliedBy(m));
+    }
+
+    /**
+     * How much of a field is left over when it is divided, expressed in the next finer
+     * field. A month divides into 30 days and a year into 12 months, which are the
+     * conventional lengths rather than the calendar's.
+     */
+    private static final Map<TemporalUnit, Pair<TemporalUnit, Integer>> DIVIDE_REMAINDERS;
+
+    static {
+      Map<TemporalUnit, Pair<TemporalUnit, Integer>> m = new LinkedHashMap<>();
+      m.put(ChronoUnit.YEARS, new Pair<>(ChronoUnit.MONTHS, 12));
+      m.put(ChronoUnit.MONTHS, new Pair<>(ChronoUnit.DAYS, 30));
+      m.put(ChronoUnit.WEEKS, new Pair<>(ChronoUnit.DAYS, 7));
+      m.put(ChronoUnit.DAYS, new Pair<>(ChronoUnit.HOURS, 24));
+      m.put(ChronoUnit.HOURS, new Pair<>(ChronoUnit.MINUTES, 60));
+      m.put(ChronoUnit.MINUTES, new Pair<>(ChronoUnit.SECONDS, 60));
+      m.put(ChronoUnit.SECONDS, new Pair<>(ChronoUnit.MILLIS, 1000));
+      // A millisecond is the finest field there is, so a remainder of one is dropped.
+      m.put(ChronoUnit.MILLIS, new Pair<>(ChronoUnit.MILLIS, 0));
+      DIVIDE_REMAINDERS = Collections.unmodifiableMap(m);
     }
 
     @Override
     public Duration divideBy(int m) {
       if (m == 1 || period == null) {
         return this;
-      } else {
-        MutablePeriod p = new MutablePeriod();
-        for (int i = 0; i < period.size(); i++) {
-          int oldVal = period.getValue(i);
-          DurationFieldType field = period.getFieldType(i);
-          int remainder = oldVal % m;
-          p.add(field, oldVal - remainder);
-          if (remainder != 0) {
-            DurationFieldType f;
-            int standardUnit; // initialized below
-            // TODO: This seems silly, how to do this with jodatime???
-            if (DurationFieldType.centuries().equals(field)) {
-              f = DurationFieldType.years();
-              standardUnit = 100;
-            } else if (DurationFieldType.years().equals(field)) {
-              f = DurationFieldType.months();
-              standardUnit = 12;
-            } else if (DurationFieldType.halfdays().equals(field)) {
-              f = DurationFieldType.hours();
-              standardUnit = 12;
-            } else if (DurationFieldType.days().equals(field)) {
-              f = DurationFieldType.hours();
-              standardUnit = 24;
-            } else if (DurationFieldType.hours().equals(field)) {
-              f = DurationFieldType.minutes();
-              standardUnit = 60;
-            } else if (DurationFieldType.minutes().equals(field)) {
-              f = DurationFieldType.seconds();
-              standardUnit = 60;
-            } else if (DurationFieldType.seconds().equals(field)) {
-              f = DurationFieldType.millis();
-              standardUnit = 1000;
-            } else if (DurationFieldType.months().equals(field)) {
-              f = DurationFieldType.days();
-              standardUnit = 30;
-            } else if (DurationFieldType.weeks().equals(field)) {
-              f = DurationFieldType.days();
-              standardUnit = 7;
-            } else if (DurationFieldType.millis().equals(field)) {
-              // No more granularity units....
-              f = DurationFieldType.millis();
-              standardUnit = 0;
-            } else {
-              throw new UnsupportedOperationException("Unsupported duration type: " + field + " when dividing");
-            }
-            p.add(f, standardUnit * remainder);
-          }
-        }
-        for (int i = 0; i < p.size(); i++) {
-          p.setValue(i, p.getValue(i) / m);
-        }
-        return new DurationWithFields(p);
       }
+      SUTimePeriod divided = SUTimePeriod.ZERO;
+      for (int i = 0; i < period.size(); i++) {
+        TemporalUnit unit = period.getUnit(i);
+        long value = period.getValue(i);
+        long remainder = value % m;
+        divided = divided.plus(unit, value - remainder);
+        if (remainder != 0) {
+          Pair<TemporalUnit, Integer> finer = DIVIDE_REMAINDERS.get(unit);
+          if (finer == null) {
+            throw new UnsupportedOperationException("Unsupported duration type: " + unit + " when dividing");
+          }
+          divided = divided.plus(finer.first(), finer.second() * remainder);
+        }
+      }
+      for (int i = 0; i < divided.size(); i++) {
+        divided = divided.with(divided.getUnit(i), divided.getValue(i) / m);
+      }
+      return new DurationWithFields(divided);
     }
 
     @Override
-    public Period getJodaTimePeriod() {
-      return (period != null) ? period.toPeriod() : null;
+    public SUTimePeriod getFieldPeriod() {
+      return period;
     }
 
     @Override
-    public org.joda.time.Duration getJodaTimeDuration() {
-      return (period != null) ? period.toPeriod().toDurationFrom(JodaTimeUtils.INSTANT_ZERO) : null;
+    public java.time.Duration getElapsedDuration() {
+      return (period != null) ? period.toDurationFrom(java.time.Instant.EPOCH) : null;
     }
 
     @Override
     public Duration resolve(Time refTime, int flags) {
-      Instant instant = (refTime != null) ? refTime.getJodaTimeInstant() : null;
+      Instant jodaInstant = (refTime != null) ? refTime.getJodaTimeInstant() : null;
+      // The time half of SUTime still answers in joda; this meets it until it is ported.
+      java.time.Instant instant =
+              (jodaInstant != null) ? java.time.Instant.ofEpochMilli(jodaInstant.getMillis()) : null;
       if (instant != null) {
         if ((flags & DUR_RESOLVE_FROM_AS_REF) != 0) {
-          return new DurationWithMillis(this, period.toPeriod().toDurationFrom(instant));
+          return new DurationWithMillis(this, period.toDurationFrom(instant));
         } else if ((flags & DUR_RESOLVE_TO_AS_REF) != 0) {
-          return new DurationWithMillis(this, period.toPeriod().toDurationTo(instant));
+          return new DurationWithMillis(this, period.toDurationTo(instant));
         }
       }
       return this;
@@ -4292,7 +4352,7 @@ public class SUTime  {
 
     @Override
     public Duration add(Duration d) {
-      Period p = period.toPeriod().plus(d.getJodaTimePeriod());
+      SUTimePeriod p = period.plus(d.getFieldPeriod());
       if (this instanceof InexactDuration || d instanceof InexactDuration) {
         return new InexactDuration(this, p);
       } else {
@@ -4302,9 +4362,7 @@ public class SUTime  {
 
     @Override
     public Duration getGranularity() {
-      Period res = new Period();
-      res = res.withField(JodaTimeUtils.getMostSpecific(getJodaTimePeriod()), 1);
-      return Duration.getDuration(res);
+      return Duration.getDuration(SUTimePeriod.of(getFieldPeriod().getMostSpecificUnit(), 1));
     }
 
     private static final long serialVersionUID = 1;
@@ -4314,17 +4372,17 @@ public class SUTime  {
    * Duration specified in terms of milliseconds.
    */
   public static class DurationWithMillis extends Duration {
-    private final ReadableDuration base;
+    private final java.time.Duration base;
 
     public DurationWithMillis(long ms) {
-      this.base = new org.joda.time.Duration(ms);
+      this.base = java.time.Duration.ofMillis(ms);
     }
 
-    public DurationWithMillis(ReadableDuration base) {
+    public DurationWithMillis(java.time.Duration base) {
       this.base = base;
     }
 
-    public DurationWithMillis(Duration d, ReadableDuration base) {
+    public DurationWithMillis(Duration d, java.time.Duration base) {
       super(d);
       this.base = base;
     }
@@ -4334,8 +4392,7 @@ public class SUTime  {
       if (m == 1) {
         return this;
       } else {
-        long ms = base.getMillis();
-        return new DurationWithMillis(ms * m);
+        return new DurationWithMillis(base.toMillis() * m);
       }
     }
 
@@ -4344,25 +4401,24 @@ public class SUTime  {
       if (m == 1) {
         return this;
       } else {
-        long ms = base.getMillis();
-        return new DurationWithMillis(ms / m);
+        return new DurationWithMillis(base.toMillis() / m);
       }
     }
 
     @Override
-    public Period getJodaTimePeriod() {
-      return base.toPeriod();
+    public SUTimePeriod getFieldPeriod() {
+      return SUTimePeriod.from(base);
     }
 
     @Override
-    public org.joda.time.Duration getJodaTimeDuration() {
-      return base.toDuration();
+    public java.time.Duration getElapsedDuration() {
+      return base;
     }
 
     @Override
     public Duration add(Duration d) {
       if (d instanceof DurationWithMillis) {
-        return new DurationWithMillis(this, base.toDuration().plus(((DurationWithMillis) d).base));
+        return new DurationWithMillis(this, base.plus(((DurationWithMillis) d).base));
       } else if (d instanceof DurationWithFields) {
         return d.add(this);
       } else {
@@ -4412,23 +4468,23 @@ public class SUTime  {
     }
 
     @Override
-    public Period getJodaTimePeriod() {
+    public SUTimePeriod getFieldPeriod() {
       if (minDuration == null)
-        return maxDuration.getJodaTimePeriod();
+        return maxDuration.getFieldPeriod();
       if (maxDuration == null)
-        return minDuration.getJodaTimePeriod();
+        return minDuration.getFieldPeriod();
       Duration mid = minDuration.add(maxDuration).divideBy(2);
-      return mid.getJodaTimePeriod();
+      return mid.getFieldPeriod();
     }
 
     @Override
-    public org.joda.time.Duration getJodaTimeDuration() {
+    public java.time.Duration getElapsedDuration() {
       if (minDuration == null)
-        return maxDuration.getJodaTimeDuration();
+        return maxDuration.getElapsedDuration();
       if (maxDuration == null)
-        return minDuration.getJodaTimeDuration();
+        return minDuration.getElapsedDuration();
       Duration mid = minDuration.add(maxDuration).divideBy(2);
-      return mid.getJodaTimeDuration();
+      return mid.getElapsedDuration();
     }
 
     @Override
@@ -4468,18 +4524,18 @@ public class SUTime  {
     // TODO: Have inexact duration in which some fields are exact
     // add/toISOString
     // boolean[] exactFields;
-    public InexactDuration(ReadablePeriod period) {
+    public InexactDuration(SUTimePeriod period) {
       this.period = period;
       // exactFields = new boolean[period.size()];
       this.approx = true;
     }
 
     public InexactDuration(Duration d) {
-      super(d, d.getJodaTimePeriod());
+      super(d, d.getFieldPeriod());
       this.approx = true;
     }
 
-    public InexactDuration(Duration d, ReadablePeriod period) {
+    public InexactDuration(Duration d, SUTimePeriod period) {
       super(d, period);
       this.approx = true;
     }

@@ -454,7 +454,7 @@ public class SUTimeTemporalTest {
 
   @Test
   public void testInexactDuration() {
-    assertEquals("PXD", new InexactDuration(SUTime.DAY.getJodaTimePeriod()).getTimexValue());
+    assertEquals("PXD", new InexactDuration(SUTime.DAY.getFieldPeriod()).getTimexValue());
   }
 
   @Test

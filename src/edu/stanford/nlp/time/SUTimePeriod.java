@@ -114,6 +114,30 @@ public final class SUTimePeriod implements TemporalAmount, Comparable<SUTimePeri
   }
 
   /**
+   * An elapsed length of time as a period, in hours and below. An elapsed amount says
+   * nothing about where it starts, and a day, a month or a year is not a fixed length, so
+   * the coarsest field it can be given in is the hour: a day's worth of elapsed time is
+   * {@code PT24H} rather than {@code P1D}. Each field keeps its own sign, so a negative
+   * duration gives negative fields.
+   */
+  public static SUTimePeriod from(Duration duration) {
+    if (duration == null) {
+      return null;
+    }
+    long millis = duration.toMillis();
+    long hours = millis / 3_600_000;
+    millis -= hours * 3_600_000;
+    long minutes = millis / 60_000;
+    millis -= minutes * 60_000;
+    long seconds = millis / 1_000;
+    millis -= seconds * 1_000;
+    return ZERO.with(ChronoUnit.HOURS, hours)
+            .with(ChronoUnit.MINUTES, minutes)
+            .with(ChronoUnit.SECONDS, seconds)
+            .with(ChronoUnit.MILLIS, millis);
+  }
+
+  /**
    * The index of {@code unit} among the eight fields, or -1 if a period has no such field.
    * {@code HALF_DAYS}, {@code DECADES}, {@code CENTURIES} and the rest are not fields of a
    * period; a duration of ten years is {@code P10Y}.
