@@ -94,6 +94,65 @@ public final class PartialTemporalUtils {
     return a.getBaseUnit().getDuration().compareTo(b.getBaseUnit().getDuration()) < 0;
   }
 
+  /**
+   * How long one of the partial's finest field lasts, as a period: a partial dated to the
+   * month is one month wide, one dated to the week is one week wide. This is the partial's
+   * granularity, which SUTime uses as the duration of a time it has only partly pinned
+   * down.
+   *
+   * <p>A field coarser than any period field is given in the coarsest field that can hold
+   * it, so a century is {@code P100Y} and a quarter is {@code P3M}. A field whose unit has
+   * no such expression, such as the half day behind {@code AMPM_OF_DAY}, gives null, as
+   * does an empty partial.
+   */
+  public static SUTimePeriod getGranularity(PartialTemporal partial) {
+    if (partial == null || partial.size() == 0) {
+      return null;
+    }
+    TemporalUnit unit = getMostSpecific(partial).getBaseUnit();
+    if (SUTimePeriod.isSupportedUnit(unit)) {
+      return SUTimePeriod.of(unit, 1);
+    }
+    if (ChronoUnit.CENTURIES.equals(unit)) {
+      return SUTimePeriod.ofYears(100);
+    }
+    if (ChronoUnit.DECADES.equals(unit)) {
+      return SUTimePeriod.ofYears(10);
+    }
+    if (TemporalFields.HALF_YEARS.equals(unit)) {
+      return SUTimePeriod.ofMonths(6);
+    }
+    if (IsoFields.QUARTER_YEARS.equals(unit)) {
+      return SUTimePeriod.ofMonths(3);
+    }
+    return null;
+  }
+
+  /**
+   * The fields of {@code offset} that {@code partial} has nowhere to put, or null if it can
+   * take all of them. Adding a period to a partial can only move the fields the partial
+   * carries, so this is what adding it would silently drop: five hours offset against a
+   * partial dated only to the day has nowhere to go.
+   */
+  public static SUTimePeriod getUnsupportedPeriod(PartialTemporal partial, SUTimePeriod offset) {
+    if (offset == null) {
+      return null;
+    }
+    Set<TemporalUnit> supported = getSupportedUnits(partial);
+    SUTimePeriod unsupported = null;
+    for (int i = 0; i < offset.size(); i++) {
+      TemporalUnit unit = offset.getUnit(i);
+      long value = offset.getValue(i);
+      if (value != 0 && !supported.contains(unit)) {
+        if (unsupported == null) {
+          unsupported = SUTimePeriod.ZERO;
+        }
+        unsupported = unsupported.with(unit, value);
+      }
+    }
+    return unsupported;
+  }
+
   /** The base units of every field present, coarsest first. */
   public static Set<TemporalUnit> getSupportedUnits(PartialTemporal partial) {
     Set<TemporalUnit> units = new LinkedHashSet<>();

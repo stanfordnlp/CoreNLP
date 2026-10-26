@@ -11,6 +11,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.IsoFields;
 import java.time.temporal.TemporalField;
 import java.time.temporal.WeekFields;
+import java.util.Map;
 
 /**
  * Turning partial dates into instants and back, and pinning down a day of the week.
@@ -23,6 +24,43 @@ public final class PartialTemporalResolution {
   private PartialTemporalResolution() { }
 
   public static final ZoneId UTC = ZoneOffset.UTC;
+
+  /**
+   * A full date and time, as the set of fields to read off an instant. The values are
+   * placeholders; {@link #getPartial} overwrites every one of them, and only which fields
+   * are present matters.
+   */
+  public static final PartialTemporal EMPTY_ISO_PARTIAL = PartialTemporal.empty()
+          .withField(ChronoField.YEAR, 0)
+          .withField(ChronoField.MONTH_OF_YEAR, 1)
+          .withField(ChronoField.DAY_OF_MONTH, 1)
+          .withField(ChronoField.HOUR_OF_DAY, 0)
+          .withField(ChronoField.MINUTE_OF_HOUR, 0)
+          .withField(ChronoField.SECOND_OF_MINUTE, 0)
+          .withField(ChronoField.MILLI_OF_SECOND, 0);
+
+  /** The same fields as {@link #EMPTY_ISO_PARTIAL}, dated by week and weekday. */
+  public static final PartialTemporal EMPTY_ISO_WEEK_PARTIAL = PartialTemporal.empty()
+          .withField(ChronoField.YEAR, 0)
+          .withField(WeekFields.ISO.weekOfWeekBasedYear(), 1)
+          .withField(ChronoField.DAY_OF_WEEK, 1)
+          .withField(ChronoField.HOUR_OF_DAY, 0)
+          .withField(ChronoField.MINUTE_OF_HOUR, 0)
+          .withField(ChronoField.SECOND_OF_MINUTE, 0)
+          .withField(ChronoField.MILLI_OF_SECOND, 0);
+
+  /** Just the date fields of {@link #EMPTY_ISO_PARTIAL}. */
+  public static final PartialTemporal EMPTY_ISO_DATE_PARTIAL = PartialTemporal.empty()
+          .withField(ChronoField.YEAR, 0)
+          .withField(ChronoField.MONTH_OF_YEAR, 1)
+          .withField(ChronoField.DAY_OF_MONTH, 1);
+
+  /** Just the time fields of {@link #EMPTY_ISO_PARTIAL}. */
+  public static final PartialTemporal EMPTY_ISO_TIME_PARTIAL = PartialTemporal.empty()
+          .withField(ChronoField.HOUR_OF_DAY, 0)
+          .withField(ChronoField.MINUTE_OF_HOUR, 0)
+          .withField(ChronoField.SECOND_OF_MINUTE, 0)
+          .withField(ChronoField.MILLI_OF_SECOND, 0);
 
   /**
    * The instant a partial names, filling in anything it does not say: a missing month and
@@ -125,14 +163,10 @@ public final class PartialTemporalResolution {
             .with(WeekFields.ISO.weekOfWeekBasedYear(), week)
             .with(ChronoField.DAY_OF_WEEK, dayOfWeek);
 
-    PartialTemporal full = PartialTemporal.empty()
+    PartialTemporal full = EMPTY_ISO_PARTIAL
             .withField(ChronoField.YEAR, date.getYear())
             .withField(ChronoField.MONTH_OF_YEAR, date.getMonthValue())
-            .withField(ChronoField.DAY_OF_MONTH, date.getDayOfMonth())
-            .withField(ChronoField.HOUR_OF_DAY, 0)
-            .withField(ChronoField.MINUTE_OF_HOUR, 0)
-            .withField(ChronoField.SECOND_OF_MINUTE, 0)
-            .withField(ChronoField.MILLI_OF_SECOND, 0);
+            .withField(ChronoField.DAY_OF_MONTH, date.getDayOfMonth());
     TemporalField finest = PartialTemporalUtils.getMostSpecific(partial);
     return PartialTemporalUtils.discardMoreSpecificFields(full, finest.getBaseUnit());
   }
@@ -144,6 +178,76 @@ public final class PartialTemporalResolution {
     }
     Instant instant = getInstant(partial);
     return getPartial(instant, partial.withField(WeekFields.ISO.weekOfWeekBasedYear(), 1));
+  }
+
+  // ------------------------------------------------- resolving against a reference date
+
+  /**
+   * Set every field of {@code partial} on {@code base}, coarsest field first, and return
+   * where that lands. This is how a partial is read against a reference date: the fields
+   * the partial names override the reference, and the fields it leaves out keep the
+   * reference's values.
+   *
+   * <p>The order matters, since a field is set relative to what the coarser fields already
+   * say. A {@code PartialTemporal} keeps its fields sorted coarsest first, so iterating
+   * them gives that order.
+   */
+  public static ZonedDateTime overlay(PartialTemporal partial, Instant base) {
+    return overlay(partial, base, UTC);
+  }
+
+  public static ZonedDateTime overlay(PartialTemporal partial, Instant base, ZoneId zone) {
+    ZonedDateTime result = base.atZone(zone);
+    for (Map.Entry<TemporalField, Long> entry : partial.getFields().entrySet()) {
+      result = result.with(entry.getKey(), entry.getValue());
+    }
+    return result;
+  }
+
+  /**
+   * Turn the day of the week in {@code p1} into a day of the month, taking the week it
+   * falls in from {@code p2}. The two have to agree on the fields they share, {@code p1}
+   * has to name a weekday and not already name a day of the month, and {@code p2} has to
+   * name a full date. Otherwise {@code p1} comes back untouched.
+   */
+  public static PartialTemporal resolveDowToDay(PartialTemporal p1, PartialTemporal p2) {
+    if (p1 == null || p2 == null) {
+      return p1;
+    }
+    // Anything in p2 finer than a day cannot help place a weekday, and would otherwise
+    // make the two look incompatible.
+    p2 = PartialTemporalUtils.discardMoreSpecificFields(p2, ChronoField.DAY_OF_MONTH);
+    if (!PartialTemporalUtils.isCompatible(p1, p2)
+            || !p1.isSupported(ChronoField.DAY_OF_WEEK)
+            || p1.isSupported(ChronoField.DAY_OF_MONTH)
+            || !PartialTemporalUtils.hasYYYYMMDD(p2)) {
+      return p1;
+    }
+    ZonedDateTime resolved = overlay(p1, getInstant(p2));
+    return getPartial(resolved.toInstant(), p1.withField(ChronoField.DAY_OF_MONTH, 1));
+  }
+
+  /**
+   * Work out which week of the year {@code p1} falls in, taking the date from {@code p2}.
+   * The result is dated by week rather than by month and day, so the month and day of the
+   * month are dropped. As with {@link #resolveDowToDay}, {@code p1} comes back untouched
+   * unless the two agree and {@code p2} names a full date.
+   */
+  public static PartialTemporal resolveWeek(PartialTemporal p1, PartialTemporal p2) {
+    if (p1 == null || p2 == null) {
+      return p1;
+    }
+    if (!PartialTemporalUtils.isCompatible(p1, p2)
+            || p1.isSupported(ChronoField.DAY_OF_MONTH)
+            || !PartialTemporalUtils.hasYYYYMMDD(p2)) {
+      return p1;
+    }
+    ZonedDateTime resolved = overlay(p1, getInstant(p2));
+    PartialTemporal template = p1
+            .withoutField(ChronoField.DAY_OF_MONTH)
+            .withoutField(ChronoField.MONTH_OF_YEAR)
+            .withField(WeekFields.ISO.weekOfWeekBasedYear(), 1);
+    return getPartial(resolved.toInstant(), template);
   }
 
 }

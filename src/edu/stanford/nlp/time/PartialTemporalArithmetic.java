@@ -3,6 +3,8 @@ package edu.stanford.nlp.time;
 import org.threeten.extra.PartialTemporal;
 import org.threeten.extra.TemporalFields;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -150,6 +152,27 @@ public final class PartialTemporalArithmetic {
     return LocalDate.of((int) partial.getLong(ChronoField.YEAR),
             (int) partial.getLong(ChronoField.MONTH_OF_YEAR),
             (int) partial.getLong(ChronoField.DAY_OF_MONTH));
+  }
+
+  /**
+   * Add {@code scalar} times {@code offset} to a partial by going out to an instant and
+   * back, so that every field of the offset lands even where the partial has no field for
+   * it. Where {@link #plus} would silently drop an offset the partial cannot hold, this
+   * moves the partial's own fields by the equivalent amount.
+   *
+   * <p>The offset is measured as a fixed length of time from the epoch, which is what
+   * SUTime has always done and is not the same as adding the fields one at a time. A month
+   * is however long January is, so 31 January plus one month is 3 March here, not
+   * 28 February: {@code P1M} from the epoch is 31 days, and 31 days after 31 January is
+   * 3 March. The same goes for a year, which is 365 days.
+   */
+  public static PartialTemporal addForce(PartialTemporal partial, SUTimePeriod offset, int scalar) {
+    if (partial == null || offset == null || scalar == 0) {
+      return partial;
+    }
+    Instant instant = PartialTemporalResolution.getInstant(partial);
+    Duration shift = offset.toDurationFrom(Instant.EPOCH).multipliedBy(scalar);
+    return PartialTemporalResolution.getPartial(instant.plus(shift), partial);
   }
 
   /** Copy the date fields of {@code date} onto the partial, leaving its other fields alone. */
