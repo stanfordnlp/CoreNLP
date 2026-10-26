@@ -21,16 +21,16 @@ import static org.junit.Assert.assertEquals;
  * Text-in, TIMEX-out tests for SUTime behaviour that the lower-level unit tests reach only
  * through the joda-time API.
  *
- * <p>Most of {@code JodaTimeUtilsTest} and part of {@code SUTimeTemporalTest} build their
+ * <p>Most of the partial-date unit tests and part of {@code SUTimeTemporalTest} build their
  * inputs from joda types, so replacing joda-time rewrites those tests along with the code
  * they guard. The cases here go in as text and come out as TIMEX strings, and survive that
  * change untouched. Each group pins behaviour that mutation testing found was otherwise
  * guarded after such a rewrite by nothing but the golden file:
  *
  * <ul>
- *   <li>{@code JodaTimeUtils.isCompatible}, which decides whether two partial dates can be
+ *   <li>{@code PartialTemporalUtils.isCompatible}, which decides whether two partial dates can be
  *       merged: ordinal weekdays within a month, and adjacent dates in a list.
- *   <li>{@code JodaTimeUtils.getMostSpecific}, which fixes the granularity of an expression:
+ *   <li>{@code PartialTemporalUtils.getMostSpecific}, which fixes the granularity of an expression:
  *       hour-precision ISO dates, and a day within a relative week.
  *   <li>{@code JollyDayHolidays}, which had no test at all. Floating holidays are used
  *       because their dates are computed, and that computation is what a change of date

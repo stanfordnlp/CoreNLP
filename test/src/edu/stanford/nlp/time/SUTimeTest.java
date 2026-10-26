@@ -4,7 +4,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-import org.joda.time.Partial;
+import org.threeten.extra.PartialTemporal;
+
+import java.time.temporal.ChronoField;
+import java.time.temporal.WeekFields;
 import org.junit.Test;
 
 import edu.stanford.nlp.util.ErasureUtils;
@@ -27,11 +30,20 @@ public class SUTimeTest {
 
   @Test
   public void testResolveDowToDay() {
-    Partial p = new Partial(JodaTimeUtils.standardISOWeekFields, new int[]{2016,1,1,0,0,0,0});
-    assertEquals("[year=2016, weekOfWeekyear=1, dayOfWeek=1, hourOfDay=0, minuteOfHour=0, secondOfMinute=0, millisOfSecond=0]", p.toString());
+    PartialTemporal p = PartialTemporalResolution.EMPTY_ISO_WEEK_PARTIAL
+            .withField(ChronoField.YEAR, 2016)
+            .withField(WeekFields.ISO.weekOfWeekBasedYear(), 1)
+            .withField(ChronoField.DAY_OF_WEEK, 1);
+    // the fields rather than the rendering, which belongs to the partial's own class
+    assertEquals(2016, p.getLong(ChronoField.YEAR));
+    assertEquals(1, p.getLong(WeekFields.ISO.weekOfWeekBasedYear()));
+    assertEquals(1, p.getLong(ChronoField.DAY_OF_WEEK));
 
-    Partial p2 = JodaTimeUtils.resolveDowToDay(p);
-    assertEquals("2016-01-04T00:00:00.000", p2.toString());
+    // the Monday of the first ISO week of 2016 is the 4th of January
+    PartialTemporal p2 = PartialTemporalResolution.resolveDowToDay(p);
+    assertEquals(2016, p2.getLong(ChronoField.YEAR));
+    assertEquals(1, p2.getLong(ChronoField.MONTH_OF_YEAR));
+    assertEquals(4, p2.getLong(ChronoField.DAY_OF_MONTH));
   }
 
   @Test
@@ -114,7 +126,7 @@ public class SUTimeTest {
   public void parseDateTimeStandardInstantFormat() {
     assertEquals(
         Instant.parse("2017-11-02T19:30:00Z").toEpochMilli(),
-        SUTime.parseDateTime("2017-11-02T19:30:00Z", true).getJodaTimeInstant().getMillis());
+        SUTime.parseDateTime("2017-11-02T19:30:00Z", true).getInstant().toEpochMilli());
 
   }
 
@@ -125,10 +137,10 @@ public class SUTimeTest {
     // this used to request but this was off by 7 hours, which is presumably the time zone difference UTC To Pacific
     // assertEquals(
     //     expected.toInstant(ZoneId.systemDefault().getRules().getOffset(expected.toInstant(ZoneOffset.UTC))).toEpochMilli(),
-    //     actual.getJodaTimeInstant().getMillis());
+    //     actual.getInstant().toEpochMilli());
     assertEquals(
             expected.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli(),
-            actual.getJodaTimeInstant().getMillis());
+            actual.getInstant().toEpochMilli());
   }
 
 }

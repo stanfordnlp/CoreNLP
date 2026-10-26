@@ -11,9 +11,13 @@ import edu.stanford.nlp.time.SUTime.StandardTemporalType;
 import edu.stanford.nlp.time.SUTime.Time;
 import edu.stanford.nlp.time.SUTime.TimexType;
 
-import org.joda.time.DateTimeFieldType;
-import org.joda.time.Partial;
-import org.joda.time.Period;
+import org.threeten.extra.PartialTemporal;
+import org.threeten.extra.TemporalFields;
+
+import java.time.temporal.ChronoField;
+import java.time.temporal.IsoFields;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 
 import org.junit.Test;
 
@@ -50,16 +54,16 @@ import static org.junit.Assert.fail;
  */
 public class SUTimeTemporalTest {
 
-  private static final DateTimeFieldType YEAR = DateTimeFieldType.year();
-  private static final DateTimeFieldType MONTH = DateTimeFieldType.monthOfYear();
-  private static final DateTimeFieldType DAY = DateTimeFieldType.dayOfMonth();
-  private static final DateTimeFieldType HOUR = DateTimeFieldType.hourOfDay();
-  private static final DateTimeFieldType MINUTE = DateTimeFieldType.minuteOfHour();
-  private static final DateTimeFieldType SECOND = DateTimeFieldType.secondOfMinute();
-  private static final DateTimeFieldType DOW = DateTimeFieldType.dayOfWeek();
-  private static final DateTimeFieldType WEEK = DateTimeFieldType.weekOfWeekyear();
-  private static final DateTimeFieldType YOC = DateTimeFieldType.yearOfCentury();
-  private static final DateTimeFieldType CENTURY = DateTimeFieldType.centuryOfEra();
+  private static final TemporalField YEAR = ChronoField.YEAR;
+  private static final TemporalField MONTH = ChronoField.MONTH_OF_YEAR;
+  private static final TemporalField DAY = ChronoField.DAY_OF_MONTH;
+  private static final TemporalField HOUR = ChronoField.HOUR_OF_DAY;
+  private static final TemporalField MINUTE = ChronoField.MINUTE_OF_HOUR;
+  private static final TemporalField SECOND = ChronoField.SECOND_OF_MINUTE;
+  private static final TemporalField DOW = ChronoField.DAY_OF_WEEK;
+  private static final TemporalField WEEK = WeekFields.ISO.weekOfWeekBasedYear();
+  private static final TemporalField YOC = SUTimeFields.YEAR_OF_CENTURY;
+  private static final TemporalField CENTURY = SUTimeFields.CENTURY_OF_ERA;
 
   /** Thursday 15 June 2017. */
   private static final PartialTime REFERENCE = time(YEAR, 2017, MONTH, 6, DAY, 15);
@@ -70,16 +74,16 @@ public class SUTimeTemporalTest {
 
   // ---------------------------------------------------------------- helpers
 
-  private static Partial partial(Object... fieldsAndValues) {
-    Partial p = new Partial();
+  private static PartialTemporal partial(Object... fieldsAndValues) {
+    PartialTemporal p = PartialTemporal.empty();
     for (int i = 0; i < fieldsAndValues.length; i += 2) {
-      p = p.with((DateTimeFieldType) fieldsAndValues[i], (Integer) fieldsAndValues[i + 1]);
+      p = p.withField((TemporalField) fieldsAndValues[i], (Integer) fieldsAndValues[i + 1]);
     }
     return p;
   }
 
   private static PartialTime time(Object... fieldsAndValues) {
-    return new PartialTime(SUTime.fromJodaPartial(partial(fieldsAndValues)));
+    return new PartialTime(partial(fieldsAndValues));
   }
 
   /** Assert the ISO rendering, which is also what toString gives. */
@@ -170,7 +174,7 @@ public class SUTimeTemporalTest {
 
   @Test
   public void testQuarterPartial() {
-    PartialTime q3 = new PartialTime(SUTime.fromJodaPartial(partial(YEAR, 2017).with(JodaTimeUtils.QuarterOfYear, 3)));
+    PartialTime q3 = new PartialTime(partial(YEAR, 2017).withField(IsoFields.QUARTER_OF_YEAR, 3));
     // QUIRK: the ISO rendering drops the quarter entirely and reports the bare year,
     // while the TIMEX value keeps it. The two disagree about what this temporal is.
     assertIso("2017", q3);
@@ -182,7 +186,7 @@ public class SUTimeTemporalTest {
 
   @Test
   public void testHalfYearPartial() {
-    PartialTime h2 = new PartialTime(SUTime.fromJodaPartial(partial(YEAR, 2017).with(JodaTimeUtils.HalfYearOfYear, 2)));
+    PartialTime h2 = new PartialTime(partial(YEAR, 2017).withField(TemporalFields.HALF_OF_YEAR, 2));
     // Same divergence as the quarter case above.
     assertIso("2017", h2);
     assertEquals("2017-H2", h2.getTimexValue());
@@ -192,7 +196,7 @@ public class SUTimeTemporalTest {
   @Test
   public void testDecadePartial() {
     PartialTime nineties =
-            new PartialTime(SUTime.fromJodaPartial(partial(CENTURY, 19).with(JodaTimeUtils.DecadeOfCentury, 9)));
+            new PartialTime(partial(CENTURY, 19).withField(SUTimeFields.DECADE_OF_CENTURY, 9));
     assertIso("199X", nineties);
     assertEquals("199X", nineties.getTimexValue());
     assertEquals("P10Y", nineties.getGranularity().getTimexValue());
@@ -416,10 +420,10 @@ public class SUTimeTemporalTest {
   }
 
   @Test
-  public void testDurationsExposeTheirJodaPeriod() {
-    assertEquals(Period.years(1), SUTime.YEAR.getJodaTimePeriod());
-    assertEquals(Period.days(1), SUTime.DAY.getJodaTimePeriod());
-    assertEquals(Period.months(3), SUTime.QUARTER.getJodaTimePeriod());
+  public void testDurationsExposeTheirFieldPeriod() {
+    assertEquals(SUTimePeriod.ofYears(1), SUTime.YEAR.getFieldPeriod());
+    assertEquals(SUTimePeriod.ofDays(1), SUTime.DAY.getFieldPeriod());
+    assertEquals(SUTimePeriod.ofMonths(3), SUTime.QUARTER.getFieldPeriod());
     assertEquals(TimexType.DURATION, SUTime.DAY.getTimexType());
   }
 
@@ -428,7 +432,7 @@ public class SUTimeTemporalTest {
     assertEquals("PT0S", SUTime.DURATION_NONE.getTimexValue());
     assertEquals("PXX", SUTime.DURATION_UNKNOWN.getTimexValue());
     assertNull("an unknown duration has no period behind it",
-            SUTime.DURATION_UNKNOWN.getJodaTimePeriod());
+            SUTime.DURATION_UNKNOWN.getFieldPeriod());
   }
 
   @Test

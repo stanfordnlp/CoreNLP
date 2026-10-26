@@ -5,9 +5,6 @@ import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
 
 import org.junit.Test;
 
@@ -30,7 +27,7 @@ import static org.junit.Assert.assertTrue;
  * dependency.
  *
  * <p>{@code TimeFormatter} is the third place joda types are load-bearing, after
- * {@code JodaTimeUtils} and the {@code SUTime} temporals. It maps custom date-format
+ * {@code PartialTemporalUtils} and the {@code SUTime} temporals. It maps custom date-format
  * patterns onto {@code DateTimeFieldType} constants, builds a regex per pattern, and
  * assembles a {@code Partial} from whatever the regex captured. A replacement has to
  * reproduce both the generated regex and the resulting temporal.
@@ -163,8 +160,8 @@ public class TimeFormatterTest {
 
   @Test
   public void testClockhourOfDayWithAHalfdayMarker() {
-    // Adding a marker sends the value through JodaTimeUtils.combine. See
-    // JodaTimeUtilsTest.testCombineNormalisesClockhourOfDay.
+    // Adding a marker sends the value through PartialTemporalUtils.combine, which folds
+    // the marker and the hour beside it into an hour of the day.
     assertEquals("T10:30", parse("kk:mm a", "10:30 AM"));
     assertEquals("T22:30", parse("kk:mm a", "10:30 PM"));
     assertEquals("T00:00", parse("kk:mm a", "12:00 AM"));
@@ -176,7 +173,7 @@ public class TimeFormatterTest {
   @Test
   public void testTwelveHourClock() {
     // hh is clockhourOfHalfday; the conversion to a 24-hour clock happens in
-    // JodaTimeUtils.combine. See JodaTimeUtilsTest.testCombineNormalisesClockhourOfHalfday.
+    // PartialTemporalUtils.combine.
     assertEquals("T10:30", parse("hh:mm a", "10:30 AM"));
     assertEquals("T22:30", parse("hh:mm a", "10:30 PM"));
     assertEquals("T01:00", parse("hh:mm a", "01:00 AM"));
@@ -429,18 +426,15 @@ public class TimeFormatterTest {
     // here. The instant that results is zone-dependent; that is the behaviour, not a
     // detail of the test.
     TimeZone previousJvm = TimeZone.getDefault();
-    DateTimeZone previousJoda = DateTimeZone.getDefault();
+
     try {
       TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-      DateTimeZone.setDefault(DateTimeZone.UTC);
       TimeFormatter.JavaDateFormatExtractor ex =
               new TimeFormatter.JavaDateFormatExtractor("yyyy-MM-dd");
       SUTime.GroundedTime t = (SUTime.GroundedTime) ex.apply(textOf("2017-06-15")).get();
-      assertEquals(new DateTime("2017-06-15T00:00:00Z", DateTimeZone.UTC).toInstant(),
-              t.getJodaTimeInstant());
+      assertEquals(java.time.Instant.parse("2017-06-15T00:00:00Z"), t.getInstant());
     } finally {
       TimeZone.setDefault(previousJvm);
-      DateTimeZone.setDefault(previousJoda);
     }
   }
 

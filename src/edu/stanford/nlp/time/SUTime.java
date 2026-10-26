@@ -12,8 +12,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 // import edu.stanford.nlp.util.logging.Redwood;
 
-import org.joda.time.*;
-
 import org.threeten.extra.PartialTemporal;
 import org.threeten.extra.TemporalFields;
 
@@ -1651,20 +1649,6 @@ public class SUTime  {
     /** The fields this time pins down, or null if it pins none down. */
     public PartialTemporal getPartialTemporal() {
       return null;
-    }
-
-    /**
-     * The instant as a joda instant. TimeFormatter and the holiday binder still work in
-     * joda, so the two meet here until they are ported.
-     */
-    public org.joda.time.Instant getJodaTimeInstant() {
-      Instant i = getInstant();
-      return (i != null) ? new org.joda.time.Instant(i.toEpochMilli()) : null;
-    }
-
-    /** The fields as a joda partial, for the same reason as above. */
-    public Partial getJodaTimePartial() {
-      return toJodaPartial(getPartialTemporal());
     }
 
     private static final long serialVersionUID = 1;
@@ -3937,179 +3921,6 @@ public class SUTime  {
    * </ol>
    */
   /**
-   * The eight period fields, joda's name for each alongside java.time's. These sit in a
-   * class of their own so that they are ready whenever a period is first converted,
-   * whatever order the constants in {@link SUTime} itself happen to be built in.
-   */
-  private static final class PeriodFields {
-    static final DurationFieldType[] JODA = {
-        DurationFieldType.years(), DurationFieldType.months(), DurationFieldType.weeks(),
-        DurationFieldType.days(), DurationFieldType.hours(), DurationFieldType.minutes(),
-        DurationFieldType.seconds(), DurationFieldType.millis(),
-    };
-    static final TemporalUnit[] JAVA = {
-        ChronoUnit.YEARS, ChronoUnit.MONTHS, ChronoUnit.WEEKS, ChronoUnit.DAYS,
-        ChronoUnit.HOURS, ChronoUnit.MINUTES, ChronoUnit.SECONDS, ChronoUnit.MILLIS,
-    };
-  }
-
-  /**
-   * A field period as a joda period. This is here for the partial-date half of SUTime,
-   * which still works in joda, and goes away with it.
-   */
-  static Period toJodaPeriod(SUTimePeriod period) {
-    if (period == null) {
-      return null;
-    }
-    Period result = new Period();
-    for (int i = 0; i < PeriodFields.JAVA.length; i++) {
-      long value = period.get(PeriodFields.JAVA[i]);
-      if (value != 0) {
-        result = result.withField(PeriodFields.JODA[i], (int) value);
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Every date-time field SUTime uses, joda's name for each alongside java.time's. As with
-   * {@link PeriodFields}, these sit in a class of their own so that they are ready whenever
-   * a partial is first converted.
-   */
-  private static final class PartialFields {
-    static final DateTimeFieldType[] JODA = {
-        DateTimeFieldType.era(),
-        DateTimeFieldType.centuryOfEra(),
-        DateTimeFieldType.yearOfCentury(),
-        DateTimeFieldType.yearOfEra(),
-        DateTimeFieldType.year(),
-        DateTimeFieldType.weekyear(),
-        DateTimeFieldType.monthOfYear(),
-        DateTimeFieldType.weekOfWeekyear(),
-        DateTimeFieldType.dayOfYear(),
-        DateTimeFieldType.dayOfMonth(),
-        DateTimeFieldType.dayOfWeek(),
-        DateTimeFieldType.halfdayOfDay(),
-        DateTimeFieldType.hourOfHalfday(),
-        DateTimeFieldType.clockhourOfHalfday(),
-        DateTimeFieldType.clockhourOfDay(),
-        DateTimeFieldType.hourOfDay(),
-        DateTimeFieldType.minuteOfDay(),
-        DateTimeFieldType.minuteOfHour(),
-        DateTimeFieldType.secondOfDay(),
-        DateTimeFieldType.secondOfMinute(),
-        DateTimeFieldType.millisOfDay(),
-        DateTimeFieldType.millisOfSecond(),
-        JodaTimeUtils.QuarterOfYear,
-        JodaTimeUtils.HalfYearOfYear,
-        JodaTimeUtils.MonthOfQuarter,
-        JodaTimeUtils.MonthOfHalfYear,
-        JodaTimeUtils.WeekOfMonth,
-        JodaTimeUtils.DecadeOfCentury,
-        JodaTimeUtils.YearOfDecade,
-    };
-    static final TemporalField[] JAVA = {
-        ChronoField.ERA,
-        SUTimeFields.CENTURY_OF_ERA,
-        SUTimeFields.YEAR_OF_CENTURY,
-        ChronoField.YEAR_OF_ERA,
-        ChronoField.YEAR,
-        WeekFields.ISO.weekBasedYear(),
-        ChronoField.MONTH_OF_YEAR,
-        WeekFields.ISO.weekOfWeekBasedYear(),
-        ChronoField.DAY_OF_YEAR,
-        ChronoField.DAY_OF_MONTH,
-        ChronoField.DAY_OF_WEEK,
-        ChronoField.AMPM_OF_DAY,
-        ChronoField.HOUR_OF_AMPM,
-        ChronoField.CLOCK_HOUR_OF_AMPM,
-        ChronoField.CLOCK_HOUR_OF_DAY,
-        ChronoField.HOUR_OF_DAY,
-        ChronoField.MINUTE_OF_DAY,
-        ChronoField.MINUTE_OF_HOUR,
-        ChronoField.SECOND_OF_DAY,
-        ChronoField.SECOND_OF_MINUTE,
-        ChronoField.MILLI_OF_DAY,
-        ChronoField.MILLI_OF_SECOND,
-        IsoFields.QUARTER_OF_YEAR,
-        TemporalFields.HALF_OF_YEAR,
-        SUTimeFields.MONTH_OF_QUARTER,
-        SUTimeFields.MONTH_OF_HALF_YEAR,
-        SUTimeFields.WEEK_OF_MONTH,
-        SUTimeFields.DECADE_OF_CENTURY,
-        SUTimeFields.YEAR_OF_DECADE,
-    };
-  }
-
-  /** The java.time field that matches a joda one, or null if SUTime never uses it. */
-  static TemporalField toJavaField(DateTimeFieldType field) {
-    for (int i = 0; i < PartialFields.JODA.length; i++) {
-      if (PartialFields.JODA[i].equals(field)) {
-        return PartialFields.JAVA[i];
-      }
-    }
-    return null;
-  }
-
-  /** The joda field that matches a java.time one, or null if SUTime never uses it. */
-  static DateTimeFieldType toJodaField(TemporalField field) {
-    for (int i = 0; i < PartialFields.JAVA.length; i++) {
-      if (PartialFields.JAVA[i].equals(field)) {
-        return PartialFields.JODA[i];
-      }
-    }
-    return null;
-  }
-
-  /**
-   * A partial as a joda partial. The TIMEX formatting still goes through joda's
-   * {@code DateTimeFormatterBuilder}, which prints a joda partial, so the two meet here
-   * until the formatter is ported.
-   */
-  static Partial toJodaPartial(PartialTemporal partial) {
-    if (partial == null) {
-      return null;
-    }
-    Partial result = new Partial();
-    for (Map.Entry<TemporalField, Long> entry : partial.getFields().entrySet()) {
-      DateTimeFieldType field = toJodaField(entry.getKey());
-      if (field != null) {
-        result = result.with(field, (int) (long) entry.getValue());
-      }
-    }
-    return result;
-  }
-
-  /** A joda partial as a partial, for the same reason as above. */
-  static PartialTemporal fromJodaPartial(ReadablePartial partial) {
-    if (partial == null) {
-      return null;
-    }
-    PartialTemporal result = PartialTemporal.empty();
-    for (int i = 0; i < partial.size(); i++) {
-      TemporalField field = toJavaField(partial.getFieldType(i));
-      if (field != null) {
-        result = result.withField(field, partial.getValue(i));
-      }
-    }
-    return result;
-  }
-
-  /** A joda period as a field period, for the same reason as above. */
-  static SUTimePeriod fromJodaPeriod(Period period) {
-    if (period == null) {
-      return null;
-    }
-    SUTimePeriod result = SUTimePeriod.ZERO;
-    for (int i = 0; i < PeriodFields.JODA.length; i++) {
-      if (period.isSupported(PeriodFields.JODA[i])) {
-        result = result.with(PeriodFields.JAVA[i], period.get(PeriodFields.JODA[i]));
-      }
-    }
-    return result;
-  }
-
-  /**
    * A zone's offset as four digits with a sign, such as {@code +0000} or {@code -0800},
    * which is what SUTime appends to a time carrying a zone.
    */
@@ -4249,25 +4060,6 @@ public class SUTime  {
 
     /** How long this duration is as a single elapsed amount, measured from the epoch. */
     public abstract java.time.Duration getElapsedDuration();
-
-    /** Builds a duration from a joda period, for the callers that still hold one. */
-    public static Duration getDuration(Period p) {
-      return new DurationWithFields(fromJodaPeriod(p));
-    }
-
-    /**
-     * The field period as a joda period. The partial-date half of SUTime still works in
-     * joda and asks durations for their period, so the two meet here until it is ported.
-     */
-    public Period getJodaTimePeriod() {
-      return toJodaPeriod(getFieldPeriod());
-    }
-
-    /** The elapsed duration as a joda duration, for the same reason as above. */
-    public org.joda.time.Duration getJodaTimeDuration() {
-      java.time.Duration d = getElapsedDuration();
-      return (d != null) ? org.joda.time.Duration.millis(d.toMillis()) : null;
-    }
 
     @Override
     public String toFormattedString(int flags) {

@@ -18,7 +18,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 /**
- * Tests the parts of {@code JodaTimeUtils} that {@link SUTime} calls and that the rest of
+ * Tests the parts of the partial-date layer that {@link SUTime} calls and that the rest of
  * the {@code PartialTemporal} classes did not yet cover: the partial templates, a partial's
  * granularity as a period, the fields of an offset a partial cannot hold, resolving a
  * weekday or a week against a reference date, and adding an offset by force.

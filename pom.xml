@@ -77,12 +77,6 @@
     </dependency>
 
     <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>2.14.0</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.ejml</groupId>
       <artifactId>ejml-core</artifactId>
       <version>0.39</version>
@@ -167,8 +161,7 @@
     <dependency>
       <groupId>org.threeten</groupId>
       <artifactId>threeten-extra</artifactId>
-      <version>1.10.0</version>
-      <scope>runtime</scope>
+      <version>1.10.1</version>
     </dependency>
 
   </dependencies>
