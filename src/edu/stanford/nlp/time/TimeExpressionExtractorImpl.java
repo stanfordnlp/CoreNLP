@@ -311,9 +311,9 @@ public class TimeExpressionExtractorImpl implements TimeExpressionExtractor {
         if (t.isGrounded()) {
           return t.getTime();
         } else if (t instanceof SUTime.PartialTime) {
-          if (JodaTimeUtils.hasYYYYMMDD(t.getTime().getJodaTimePartial())) {
+          if (PartialTemporalUtils.hasYYYYMMDD(t.getTime().getPartialTemporal())) {
             return t.getTime();
-          } else if (JodaTimeUtils.hasYYMMDD(t.getTime().getJodaTimePartial())) {
+          } else if (PartialTemporalUtils.hasYYMMDD(t.getTime().getPartialTemporal())) {
             return t.getTime().resolve(SUTime.getCurrentTime()).getTime();
           }
         }

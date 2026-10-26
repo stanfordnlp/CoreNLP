@@ -26,9 +26,8 @@ import java.util.Map;
 import java.time.temporal.TemporalUnit;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 
 import java.io.Serializable;
 import java.time.ZoneId;
@@ -2042,12 +2041,14 @@ public class SUTime  {
       }
       if (hasTime()) {
         if (!hasDate) {
-          builder.clear();
+          // A java.time builder cannot be cleared, so the date part is discarded by
+          // starting a new one.
+          builder = new DateTimeFormatterBuilder();
         }
         appendTimeFormats(builder, flags);
       } else if (tod != null) {
         if (!hasDate) {
-          builder.clear();
+          builder = new DateTimeFormatterBuilder();
         }
         // Assume tod is compatible with whatever was built and
         // tod.toISOString() does the correct thing
@@ -2737,22 +2738,22 @@ public class SUTime  {
       if (PartialTemporalUtils.hasField(base, SUTimeFields.CENTURY_OF_ERA) || PartialTemporalUtils.hasField(base, SUTimeFields.DECADE_OF_CENTURY)
           || PartialTemporalUtils.hasField(base, SUTimeFields.YEAR_OF_CENTURY)) {
         if (PartialTemporalUtils.hasField(base, SUTimeFields.CENTURY_OF_ERA)) {
-          builder.appendCenturyOfEra(2, 2);
+          builder.appendValue(SUTimeFields.CENTURY_OF_ERA, 2);
         } else {
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
         if (PartialTemporalUtils.hasField(base, SUTimeFields.DECADE_OF_CENTURY)) {
-          builder.appendDecimal(JodaTimeUtils.DecadeOfCentury, 1, 1);
+          builder.appendValue(SUTimeFields.DECADE_OF_CENTURY, 1);
           builder.appendLiteral(PAD_FIELD_UNKNOWN);
         } else if (PartialTemporalUtils.hasField(base, SUTimeFields.YEAR_OF_CENTURY)) {
-          builder.appendYearOfCentury(2, 2);
+          builder.appendValue(SUTimeFields.YEAR_OF_CENTURY, 2);
         } else {
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
       } else if (PartialTemporalUtils.hasField(base, ChronoField.YEAR)) {
-        builder.appendYear(4, 4);
+        builder.appendValue(ChronoField.YEAR, 4, 10, SignStyle.NORMAL);
       } else if (PartialTemporalUtils.hasField(base, WeekFields.ISO.weekBasedYear())) {
-        builder.appendWeekyear(4, 4);
+        builder.appendValue(WeekFields.ISO.weekBasedYear(), 4, 10, SignStyle.NORMAL);
       } else {
         builder.appendLiteral(PAD_FIELD_UNKNOWN4);
         hasDate = false;
@@ -2784,26 +2785,26 @@ public class SUTime  {
       // Half - Not ISO standard
       if (appendHalf && PartialTemporalUtils.hasField(base, TemporalFields.HALF_OF_YEAR)) {
         builder.appendLiteral("-H");
-        builder.appendDecimal(JodaTimeUtils.HalfYearOfYear, 1, 1);
+        builder.appendValue(TemporalFields.HALF_OF_YEAR, 1);
       }
       // Quarter  - Not ISO standard
       if (appendQuarter && PartialTemporalUtils.hasField(base, IsoFields.QUARTER_OF_YEAR)) {
         builder.appendLiteral("-Q");
-        builder.appendDecimal(JodaTimeUtils.QuarterOfYear, 1, 1);
+        builder.appendValue(IsoFields.QUARTER_OF_YEAR, 1);
       }
       // MONTH
       if (appendMonthDay && (PartialTemporalUtils.hasField(base, ChronoField.MONTH_OF_YEAR) || PartialTemporalUtils.hasField(base, ChronoField.DAY_OF_MONTH))) {
         hasDate = true;
         builder.appendLiteral('-');
         if (PartialTemporalUtils.hasField(base, ChronoField.MONTH_OF_YEAR)) {
-          builder.appendMonthOfYear(2);
+          builder.appendValue(ChronoField.MONTH_OF_YEAR, 2);
         } else {
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
         // Don't indicate day of month if not specified
         if (PartialTemporalUtils.hasField(base, ChronoField.DAY_OF_MONTH)) {
           builder.appendLiteral('-');
-          builder.appendDayOfMonth(2);
+          builder.appendValue(ChronoField.DAY_OF_MONTH, 2);
         } else if (alwaysPad) {
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
@@ -2812,14 +2813,14 @@ public class SUTime  {
         hasDate = true;
         builder.appendLiteral("-W");
         if (PartialTemporalUtils.hasField(base, WeekFields.ISO.weekOfWeekBasedYear())) {
-          builder.appendWeekOfWeekyear(2);
+          builder.appendValue(WeekFields.ISO.weekOfWeekBasedYear(), 2);
         } else {
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
         // Don't indicate the day of the week if not specified
         if (PartialTemporalUtils.hasField(base, ChronoField.DAY_OF_WEEK)) {
           builder.appendLiteral("-");
-          builder.appendDayOfWeek(1);
+          builder.appendValue(ChronoField.DAY_OF_WEEK, 1);
         }
       }
       return hasDate;
@@ -2832,29 +2833,29 @@ public class SUTime  {
       if (hasTime) {
         builder.appendLiteral("T");
         if (PartialTemporalUtils.hasField(base, ChronoField.HOUR_OF_DAY)) {
-          builder.appendHourOfDay(2);
+          builder.appendValue(ChronoField.HOUR_OF_DAY, 2);
         } else if (PartialTemporalUtils.hasField(base, ChronoField.CLOCK_HOUR_OF_DAY)) {
-          builder.appendClockhourOfDay(2);
+          builder.appendValue(ChronoField.CLOCK_HOUR_OF_DAY, 2);
         } else {
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
         if (PartialTemporalUtils.hasField(base, ChronoField.MINUTE_OF_HOUR)) {
           builder.appendLiteral(":");
-          builder.appendMinuteOfHour(2);
+          builder.appendValue(ChronoField.MINUTE_OF_HOUR, 2);
         } else if (alwaysPad || PartialTemporalUtils.isMoreGeneral(ChronoField.MINUTE_OF_HOUR, sdft)) {
           builder.appendLiteral(":");
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
         if (PartialTemporalUtils.hasField(base, ChronoField.SECOND_OF_MINUTE)) {
           builder.appendLiteral(":");
-          builder.appendSecondOfMinute(2);
+          builder.appendValue(ChronoField.SECOND_OF_MINUTE, 2);
         } else if (alwaysPad || PartialTemporalUtils.isMoreGeneral(ChronoField.SECOND_OF_MINUTE, sdft)) {
           builder.appendLiteral(":");
           builder.appendLiteral(PAD_FIELD_UNKNOWN2);
         }
         if (PartialTemporalUtils.hasField(base, ChronoField.MILLI_OF_SECOND)) {
           builder.appendLiteral(".");
-          builder.appendMillisOfSecond(3);
+          builder.appendValue(ChronoField.MILLI_OF_SECOND, 3);
         }
         // builder.append(isoTimeFormatter);
       }
@@ -2867,7 +2868,9 @@ public class SUTime  {
       boolean hasTime = hasTime();
       if (hasTime) {
         if (!hasDate) {
-          builder.clear();
+          // The date part is discarded by starting again, since a java.time builder
+          // cannot be cleared once something has been appended to it.
+          builder = new DateTimeFormatterBuilder();
         }
         appendTimeFormats(builder, flags);
       }
@@ -2986,14 +2989,12 @@ public class SUTime  {
         // String s = ISODateTimeFormat.basicDateTime().print(base);
         // return s.replace('\ufffd', 'X');
         DateTimeFormatter formatter = getFormatter(flags);
-        s = formatter.print(toJodaPartial(base));
+        s = base.format(formatter);
       } else {
         s = "XXXX-XX-XX";
       }
       if (dateTimeZone != null) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("Z");
-        formatter = formatter.withZone(DateTimeZone.forID(dateTimeZone.getId()));
-        s = s + formatter.print(0);
+        s = s + ZONE_OFFSET.withZone(dateTimeZone).format(Instant.EPOCH);
       }
       return s;
     }
@@ -4107,6 +4108,12 @@ public class SUTime  {
     }
     return result;
   }
+
+  /**
+   * A zone's offset as four digits with a sign, such as {@code +0000} or {@code -0800},
+   * which is what SUTime appends to a time carrying a zone.
+   */
+  private static final DateTimeFormatter ZONE_OFFSET = DateTimeFormatter.ofPattern("xx");
 
   public abstract static class Duration extends Temporal implements FuzzyInterval.FuzzyComparable<Duration> {
 

@@ -637,8 +637,8 @@ public class TimeFormatter {
 
     private static void updateTimeZoneNames(Locale locale) {
       int year = Year.now().getValue();
-      long time1 = new SUTime.IsoDate(year,1,1).getJodaTimeInstant().getMillis();
-      long time2 = new SUTime.IsoDate(year,6,1).getJodaTimeInstant().getMillis();
+      long time1 = new SUTime.IsoDate(year,1,1).getInstant().toEpochMilli();
+      long time2 = new SUTime.IsoDate(year,6,1).getInstant().toEpochMilli();
       CollectionValuedMap<String,DateTimeZone> tzMap = new CollectionValuedMap<>();
       for (DateTimeZone dtz:TimeZoneIdComponent.timeZonesById.values()) {
         // standard timezones
