@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -82,6 +83,14 @@ public class SemgrexStats {
 
   /** Opens a new stage.  Handled by the script parser, not by the registry. */
   public static final String PATTERN_COMMAND = "pattern";
+
+  /**
+   * The option which lowercases the values of one key, so that, say, "Lo"
+   * and "lo" are counted together.  It changes only what the command
+   * sees, not the match: a backreference or an Ssurgeon edit still uses
+   * the value as it was written.
+   */
+  public static final String LOWER = "-lower";
 
   /** Comments and the semgrex empty node both start with this, which is why patterns are prefixed */
   private static final String COMMENT = "#";
@@ -466,6 +475,42 @@ public class SemgrexStats {
     }
     List<String> args = rest.isEmpty() ? Collections.emptyList() : Arrays.asList(rest.split("\\s+"));
     return factory.create(context, args);
+  }
+
+  /**
+   * The value of a key in a match, as a command sees it: lowercased if
+   * the command named the key with {@link #LOWER}.  Lowercasing uses
+   * {@code Locale.ROOT}, so the result does not depend on where the
+   * script is run.
+   *
+   * @param match the match
+   * @param key the name of a node, edge, or regex group in the pattern
+   * @param lowered the keys the command lowercases
+   * @return the value, or null if the key was not bound in this match
+   */
+  public static String keyValue(SemgrexMatch match, String key, Set<String> lowered) {
+    String value = SemgrexUtils.getKey(match, key);
+    if (value != null && lowered.contains(key)) {
+      value = value.toLowerCase(Locale.ROOT);
+    }
+    return value;
+  }
+
+  /**
+   * Checks that each key a command lowercases is one the command uses,
+   * so that a typo is a parse error rather than an option which does nothing.
+   *
+   * @param command the command being built, used in error messages
+   * @param lowered the keys given with {@link #LOWER}
+   * @param used the keys the command reads
+   * @throws SemgrexParseException if a lowered key is not one the command reads
+   */
+  public static void checkLowered(String command, Set<String> lowered, Collection<String> used) {
+    for (String key : lowered) {
+      if (!used.contains(key)) {
+        throw new SemgrexParseException(command + " " + LOWER + " " + key + " names a key which " + command + " does not use");
+      }
+    }
   }
 
   /**

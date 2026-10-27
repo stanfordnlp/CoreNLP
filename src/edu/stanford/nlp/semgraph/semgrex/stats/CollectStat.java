@@ -1,19 +1,19 @@
 package edu.stanford.nlp.semgraph.semgrex.stats;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexParseException;
-import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
 
 /**
  * Gathers the distinct values of one key into a named set, for a later stage to restrict on.
  *<br>
  * Script syntax:
  *<pre>
- * collect KEY as NAME
+ * collect [-lower KEY] KEY as NAME
  *</pre>
  * This exists because some questions need two passes.  Asking which
  * relations a possessed noun takes part in cannot be one pattern: the
@@ -27,6 +27,10 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
  * pattern {}=word &lt;=relation {}
  * count -restrict word=possessed word relation
  *</pre>
+ * {@code -lower KEY} collects the values lowercased, for a later
+ * {@code count -lower KEY -restrict KEY=NAME} to match against.  It has
+ * to name the key being collected.
+ *<br>
  * Note that the values collected are whatever SemgrexUtils.getKey
  * returns for the key, which for a plain node is its word form.  To
  * gather lemmas instead, bind one in the pattern and collect that:
@@ -43,33 +47,45 @@ public class CollectStat implements SemgrexStat {
   private final String key;
   private final String name;
   private final Set<String> values;
+  /** the key, if its values are lowercased, or else nothing */
+  private final Set<String> lowered;
 
-  CollectStat(String key, String name, Set<String> values) {
+  CollectStat(String key, String name, Set<String> values, Set<String> lowered) {
     this.key = key;
     this.name = name;
     this.values = values;
+    this.lowered = Collections.unmodifiableSet(new HashSet<>(lowered));
   }
 
   /**
-   * Parses "collect KEY as NAME"
+   * Parses "collect [-lower KEY] KEY as NAME"
    *
    * @param context the stage being built; KEY is checked against its pattern and NAME is declared as a set in it
-   * @param args the words after "collect": KEY, "as", NAME
+   * @param args the words after "collect": optionally -lower and KEY, then KEY, "as", NAME
    * @return a stat which adds the value of KEY in each match to the set NAME
    * @throws SemgrexParseException if args are not in that form, KEY is not a
-   *     single name in the pattern, or NAME was already declared
+   *     single name in the pattern, -lower names some other key, or NAME was already declared
    */
   public static SemgrexStat create(SemgrexStats.Context context, List<String> args) {
+    Set<String> lowered = new HashSet<>();
+    if (!args.isEmpty() && SemgrexStats.LOWER.equals(args.get(0))) {
+      if (args.size() < 2) {
+        throw new SemgrexParseException(SemgrexStats.LOWER + " needs a key after it");
+      }
+      lowered.add(args.get(1));
+      args = args.subList(2, args.size());
+    }
     if (args.size() != 3 || !AS.equals(args.get(1))) {
-      throw new SemgrexParseException("collect takes exactly 'collect KEY " + AS + " NAME'");
+      throw new SemgrexParseException("collect takes exactly 'collect [" + SemgrexStats.LOWER + " KEY] KEY " + AS + " NAME'");
     }
     String key = args.get(0);
     String name = args.get(2);
 
     context.validateKeys("collect", Collections.singletonList(key));
+    SemgrexStats.checkLowered("collect", lowered, Collections.singletonList(key));
     Set<String> values = context.declareSet("collect", name);
 
-    return new CollectStat(key, name, values);
+    return new CollectStat(key, name, values, lowered);
   }
 
   @Override
@@ -102,7 +118,7 @@ public class CollectStat implements SemgrexStat {
 
   @Override
   public void accumulate(SemgrexMatch match) {
-    String value = SemgrexUtils.getKey(match, key);
+    String value = SemgrexStats.keyValue(match, key, lowered);
     // a key which was not bound in this match, eg under an optional
     // relation, is not a value anyone can restrict on later
     if (value != null) {
@@ -117,6 +133,7 @@ public class CollectStat implements SemgrexStat {
 
   @Override
   public String toString() {
-    return "collect " + key + " " + AS + " " + name;
+    String lower = lowered.isEmpty() ? "" : SemgrexStats.LOWER + " " + key + " ";
+    return "collect " + lower + key + " " + AS + " " + name;
   }
 }
