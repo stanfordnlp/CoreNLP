@@ -1110,6 +1110,9 @@ public abstract class SemgrexPattern implements Serializable  {
 
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
 
+    // UTF-8 whatever the locale, as the treebanks are, rather than letting
+    // a terminal in the C locale turn every accented letter into ?
+    PrintStream stdout = new PrintStream(new FileOutputStream(FileDescriptor.out), true, "utf-8");
     for (Pair<CoreMap, List<SemgrexMatch>> sentenceMatches : matches) {
       CoreMap sentence = sentenceMatches.first();
       SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
@@ -1137,7 +1140,7 @@ public abstract class SemgrexPattern implements Serializable  {
         if (graph == null || graph.vertexListSorted().isEmpty()) {
           continue;
         }
-        System.out.printf("+%d %s%n", graph.vertexListSorted().get(0).get(CoreAnnotations.LineNumberAnnotation.class),
+        stdout.printf("+%d %s%n", graph.vertexListSorted().get(0).get(CoreAnnotations.LineNumberAnnotation.class),
             sentenceFiles.getOrDefault(sentence, ""));
       } else if (outputFormat == OutputFormat.CONLLU) {
         CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
@@ -1152,9 +1155,10 @@ public abstract class SemgrexPattern implements Serializable  {
         }
         comments.addAll(highlightComments(sentenceMatches.second()));
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);
-        System.out.print(output);
+        stdout.print(output);
       }
     }
+    stdout.flush();
   }
 
 }
