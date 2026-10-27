@@ -13,6 +13,7 @@ import java.util.Set;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexParseException;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
+import edu.stanford.nlp.util.CoreMap;
 
 /**
  * Counts the values taken by the named nodes, edges, and regex groups of a semgrex match.
@@ -193,7 +194,7 @@ public class CountStat implements SemgrexStat {
   }
 
   @Override
-  public void accumulate(SemgrexMatch match) {
+  public void accumulate(CoreMap sentence, SemgrexMatch match) {
     for (Restriction restriction : restrictions) {
       // an unbound key is not in any collected set, so it cannot pass a restriction
       String value = SemgrexStats.keyValue(match, restriction.key, lowered);

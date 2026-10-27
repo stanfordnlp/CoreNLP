@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexParseException;
 
 /**
@@ -117,7 +118,7 @@ public class CollectStat implements SemgrexStat {
   }
 
   @Override
-  public void accumulate(SemgrexMatch match) {
+  public void accumulate(CoreMap sentence, SemgrexMatch match) {
     String value = SemgrexStats.keyValue(match, key, lowered);
     // a key which was not bound in this match, eg under an optional
     // relation, is not a value anyone can restrict on later
