@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +19,7 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
  *<br>
  * Script syntax:
  *<pre>
- * count [-flat] [-maxColumns N] KEY [KEY ...]
+ * count [-flat] [-maxColumns N] [-lower KEY ...] KEY [KEY ...]
  *</pre>
  * With one key, this produces a ranked list of the values that key took
  * and how often.  With two keys, it produces a contingency table of the
@@ -29,6 +30,10 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexUtils;
  * A pair of keys which each take many values would produce a chart
  * thousands of columns wide, so past {@code -maxColumns} distinct values
  * of the second key the flat listing is used instead.
+ *<br>
+ * {@code -lower KEY} counts the values of that key lowercased, so that
+ * "Lo", "lo", and "LO" are one row.  It can be given for more than one
+ * key, and applies to a {@code -restrict} on the same key as well.
  *
  * @author John Bauer
  */
@@ -54,6 +59,8 @@ public class CountStat implements SemgrexStat {
   private static final String NO_BIDI = "-noBidi";
 
   private final List<String> keys;
+  /** the keys whose values are lowercased */
+  private final Set<String> lowered;
   private final Map<List<String>, Integer> counts = new HashMap<>();
 
   private final int maxColumns;
@@ -86,11 +93,12 @@ public class CountStat implements SemgrexStat {
    */
   private boolean bidi = false;
 
-  CountStat(List<String> keys, boolean flat, int maxColumns, List<Restriction> restrictions, boolean bidiAllowed) {
+  CountStat(List<String> keys, Set<String> lowered, boolean flat, int maxColumns, List<Restriction> restrictions, boolean bidiAllowed) {
     if (keys.isEmpty()) {
       throw new SemgrexParseException("count needs at least one key to count");
     }
     this.keys = Collections.unmodifiableList(new ArrayList<>(keys));
+    this.lowered = Collections.unmodifiableSet(new LinkedHashSet<>(lowered));
     this.flat = flat;
     this.maxColumns = maxColumns;
     this.restrictions = Collections.unmodifiableList(new ArrayList<>(restrictions));
@@ -98,17 +106,19 @@ public class CountStat implements SemgrexStat {
   }
 
   /**
-   * Parses "count [-flat] [-maxColumns N] [-noBidi] [-restrict KEY=SET ...] KEY [KEY ...]"
+   * Parses "count [-flat] [-maxColumns N] [-noBidi] [-restrict KEY=SET ...] [-lower KEY ...] KEY [KEY ...]"
    *
    * @param context the stage this command is in, used to validate keys and look up sets
    * @param args the arguments after "count"
    * @return a new CountStat
    * @throws SemgrexParseException if an option is unknown or malformed, there are no keys,
-   *   a key isn't in the pattern, or a restriction's set can't be used in this stage
+   *   a key isn't in the pattern, a restriction's set can't be used in this stage, or a
+   *   lowercased key is not one this command counts or restricts
    */
   public static SemgrexStat create(SemgrexStats.Context context, List<String> args) {
     List<String> keys = new ArrayList<>();
     List<Restriction> restrictions = new ArrayList<>();
+    Set<String> lowered = new LinkedHashSet<>();
     boolean flat = false;
     int maxColumns = DEFAULT_MAX_COLUMNS;
     // the run decides by default, since it is a property of whatever is
@@ -145,9 +155,15 @@ public class CountStat implements SemgrexStat {
         }
         context.validateKeys("count " + RESTRICT, Collections.singletonList(pieces[0]));
         restrictions.add(new Restriction(pieces[0], pieces[1], context.useSet("count " + RESTRICT, pieces[1])));
+      } else if (SemgrexStats.LOWER.equals(arg)) {
+        if (idx + 1 >= args.size() || args.get(idx + 1).startsWith("-")) {
+          throw new SemgrexParseException(SemgrexStats.LOWER + " needs a key after it");
+        }
+        ++idx;
+        lowered.add(args.get(idx));
       } else if (arg.startsWith("-")) {
         throw new SemgrexParseException("Unknown option '" + arg + "' for count.  Known options: " +
-                                        FLAT + ", " + MAX_COLUMNS + ", " + NO_BIDI + ", " + RESTRICT);
+                                        FLAT + ", " + MAX_COLUMNS + ", " + NO_BIDI + ", " + RESTRICT + ", " + SemgrexStats.LOWER);
       } else {
         keys.add(arg);
       }
@@ -157,8 +173,13 @@ public class CountStat implements SemgrexStat {
       throw new SemgrexParseException("count needs at least one key to count");
     }
     context.validateKeys("count", keys);
+    Set<String> used = new LinkedHashSet<>(keys);
+    for (Restriction restriction : restrictions) {
+      used.add(restriction.key);
+    }
+    SemgrexStats.checkLowered("count", lowered, used);
 
-    return new CountStat(keys, flat, maxColumns, restrictions, bidiAllowed);
+    return new CountStat(keys, lowered, flat, maxColumns, restrictions, bidiAllowed);
   }
 
   @Override
@@ -175,16 +196,15 @@ public class CountStat implements SemgrexStat {
   public void accumulate(SemgrexMatch match) {
     for (Restriction restriction : restrictions) {
       // an unbound key is not in any collected set, so it cannot pass a restriction
-      String value = SemgrexUtils.getKey(match, restriction.key);
+      String value = SemgrexStats.keyValue(match, restriction.key, lowered);
       if (value == null || !restriction.values.contains(value)) {
         return;
       }
     }
 
-    List<String> key = SemgrexUtils.buildKey(match, keys);
-    List<String> cleaned = new ArrayList<>(key.size());
-    for (String value : key) {
-      cleaned.add(clean(value));
+    List<String> cleaned = new ArrayList<>(keys.size());
+    for (String key : keys) {
+      cleaned.add(clean(SemgrexStats.keyValue(match, key, lowered)));
     }
     counts.merge(Collections.unmodifiableList(cleaned), 1, Integer::sum);
     totalMatches++;
@@ -354,6 +374,9 @@ public class CountStat implements SemgrexStat {
     }
     if (!bidiAllowed) {
       sb.append(" ").append(NO_BIDI);
+    }
+    for (String key : lowered) {
+      sb.append(" ").append(SemgrexStats.LOWER).append(" ").append(key);
     }
     for (String key : keys) {
       sb.append(" ").append(key);

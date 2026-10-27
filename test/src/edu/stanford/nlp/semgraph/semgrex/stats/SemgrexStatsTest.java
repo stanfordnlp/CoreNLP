@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Collections;
 import java.util.List;
 
@@ -767,6 +768,79 @@ public class SemgrexStatsTest {
                                            "pattern {}=word <=relation {}",
                                            "count relation")).report().split("\\R"));
     assertEquals(Arrays.asList("## relations", "# count relation"), report.subList(0, 2));
+  }
+
+  /** Sentences whose objects are the same clitic spelled three ways, and one other */
+  private static List<CoreMap> cliticSentences() {
+    List<CoreMap> sentences = new ArrayList<>();
+    for (String parse : new String[] { "[vi-1 obj> lo-2]", "[vi-1 obj> Lo-2]", "[vi-1 obj> LO-2]", "[vi-1 iobj> la-2]" }) {
+      CoreMap sentence = new ArrayCoreMap();
+      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, SemanticGraph.valueOf(parse));
+      sentence.set(CoreAnnotations.TextAnnotation.class, parse);
+      sentences.add(sentence);
+    }
+    return sentences;
+  }
+
+  /** -lower counts the values of a key lowercased, and only that key */
+  @Test
+  public void testCountLower() {
+    String report = runScript(lines("pattern {}=word <=relation {}",
+                                    "count word"), cliticSentences()).report();
+    assertChartRows(report, "count word", "LO", "Lo", "la", "lo");
+
+    SemgrexStats stats = runScript(lines("pattern {}=word <=relation {}",
+                                         "count -lower word word"), cliticSentences());
+    report = stats.report();
+    assertChartRows(report, "count -lower word word", "lo", "la");
+    assertChartRow(report, "lo", "3", "75.00%");
+    assertChartRow(report, "la", "1", "25.00%");
+
+    // the relation, which is not lowered, keeps its own values
+    report = runScript(lines("pattern {}=word <=relation {}",
+                             "count -lower word word relation"), cliticSentences()).report();
+    assertChartRow(report, "lo", "3", "0", "3");
+    assertChartRow(report, "la", "0", "1", "1");
+  }
+
+  /**
+   * A set collected with -lower holds the lowercased values, which a count
+   * with -lower on the same key restricts against
+   */
+  @Test
+  public void testCollectLower() {
+    String script = lines("pattern {}=word <obj {}",
+                          "collect -lower word word as objects",
+                          "",
+                          "pattern {}=word <=relation {}",
+                          "count -lower word -restrict word=objects word");
+    SemgrexStats stats = runScript(script, cliticSentences());
+    assertEquals(new HashSet<>(Arrays.asList("lo")),
+                 ((CollectStat) stats.getStages().get(0).getStats().get(0)).getValues());
+    assertEquals("collect -lower word word as objects", stats.getStages().get(0).getStats().get(0).toString());
+    String report = stats.report();
+    assertChartRows(report, stats.getStages().get(1).getStats().get(0), "lo");
+    assertChartRow(report, "lo", "3", "100.00%");
+
+    // without -lower, only the spelling which is in the set gets through
+    report = runScript(script.replace("count -lower word", "count"), cliticSentences()).report();
+    assertChartRow(report, "lo", "1", "100.00%");
+    assertNull(chartRow(report, "Lo"));
+  }
+
+  /** -lower has to name a key which the command uses */
+  @Test
+  public void testLowerErrors() {
+    for (String command : new String[] { "count -lower", "count -lower relation word", "count -lower nothing word",
+                                         "collect -lower relation word as objects", "collect -lower" }) {
+      assertThrows(command, SemgrexParseException.class, () ->
+        SemgrexStats.parse(lines("pattern {}=word <=relation {}", command)));
+    }
+    // a key used only by a restriction can be lowered
+    SemgrexStats.parse(lines("pattern {}=word <obj {}",
+                             "collect -lower word word as objects",
+                             "pattern {}=word <=relation {}",
+                             "count -lower word -restrict word=objects relation"));
   }
 
   // ------------------------------------------------------------------
