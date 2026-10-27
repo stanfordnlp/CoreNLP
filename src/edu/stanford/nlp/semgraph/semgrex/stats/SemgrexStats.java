@@ -167,7 +167,7 @@ public class SemgrexStats {
       for (Pair<CoreMap, List<SemgrexMatch>> sentence : matches) {
         for (SemgrexMatch match : sentence.second()) {
           for (SemgrexStat stat : stats) {
-            stat.accumulate(match);
+            stat.accumulate(sentence.first(), match);
           }
         }
       }

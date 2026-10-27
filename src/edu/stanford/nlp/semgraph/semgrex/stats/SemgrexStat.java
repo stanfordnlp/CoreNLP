@@ -3,18 +3,19 @@ package edu.stanford.nlp.semgraph.semgrex.stats;
 import java.util.List;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatch;
+import edu.stanford.nlp.util.CoreMap;
 
 /**
  * A single statistics command from a semgrex stats script.
  *<br>
- * A stats script is a semgrex pattern on the first line followed by one
- * command per line, in the same spirit as an Ssurgeon script, except
- * that these commands only read the matches:
- *<pre>
- * {}=gov &gt;nsubj=edge {pos:/NOUN|PRON/}=dep
+ * A stats script is a {@code pattern} line followed by one command per
+ * line, in the same spirit as an Ssurgeon script, except that these
+ * commands only read the matches:
+ *<pre>{@code
+ * pattern {}=gov >nsubj=edge {pos:/NOUN|PRON/}=dep
  * count edge
  * count dep gov
- *</pre>
+ * }</pre>
  * Each command accumulates over every match in the corpus and then
  * reports.  Commands are independent of one another, so a script with
  * several of them produces several charts from a single pass over the
@@ -44,11 +45,14 @@ public interface SemgrexStat {
   List<String> getKeys();
 
   /**
-   * Tally a single match.  Called once per match, in corpus order.
+   * Tally a single match.  Called once per match, in corpus order, so the
+   * matches of one sentence arrive one after another.
    *
+   * @param sentence the sentence the match is in, for a command which
+   *   reports sentences rather than only counting them
    * @param match the match to tally
    */
-  void accumulate(SemgrexMatch match);
+  void accumulate(CoreMap sentence, SemgrexMatch match);
 
   /**
    * Render the accumulated results.  Should end with a line separator.
