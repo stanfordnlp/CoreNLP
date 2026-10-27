@@ -1,7 +1,10 @@
 package edu.stanford.nlp.semgraph.semgrex.stats;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -881,7 +884,11 @@ public class SemgrexStats {
       }
     }
 
-    System.out.print(stats.report());
+    // UTF-8 whatever the locale, as the treebanks are, rather than letting
+    // a terminal in the C locale turn every accented letter into ?
+    PrintStream stdout = new PrintStream(new FileOutputStream(FileDescriptor.out), true, "utf-8");
+    stdout.print(stats.report());
+    stdout.flush();
   }
 }
 
