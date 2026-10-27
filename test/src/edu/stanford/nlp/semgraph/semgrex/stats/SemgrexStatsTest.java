@@ -843,6 +843,126 @@ public class SemgrexStatsTest {
                              "count -lower word -restrict word=objects relation"));
   }
 
+  /** Sentences from graphs, each with a sent_id comment if one is given */
+  private static List<CoreMap> sentences(String[] parses, String[] ids) {
+    List<CoreMap> sentences = new ArrayList<>();
+    for (int i = 0; i < parses.length; ++i) {
+      CoreMap sentence = new ArrayCoreMap();
+      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, SemanticGraph.valueOf(parses[i]));
+      if (ids != null && ids[i] != null) {
+        sentence.set(CoreAnnotations.CommentsAnnotation.class, Collections.singletonList("# sent_id = " + ids[i]));
+      }
+      sentences.add(sentence);
+    }
+    return sentences;
+  }
+
+  private static SampleStat sampleStat(SemgrexStats stats) {
+    return (SampleStat) stats.getStages().get(0).getStats().get(0);
+  }
+
+  /**
+   * sample keeps the sentences of each combination in corpus order, counts
+   * a sentence with two matches once, and marks both matches
+   */
+  @Test
+  public void testSample() {
+    List<CoreMap> corpus = sentences(new String[] { "[vi-1 obj> lo-2]", "[vi-1 obj> lo-2 iobj> lo-3]", "[vi-1 iobj> la-2]", "[vi-1 obj> Lo-2]" },
+                                     new String[] { "s1", "s2", null, "s4" });
+    SemgrexStats stats = runScript(lines("pattern {}=word <=relation {}",
+                                         "sample word"), corpus);
+    SampleStat sample = sampleStat(stats);
+    assertEquals(3, sample.getMatches(Arrays.asList("lo")));
+    assertEquals(Arrays.asList("s1", "s2"), sample.getSampleIds(Arrays.asList("lo")));
+    // a sentence with no sent_id is named by its place in the corpus
+    assertEquals(Arrays.asList("sentence 3"), sample.getSampleIds(Arrays.asList("la")));
+    assertEquals(Arrays.asList("s4"), sample.getSampleIds(Arrays.asList("Lo")));
+    assertEquals(Collections.emptyList(), sample.getSampleIds(Arrays.asList("le")));
+
+    List<String> report = Arrays.asList(stats.report().split("\\R"));
+    assertEquals(Arrays.asList("# sample word",
+                               "word=lo: 3 matches in 2 sentences",
+                               "  s1  vi [[lo]]",
+                               "  s2  vi [[lo]] [[lo]]",
+                               "",
+                               "word=Lo: 1 match in 1 sentence",
+                               "  s4  vi [[Lo]]",
+                               "",
+                               "word=la: 1 match in 1 sentence",
+                               "  sentence 3  vi [[la]]"),
+                 report);
+
+    // -lower puts lo and Lo together, and the relation splits them again
+    stats = runScript(lines("pattern {}=word <=relation {}",
+                            "sample -lower word word relation"), corpus);
+    sample = sampleStat(stats);
+    assertEquals(Arrays.asList("s1", "s2", "s4"), sample.getSampleIds(Arrays.asList("lo", "obj")));
+    assertEquals(Arrays.asList("s2"), sample.getSampleIds(Arrays.asList("lo", "iobj")));
+    assertTrue(stats.report().contains("word=lo relation=obj: 3 matches in 3 sentences"));
+  }
+
+  /**
+   * With more sentences than -count, sample chooses that many, the same
+   * ones each time, and prints them in corpus order
+   */
+  @Test
+  public void testSampleChoice() {
+    String[] parses = new String[100];
+    String[] ids = new String[100];
+    for (int i = 0; i < parses.length; ++i) {
+      parses[i] = "[vi-1 obj> lo-2]";
+      ids[i] = String.format("s%03d", i);
+    }
+    List<CoreMap> corpus = sentences(parses, ids);
+    String script = lines("pattern {}=word <=relation {}",
+                          "sample -count 5 word");
+    List<String> chosen = sampleStat(runScript(script, corpus)).getSampleIds(Arrays.asList("lo"));
+    assertEquals(5, chosen.size());
+    List<String> sorted = new ArrayList<>(chosen);
+    Collections.sort(sorted);
+    assertEquals(sorted, chosen);
+    assertEquals(chosen, sampleStat(runScript(script, corpus)).getSampleIds(Arrays.asList("lo")));
+    // not simply the first five
+    assertNotEquals(Arrays.asList("s000", "s001", "s002", "s003", "s004"), chosen);
+
+    // another seed, another sample
+    List<String> other = sampleStat(runScript(script.replace("-count 5", "-count 5 -seed 99"), corpus)).getSampleIds(Arrays.asList("lo"));
+    assertEquals(5, other.size());
+    assertNotEquals(chosen, other);
+    assertEquals(100, sampleStat(runScript(script, corpus)).getMatches(Arrays.asList("lo")));
+  }
+
+  /**
+   * With -conllu, each sentence is written in CoNLL-U, with its
+   * combination and its marked words as comments
+   */
+  @Test
+  public void testSampleConllu() {
+    List<CoreMap> corpus = sentences(new String[] { "[vi-1 obj> lo-2 iobj> la-3]" }, new String[] { "s1" });
+    String report = runScript(lines("pattern {}=word <obj {}",
+                                    "sample -conllu word"), corpus).report();
+    List<String> lines = Arrays.asList(report.split("\\R"));
+    assertEquals(Arrays.asList("# sample -conllu word",
+                               "# sent_id = s1",
+                               "# sample = word=lo: 1 match in 1 sentence",
+                               "# highlight tokens = 2"),
+                 lines.subList(0, 4));
+    assertTrue(lines.get(4), lines.get(4).startsWith("1\tvi\t"));
+  }
+
+  /** The options of sample are checked when the script is read */
+  @Test
+  public void testSampleErrors() {
+    for (String command : new String[] { "sample", "sample -count 0 word", "sample -count many word", "sample -count",
+                                         "sample -seed x word", "sample -sort word", "sample -lower relation word", "sample nothing" }) {
+      assertThrows(command, SemgrexParseException.class, () ->
+        SemgrexStats.parse(lines("pattern {}=word <=relation {}", command)));
+    }
+    assertEquals("sample -count 3 -seed 7 -conllu -lower word word relation",
+                 SemgrexStats.parse(lines("pattern {}=word <=relation {}",
+                                          "sample -conllu -count 3 -lower word -seed 7 word relation")).getStages().get(0).getStats().get(0).toString());
+  }
+
   // ------------------------------------------------------------------
   // expanding the -conlluFile arguments
   // ------------------------------------------------------------------

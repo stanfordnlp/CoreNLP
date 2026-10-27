@@ -216,7 +216,7 @@ public class CountStat implements SemgrexStat {
    * particular match; tabs and newlines in a token would wreck the
    * chart, and MISC fields have been known to contain both.
    */
-  private static String clean(String value) {
+  static String clean(String value) {
     if (value == null) {
       return UNBOUND;
     }

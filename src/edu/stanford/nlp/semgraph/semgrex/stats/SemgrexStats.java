@@ -104,6 +104,7 @@ public class SemgrexStats {
     Map<String, SemgrexStat.Factory> registry = new LinkedHashMap<>();
     registry.put("count", CountStat::create);
     registry.put("collect", CollectStat::create);
+    registry.put("sample", SampleStat::create);
     return Collections.unmodifiableMap(registry);
   }
 
