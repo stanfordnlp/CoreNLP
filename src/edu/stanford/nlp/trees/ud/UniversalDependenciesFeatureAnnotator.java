@@ -226,21 +226,30 @@ public class UniversalDependenciesFeatureAnnotator  {
       subj = sg.getChildWithReln(word, UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT);
     }
 
+    /* A subject of its own settles the person: only "I" is first person. */
     if (subj != null) {
-      if (subj.word().equalsIgnoreCase("i")) {
-        /* "I" is the subject of "was". */
-        return "1";
+      return subj.word().equalsIgnoreCase("i") ? "1" : "3";
+    }
+
+    /* So does a clausal subject or an expletive, which are third person. */
+    for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(word)) {
+      GrammaticalRelation rel = edge.getRelation();
+      if (UniversalEnglishGrammaticalRelations.SUBJECT.isAncestor(rel) ||
+          UniversalEnglishGrammaticalRelations.EXPLETIVE.equals(rel)) {
+        return "3";
       }
     }
 
+    /* Without a subject, look for one on the head of an auxiliary,
+       a copula or a conjunct. */
     IndexedWord parent = sg.getParent(word);
     if (parent == null) {
-      return subj != null ? "3" : null;
+      return null;
     }
 
     SemanticGraphEdge edge = sg.getEdge(parent, word);
     if (edge == null) {
-      return subj != null ? "3" : null;
+      return null;
     }
 
     if (UniversalEnglishGrammaticalRelations.AUX_MODIFIER.equals(edge.getRelation()) ||
