@@ -316,11 +316,17 @@ public class UniversalDependenciesFeatureAnnotator  {
     return tb.iterator();
   }
 
-  private static final TregexPattern IMPERATIVE_PATTERN = TregexPattern.compile("__ > VB >+(/^[^S]/) S-IMP");
+  /**
+   * A VB under an S-IMP, with no other S in between.  A VB whose VP is the
+   * complement of another VB is skipped, so in {@code (S-IMP (VP (VB Do) (RB n't) (VP (VB sleep))))}
+   * only "Do" is imperative and "sleep" stays an infinitive.
+   */
+  private static final TregexPattern IMPERATIVE_PATTERN =
+    TregexPattern.compile("__ > (VB !> (VP > (VP < VB))) >+(/^[^S]/) S-IMP");
 
   /**
    * Returns the indices of all imperative verbs in the
-   * tree t.
+   * tree t, as marked by the S-IMP function tag.
    */
   private static Set<Integer> getImperatives(Tree t) {
     Set<Integer> imps = new HashSet<>();
