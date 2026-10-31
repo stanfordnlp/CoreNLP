@@ -343,6 +343,73 @@ public class UniversalDependenciesFeatureAnnotator  {
 
   }
 
+  /**
+   * Returns the indices of the imperative verbs in {@code sg}, found from the
+   * dependency structure.  This works on parser output, which has no S-IMP
+   * function tags.
+   *<br>
+   * The head of the sentence is imperative if it has no subject, no
+   * infinitival "to", no "why", and no auxiliary or copula other than a bare
+   * VB.  "Why not compromise?" is a bare infinitive, as in EWT and GUM.
+   * The word that carries the imperative is the first bare VB among the head,
+   * its auxiliaries and its copula: "Go home", "Do n't sleep", "Be careful",
+   * "Do n't be late".  Conjuncts and parataxis of an imperative are checked the
+   * same way ("Copy and paste"), except under a do-support auxiliary, which
+   * the conjuncts share: in "Do n't sleep or eat", "eat" stays an infinitive.
+   */
+  private static Set<Integer> getGraphImperatives(SemanticGraph sg) {
+    Set<Integer> imps = new HashSet<>();
+    for (IndexedWord root : sg.getRoots()) {
+      addGraphImperatives(sg, root, imps);
+    }
+    return imps;
+  }
+
+  private static void addGraphImperatives(SemanticGraph sg, IndexedWord head, Set<Integer> imps) {
+    IndexedWord imperative = "VB".equals(head.tag()) ? head : null;
+    for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(head)) {
+      GrammaticalRelation rel = edge.getRelation();
+      IndexedWord child = edge.getDependent();
+      if (UniversalEnglishGrammaticalRelations.SUBJECT.isAncestor(rel) ||
+          UniversalEnglishGrammaticalRelations.EXPLETIVE.equals(rel)) {
+        return;
+      }
+      if (UniversalEnglishGrammaticalRelations.MARKER.equals(rel) && child.value().equalsIgnoreCase("to")) {
+        return;
+      }
+      if (child.value().equalsIgnoreCase("why")) {
+        return;
+      }
+      if (UniversalEnglishGrammaticalRelations.AUX_MODIFIER.equals(rel) ||
+          UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER.equals(rel) ||
+          UniversalEnglishGrammaticalRelations.COPULA.equals(rel)) {
+        // a modal or an inflected auxiliary means this is not an imperative
+        if (!"VB".equals(child.tag())) {
+          return;
+        }
+        if (imperative == null || child.index() < imperative.index()) {
+          imperative = child;
+        }
+      }
+    }
+    if (imperative == null) {
+      return;
+    }
+    imps.add(imperative.index());
+
+    boolean doSupport = imperative != head && imperative.value().equalsIgnoreCase("do");
+    if (doSupport) {
+      return;
+    }
+    for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(head)) {
+      GrammaticalRelation rel = edge.getRelation();
+      if (UniversalEnglishGrammaticalRelations.CONJUNCT.isAncestor(rel) ||
+          UniversalEnglishGrammaticalRelations.PARATAXIS.equals(rel)) {
+        addGraphImperatives(sg, edge.getDependent(), imps);
+      }
+    }
+  }
+
 
   /**
    * Returns true if {@code word} has an auxiliary verb attached to it.
@@ -440,6 +507,7 @@ public class UniversalDependenciesFeatureAnnotator  {
   public void addFeatures(SemanticGraph sg, Tree tree, boolean addLemma, boolean addUPOS) {
 
     Set<Integer> imperatives = tree != null ? getImperatives(tree) : new HashSet<>();
+    imperatives.addAll(getGraphImperatives(sg));
 
     for (IndexedWord word : sg.vertexListSorted()) {
       String posTag = word.get(CoreAnnotations.PartOfSpeechAnnotation.class);
