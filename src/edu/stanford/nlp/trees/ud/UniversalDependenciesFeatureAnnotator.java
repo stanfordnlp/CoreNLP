@@ -257,6 +257,14 @@ public class UniversalDependenciesFeatureAnnotator  {
       return wasPerson(sg, parent);
     }
 
+    /* As a copula, "was" shares the subject of the predicate.  A predicate
+       with a clausal subject or no subject leaves it third person, as in
+       "What triggered the clash was a skirmish". */
+    if (UniversalEnglishGrammaticalRelations.COPULA.equals(edge.getRelation())) {
+      String person = wasPerson(sg, parent);
+      return person != null ? person : "3";
+    }
+
     if (UniversalEnglishGrammaticalRelations.CONJUNCT.isAncestor(edge.getRelation())) {
       /* Check if the subject of the head of a conjunction is "I". */
       return wasPerson(sg, parent);
