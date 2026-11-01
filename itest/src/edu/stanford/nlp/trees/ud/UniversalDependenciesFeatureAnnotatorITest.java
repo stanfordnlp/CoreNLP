@@ -21,8 +21,9 @@ import edu.stanford.nlp.io.IOUtils;
  * are what the annotator produced when the test was written.
  *<br>
  * The annotator needs the constituency tree of each sentence as well as the
- * CoNLL-U, though all it takes from the tree is which verbs are imperative
- * and, with addUPOS, the UPOS tags.
+ * CoNLL-U, though all it takes from the tree is its S-IMP tags and, with
+ * addUPOS, the UPOS tags.  Imperatives are also found from the dependency
+ * graph, so they do not need the tree.
  *
  * @author John Bauer
  */
@@ -40,7 +41,7 @@ public class UniversalDependenciesFeatureAnnotatorITest {
     }
   }
 
-  /** The sentence whose verb is imperative, which only the tree can say */
+  /** The sentence whose verb is imperative, marked S-IMP in its tree */
   static final int IMPERATIVE = 2;
 
   /** The sentence with no XPOS, which is reported rather than featurized */
@@ -358,10 +359,11 @@ public class UniversalDependenciesFeatureAnnotatorITest {
 
   @Test
   public void testNoTreesGivesTheSameFeatures() throws Exception {
-    // the tree is only used to find imperatives, so a sentence without one
-    // comes out exactly the same whether or not the trees are there
+    // the dependency graph finds the same imperatives as the S-IMP of these
+    // trees, so every sentence comes out the same whether or not the trees
+    // are there
     for (int i = 0; i < SENTENCES.length; i++) {
-      if (i == IMPERATIVE || i == NO_XPOS) {
+      if (i == NO_XPOS) {
         continue;
       }
       Sentence sentence = SENTENCES[i];
@@ -370,12 +372,118 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
-  public void testNoTreesMarksImperativesAsInfinitives() throws Exception {
-    // the PTB tags an imperative VB the same as an infinitive, and only the
-    // S-IMP of the tree tells them apart, so without it Go is an infinitive
-    String feats = column(annotateWithoutTrees(SENTENCES[IMPERATIVE]), "Go", 5);
-    assertTrue(feats, feats.contains("VerbForm=Inf"));
-    assertTrue(feats, !feats.contains("Mood=Imp"));
+  public void testNoTreesFindsImperativesFromTheGraph() throws Exception {
+    // the PTB tags an imperative VB the same as an infinitive.  without the
+    // S-IMP of the tree, Go is still found to be imperative, since it is the
+    // head of the sentence and has no subject
+    assertEquals("Mood=Imp|VerbForm=Fin", column(annotateWithoutTrees(SENTENCES[IMPERATIVE]), "Go", 5));
+  }
+
+  // ------------------------------------------------------------------
+  // imperatives and "was" from the dependency graph alone
+  // ------------------------------------------------------------------
+
+  /** The features the annotator gives a word, from the CoNLL-U alone */
+  static String featsWithoutTrees(String word, String... conllu) throws Exception {
+    Sentence sentence = new Sentence(word, null, conllu);
+    String feats = column(annotateWithoutTrees(sentence), word, 5);
+    assertNotNull(word + " should have a line of its own", feats);
+    return feats;
+  }
+
+  @Test
+  public void testDoSupportImperative() throws Exception {
+    // only do is imperative in a do imperative, as in UD_English-EWT#623
+    String[] conllu = {
+        "# sent_id = do-support",
+        "# text = Don't sleep.",
+        "1-2\tDon't\t_\t_\t_\t_\t_\t_\t_\t_",
+        "1\tDo\tdo\tAUX\tVB\t_\t3\taux\t3:aux\t_",
+        "2\tn't\tnot\tPART\tRB\t_\t3\tadvmod\t3:advmod\t_",
+        "3\tsleep\tsleep\tVERB\tVB\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "4\t.\t.\tPUNCT\t.\t_\t3\tpunct\t3:punct\t_"};
+    assertEquals("Mood=Imp|VerbForm=Fin", featsWithoutTrees("Do", conllu));
+    assertEquals("VerbForm=Inf", featsWithoutTrees("sleep", conllu));
+  }
+
+  @Test
+  public void testConjoinedImperatives() throws Exception {
+    // each conjunct of an imperative is an imperative of its own
+    String[] conllu = {
+        "# sent_id = conjoined",
+        "# text = Copy and paste.",
+        "1\tCopy\tcopy\tVERB\tVB\t_\t0\troot\t0:root\t_",
+        "2\tand\tand\tCCONJ\tCC\t_\t3\tcc\t3:cc\t_",
+        "3\tpaste\tpaste\tVERB\tVB\t_\t1\tconj\t1:conj:and\tSpaceAfter=No",
+        "4\t.\t.\tPUNCT\t.\t_\t1\tpunct\t1:punct\t_"};
+    assertEquals("Mood=Imp|VerbForm=Fin", featsWithoutTrees("Copy", conllu));
+    assertEquals("Mood=Imp|VerbForm=Fin", featsWithoutTrees("paste", conllu));
+  }
+
+  @Test
+  public void testWhyNotIsInfinitive() throws Exception {
+    // "why not" with a bare verb is an infinitive question, not an order
+    assertEquals("VerbForm=Inf", featsWithoutTrees("go",
+        "# sent_id = why-not",
+        "# text = Why not go?",
+        "1\tWhy\twhy\tADV\tWRB\t_\t3\tadvmod\t3:advmod\t_",
+        "2\tnot\tnot\tPART\tRB\t_\t3\tadvmod\t3:advmod\t_",
+        "3\tgo\tgo\tVERB\tVB\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "4\t?\t?\tPUNCT\t.\t_\t3\tpunct\t3:punct\t_"));
+  }
+
+  @Test
+  public void testSubjectlessQuestionIsInfinitive() throws Exception {
+    // a subjectless question is usually an elided "do you" question
+    assertEquals("VerbForm=Inf", featsWithoutTrees("Remember",
+        "# sent_id = question",
+        "# text = Remember those days?",
+        "1\tRemember\tremember\tVERB\tVB\t_\t0\troot\t0:root\t_",
+        "2\tthose\tthat\tDET\tDT\t_\t3\tdet\t3:det\t_",
+        "3\tdays\tday\tNOUN\tNNS\t_\t1\tobj\t1:obj\tSpaceAfter=No",
+        "4\t?\t?\tPUNCT\t.\t_\t1\tpunct\t1:punct\t_"));
+  }
+
+  @Test
+  public void testPleaseQuestionIsImperative() throws Exception {
+    // with please, a question is a request
+    assertEquals("Mood=Imp|VerbForm=Fin", featsWithoutTrees("clarify",
+        "# sent_id = please-question",
+        "# text = Please clarify?",
+        "1\tPlease\tplease\tINTJ\tUH\t_\t2\tdiscourse\t2:discourse\t_",
+        "2\tclarify\tclarify\tVERB\tVB\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "3\t?\t?\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"));
+  }
+
+  @Test
+  public void testCopularWasWithI() throws Exception {
+    // the subject of a copula is on its predicate
+    assertEquals("Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin", featsWithoutTrees("was",
+        "# sent_id = copular-was",
+        "# text = I was lax.",
+        "1\tI\tI\tPRON\tPRP\t_\t3\tnsubj\t3:nsubj\t_",
+        "2\twas\tbe\tAUX\tVBD\t_\t3\tcop\t3:cop\t_",
+        "3\tlax\tlax\tADJ\tJJ\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "4\t.\t.\tPUNCT\t.\t_\t3\tpunct\t3:punct\t_"));
+  }
+
+  @Test
+  public void testWasWithAClausalSubjectInAConjunct() throws Exception {
+    // the conjunct has a subject of its own, so the I of the first clause
+    // does not make this was first person
+    assertEquals("Mood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin", featsWithoutTrees("was",
+        "# sent_id = clausal-subject",
+        "# text = I left, but what he did was criticized.",
+        "1\tI\tI\tPRON\tPRP\t_\t2\tnsubj\t2:nsubj\t_",
+        "2\tleft\tleave\tVERB\tVBD\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "3\t,\t,\tPUNCT\t,\t_\t9\tpunct\t9:punct\t_",
+        "4\tbut\tbut\tCCONJ\tCC\t_\t9\tcc\t9:cc\t_",
+        "5\twhat\twhat\tPRON\tWP\t_\t7\tobj\t7:obj\t_",
+        "6\the\the\tPRON\tPRP\t_\t7\tnsubj\t7:nsubj\t_",
+        "7\tdid\tdo\tVERB\tVBD\t_\t9\tcsubj:pass\t9:csubj:pass\t_",
+        "8\twas\tbe\tAUX\tVBD\t_\t9\taux:pass\t9:aux:pass\t_",
+        "9\tcriticized\tcriticize\tVERB\tVBN\t_\t2\tconj\t2:conj:but\tSpaceAfter=No",
+        "10\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"));
   }
 
   @Test
