@@ -138,6 +138,33 @@ public class UniversalDependenciesFeatureAnnotator  {
     "no_UH", "Neg",
     "yes_UH", "Pos");
 
+  /** Roman numerals, in either case */
+  private static final String ROMAN_EXPRESSION = "(?i)^[ivxlcdm]+$";
+
+  /**
+   * The NumForm of a word with a NumType, as in EWT and GUM: Digit for numbers
+   * without letters ("7:30", "+1", "'72", "½"), Combi for numbers with
+   * letters ("10th", "1990s"), Roman for Roman numerals ("XIV", "iv"), and
+   * Word for the rest ("two", "million", "first", "once").  Roman letters
+   * right after a number are a multiplier rather than a numeral, as in
+   * "5 M" or "10 mm" for millions, so they are Word.
+   */
+  static String numForm(String word, SemanticGraph sg, int index) {
+    if (word.matches(".*\\p{N}.*")) {
+      return word.matches(".*\\p{L}.*") ? "Combi" : "Digit";
+    }
+    if (word.matches(ROMAN_EXPRESSION) && !followsNumber(sg, index)) {
+      return "Roman";
+    }
+    return "Word";
+  }
+
+  /** Whether the word before this one is a number written with digits */
+  private static boolean followsNumber(SemanticGraph sg, int index) {
+    IndexedWord previous = sg.getNodeByIndexSafe(index - 1);
+    return previous != null && "CD".equals(previous.tag()) && previous.value().matches(".*\\p{N}.*");
+  }
+
   private static boolean isOrdinal(String word, String pos) {
 
     if ( ! pos.equals("JJ"))
@@ -563,6 +590,11 @@ public class UniversalDependenciesFeatureAnnotator  {
 
         /* Features that only depend on the word and the PTB POS tag. */
       wordFeatures.putAll(getPOSFeatures(token, posTag));
+
+        /* The form of a number, which for Roman letters depends on the word before. */
+      if (wordFeatures.containsKey("NumType")) {
+        wordFeatures.put("NumForm", numForm(token, sg, index));
+      }
 
         /* Semantic graph features. */
       wordFeatures.putAll(getGraphFeatures(sg, word));

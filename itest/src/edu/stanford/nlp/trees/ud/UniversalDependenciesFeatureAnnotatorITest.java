@@ -485,6 +485,62 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
+  public void testNumForm() throws Exception {
+    // every word with a NumType has a NumForm, which depends on its form and,
+    // for Roman letters, on whether a number comes right before it
+    String[] conllu = {
+        "# sent_id = numform",
+        "# text = twice the first two of 3 , 7:30 , +1 , '72 , 1990s , XIV , iv , 5 M , MM , 10 mm",
+        "1\ttwice\ttwice\tADV\tRB\t_\t4\tadvmod\t4:advmod\t_",
+        "2\tthe\tthe\tDET\tDT\t_\t4\tdet\t4:det\t_",
+        "3\tfirst\tfirst\tADJ\tJJ\t_\t4\tamod\t4:amod\t_",
+        "4\ttwo\ttwo\tNUM\tCD\t_\t0\troot\t0:root\t_",
+        "5\tof\tof\tADP\tIN\t_\t6\tcase\t6:case\t_",
+        "6\t3\t3\tNUM\tCD\t_\t4\tnmod\t4:nmod:of\t_",
+        "7\t,\t,\tPUNCT\t,\t_\t8\tpunct\t8:punct\t_",
+        "8\t7:30\t7:30\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "9\t,\t,\tPUNCT\t,\t_\t10\tpunct\t10:punct\t_",
+        "10\t+1\t+1\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "11\t,\t,\tPUNCT\t,\t_\t12\tpunct\t12:punct\t_",
+        "12\t'72\t'72\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "13\t,\t,\tPUNCT\t,\t_\t14\tpunct\t14:punct\t_",
+        "14\t1990s\t1990\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "15\t,\t,\tPUNCT\t,\t_\t16\tpunct\t16:punct\t_",
+        "16\tXIV\tXIV\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "17\t,\t,\tPUNCT\t,\t_\t18\tpunct\t18:punct\t_",
+        "18\tiv\tiv\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "19\t,\t,\tPUNCT\t,\t_\t21\tpunct\t21:punct\t_",
+        "20\t5\t5\tNUM\tCD\t_\t21\tnummod\t21:nummod\t_",
+        "21\tM\tM\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "22\t,\t,\tPUNCT\t,\t_\t23\tpunct\t23:punct\t_",
+        "23\tMM\tMM\tNUM\tCD\t_\t4\tappos\t4:appos\t_",
+        "24\t,\t,\tPUNCT\t,\t_\t26\tpunct\t26:punct\t_",
+        "25\t10\t10\tNUM\tCD\t_\t26\tnummod\t26:nummod\t_",
+        "26\tmm\tmm\tNUM\tCD\t_\t4\tappos\t4:appos\t_"};
+    String written = annotateWithoutTrees(new Sentence("numform", null, conllu));
+    String[][] expected = {
+        {"twice", "NumForm=Word|NumType=Mult"},
+        {"first", "Degree=Pos|NumForm=Word|NumType=Ord"},
+        {"two", "NumForm=Word|NumType=Card"},
+        {"3", "NumForm=Digit|NumType=Card"},
+        {"7:30", "NumForm=Digit|NumType=Card"},
+        {"+1", "NumForm=Digit|NumType=Card"},
+        {"'72", "NumForm=Digit|NumType=Card"},
+        {"1990s", "NumForm=Combi|NumType=Card"},
+        {"XIV", "NumForm=Roman|NumType=Card"},
+        {"iv", "NumForm=Roman|NumType=Card"},
+        {"M", "NumForm=Word|NumType=Card"},
+        {"MM", "NumForm=Roman|NumType=Card"},
+        {"mm", "NumForm=Word|NumType=Card"},
+    };
+    for (String[] word : expected) {
+      assertEquals(word[0], word[1], column(written, word[0], 5));
+    }
+    // a word without a NumType has no NumForm
+    assertEquals("Definite=Def|PronType=Art", column(written, "the", 5));
+  }
+
+  @Test
   public void testCopularWasWithI() throws Exception {
     // the subject of a copula is on its predicate
     assertEquals("Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin", featsWithoutTrees("was",
