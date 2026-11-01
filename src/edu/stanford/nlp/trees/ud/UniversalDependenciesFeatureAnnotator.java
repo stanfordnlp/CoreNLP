@@ -109,12 +109,34 @@ public class UniversalDependenciesFeatureAnnotator  {
       features.put("NumType", "Mult");
     }
 
+    String polarity = POLARITY.get(word.toLowerCase() + '_' + pos);
+    if (polarity != null) {
+      features.put("Polarity", polarity);
+    }
+
     return features;
   }
 
   private static final String ORDINAL_EXPRESSION = "^(first|second|third|fourth|fifth|sixth|seventh|eigth|ninth|tenth|([0-9,.]+(th|st|nd|rd)))$";
 
   private static final String MULTIPLICATIVE_EXPRESSION = "^(once|twice)$";
+
+  /**
+   * The Polarity of a word with a given tag, keyed as word_TAG, as in EWT and
+   * GUM.  Negation is not, n't (with a straight or curly apostrophe) and nt
+   * as adverbs, nor and neither as conjunctions, and no as an interjection;
+   * yes as an interjection is positive.  Neither as a determiner or adverb
+   * has no Polarity.
+   */
+  private static final Map<String, String> POLARITY = Map.of(
+    "not_RB", "Neg",
+    "n't_RB", "Neg",
+    "n\u2019t_RB", "Neg",
+    "nt_RB", "Neg",
+    "nor_CC", "Neg",
+    "neither_CC", "Neg",
+    "no_UH", "Neg",
+    "yes_UH", "Pos");
 
   private static boolean isOrdinal(String word, String pos) {
 

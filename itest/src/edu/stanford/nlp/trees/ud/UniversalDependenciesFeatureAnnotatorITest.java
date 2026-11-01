@@ -291,7 +291,7 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "1\tI\tI\tPRON\tPRP\tCase=Nom|Number=Sing|Person=1|PronType=Prs\t4\tnsubj\t4:nsubj\t_",
         "2-3\tdon't\t_\t_\t_\t_\t_\t_\t_\tGloss=do+not",
         "2\tdo\tdo\tAUX\tVBP\tMood=Ind|Tense=Pres|VerbForm=Fin\t4\taux\t4:aux\t_",
-        "3\tn't\tnot\tPART\tRB\t_\t4\tadvmod\t4:advmod\t_",
+        "3\tn't\tnot\tPART\tRB\tPolarity=Neg\t4\tadvmod\t4:advmod\t_",
         "4\tknow\tknow\tVERB\tVB\tVerbForm=Inf\t0\troot\t0:root\tSpaceAfter=No",
         "5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t4:punct\t_"),
         annotate(SENTENCES[5]));
@@ -453,6 +453,35 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "1\tPlease\tplease\tINTJ\tUH\t_\t2\tdiscourse\t2:discourse\t_",
         "2\tclarify\tclarify\tVERB\tVB\t_\t0\troot\t0:root\tSpaceAfter=No",
         "3\t?\t?\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"));
+  }
+
+  @Test
+  public void testPolarity() throws Exception {
+    // negation and yes have a Polarity, as in EWT and GUM, but neither as a
+    // determiner does not
+    String[] conllu = {
+        "# sent_id = polarity",
+        "# text = No, yes, not neither nor neither one.",
+        "1\tNo\tno\tINTJ\tUH\t_\t5\tdiscourse\t5:discourse\tSpaceAfter=No",
+        "2\t,\t,\tPUNCT\t,\t_\t1\tpunct\t1:punct\t_",
+        "3\tyes\tyes\tINTJ\tUH\t_\t5\tdiscourse\t5:discourse\tSpaceAfter=No",
+        "4\tnot\tnot\tPART\tRB\t_\t5\tadvmod\t5:advmod\t_",
+        "5\tneither\tneither\tCCONJ\tCC\t_\t0\troot\t0:root\t_",
+        "6\tnor\tnor\tCCONJ\tCC\t_\t5\tcc\t5:cc\t_",
+        "7\tneither\tneither\tDET\tDT\t_\t8\tdet\t8:det\t_",
+        "8\tone\tone\tNUM\tCD\t_\t5\tconj\t5:conj\tSpaceAfter=No",
+        "9\t.\t.\tPUNCT\t.\t_\t5\tpunct\t5:punct\t_"};
+    String written = annotateWithoutTrees(new Sentence("polarity", null, conllu));
+    assertEquals("Polarity=Neg", column(written, "No", 5));
+    assertEquals("Polarity=Pos", column(written, "yes", 5));
+    assertEquals("Polarity=Neg", column(written, "not", 5));
+    assertEquals("Polarity=Neg", column(written, "nor", 5));
+    for (String line : written.split("\\R")) {
+      String[] fields = line.split("\t");
+      if (fields.length == 10 && fields[1].equals("neither")) {
+        assertEquals(fields[0] + " " + fields[4], fields[4].equals("CC") ? "Polarity=Neg" : "_", fields[5]);
+      }
+    }
   }
 
   @Test
