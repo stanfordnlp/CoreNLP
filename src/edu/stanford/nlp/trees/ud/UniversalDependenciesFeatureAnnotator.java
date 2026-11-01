@@ -351,6 +351,8 @@ public class UniversalDependenciesFeatureAnnotator  {
    * The head of the sentence is imperative if it has no subject, no
    * infinitival "to", no "why", and no auxiliary or copula other than a bare
    * VB.  "Why not compromise?" is a bare infinitive, as in EWT and GUM.
+   * So is a question without "please", which is usually an elided
+   * "do you": "Remember those refrigerators?", "Sound familiar?".
    * The word that carries the imperative is the first bare VB among the head,
    * its auxiliaries and its copula: "Go home", "Do n't sleep", "Be careful",
    * "Do n't be late".  Conjuncts and parataxis of an imperative are checked the
@@ -367,6 +369,8 @@ public class UniversalDependenciesFeatureAnnotator  {
 
   private static void addGraphImperatives(SemanticGraph sg, IndexedWord head, Set<Integer> imps) {
     IndexedWord imperative = "VB".equals(head.tag()) ? head : null;
+    boolean question = false;
+    boolean please = false;
     for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(head)) {
       GrammaticalRelation rel = edge.getRelation();
       IndexedWord child = edge.getDependent();
@@ -380,6 +384,12 @@ public class UniversalDependenciesFeatureAnnotator  {
       if (child.value().equalsIgnoreCase("why")) {
         return;
       }
+      if (".".equals(child.tag()) && child.value().contains("?")) {
+        question = true;
+      }
+      if (child.value().equalsIgnoreCase("please")) {
+        please = true;
+      }
       if (UniversalEnglishGrammaticalRelations.AUX_MODIFIER.equals(rel) ||
           UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER.equals(rel) ||
           UniversalEnglishGrammaticalRelations.COPULA.equals(rel)) {
@@ -392,7 +402,7 @@ public class UniversalDependenciesFeatureAnnotator  {
         }
       }
     }
-    if (imperative == null) {
+    if (imperative == null || (question && !please)) {
       return;
     }
     imps.add(imperative.index());
