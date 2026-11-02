@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -109,7 +110,7 @@ public class UniversalDependenciesFeatureAnnotator  {
       features.put("NumType", "Mult");
     }
 
-    String polarity = POLARITY.get(word.toLowerCase() + '_' + pos);
+    String polarity = POLARITY.get(wordPos);
     if (polarity != null) {
       features.put("Polarity", polarity);
     }
@@ -149,7 +150,32 @@ public class UniversalDependenciesFeatureAnnotator  {
     "yes_UH", "Pos");
 
   /** Roman numerals, in either case */
-  private static final String ROMAN_EXPRESSION = "(?i)^[ivxlcdm]+$";
+  private static final Pattern ROMAN_PATTERN = Pattern.compile("^[ivxlcdm]+$", Pattern.CASE_INSENSITIVE);
+
+  /** Whether a word has a character which is a number, such as 7 or ½ */
+  private static boolean hasNumber(String word) {
+    for (int i = 0; i < word.length(); i++) {
+      switch (Character.getType(word.charAt(i))) {
+      case Character.DECIMAL_DIGIT_NUMBER:
+      case Character.LETTER_NUMBER:
+      case Character.OTHER_NUMBER:
+        return true;
+      default:
+        break;
+      }
+    }
+    return false;
+  }
+
+  /** Whether a word has a letter */
+  private static boolean hasLetter(String word) {
+    for (int i = 0; i < word.length(); i++) {
+      if (Character.isLetter(word.charAt(i))) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /**
    * The NumForm of a word with a NumType, as in EWT and GUM: Digit for numbers
@@ -160,10 +186,10 @@ public class UniversalDependenciesFeatureAnnotator  {
    * "5 M" or "10 mm" for millions, so they are Word.
    */
   static String numForm(String word, SemanticGraph sg, int index) {
-    if (word.matches(".*\\p{N}.*")) {
-      return word.matches(".*\\p{L}.*") ? "Combi" : "Digit";
+    if (hasNumber(word)) {
+      return hasLetter(word) ? "Combi" : "Digit";
     }
-    if (word.matches(ROMAN_EXPRESSION)) {
+    if (ROMAN_PATTERN.matcher(word).matches()) {
       IndexedWord previous = sg.getNodeByIndexSafe(index - 1);
       if (isRomanNumeral(word, previous == null ? null : previous.value(), previous == null ? null : previous.tag())) {
         return "Roman";
@@ -178,34 +204,49 @@ public class UniversalDependenciesFeatureAnnotator  {
    * a multiplier instead, as in "5 M" or "10 mm" for millions.
    */
   static boolean isRomanNumeral(String word, String previousWord, String previousTag) {
-    if ( ! word.matches(ROMAN_EXPRESSION))
+    if ( ! ROMAN_PATTERN.matcher(word).matches())
       return false;
 
-    boolean afterNumber = "CD".equals(previousTag) && previousWord != null && previousWord.matches(".*\\p{N}.*");
+    boolean afterNumber = "CD".equals(previousTag) && previousWord != null && hasNumber(previousWord);
     return ! afterNumber;
+  }
+
+  private static final Pattern ORDINAL_PATTERN = Pattern.compile(ORDINAL_EXPRESSION, Pattern.CASE_INSENSITIVE);
+
+  private static final Pattern MULTIPLICATIVE_PATTERN = Pattern.compile(MULTIPLICATIVE_EXPRESSION, Pattern.CASE_INSENSITIVE);
+
+  /** Whether a word has a digit from 0 to 9 */
+  private static boolean hasDigit(String word) {
+    for (int i = 0; i < word.length(); i++) {
+      char c = word.charAt(i);
+      if (c >= '0' && c <= '9') {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
    * Ordinal adjectives and adverbs, as in EWT and GUM.  An ordinal noun is
    * only counted when it is written with digits, as in "Dec. 10th": "a
    * second" and "a third" are usually a unit of time and a fraction.
+   * The tag is checked first, since this is asked of every word.
    */
   private static boolean isOrdinal(String word, String pos) {
-    String lower = word.toLowerCase();
-    if ( ! lower.matches(ORDINAL_EXPRESSION))
-      return false;
-
     if (pos.equals("JJ") || pos.equals("RB"))
-      return true;
+      return ORDINAL_PATTERN.matcher(word).matches();
 
-    return pos.equals("NN") && lower.matches(".*[0-9].*");
+    if (pos.equals("NN"))
+      return hasDigit(word) && ORDINAL_PATTERN.matcher(word).matches();
+
+    return false;
   }
 
   private static boolean isMultiplicative(String word, String pos) {
     if ( ! pos.equals("RB"))
       return false;
 
-    return word.toLowerCase().matches(MULTIPLICATIVE_EXPRESSION);
+    return MULTIPLICATIVE_PATTERN.matcher(word).matches();
   }
 
   private static String SELF_REGEX = EnglishPatterns.selfRegex.replace("/", "");
