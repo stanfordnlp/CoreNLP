@@ -227,7 +227,7 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "# sent_id = pronouns",
         "# text = I saw her.",
         "1\tI\tI\tPRON\tPRP\tCase=Nom|Number=Sing|Person=1|PronType=Prs\t2\tnsubj\t2:nsubj\t_",
-        "2\tsaw\tsee\tVERB\tVBD\tMood=Ind|Tense=Past|VerbForm=Fin\t0\troot\t0:root\t_",
+        "2\tsaw\tsee\tVERB\tVBD\tMood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin\t0\troot\t0:root\t_",
         "3\ther\tshe\tPRON\tPRP\tCase=Acc|Gender=Fem|Number=Sing|Person=3|PronType=Prs\t2\tobj\t2:obj\tSpaceAfter=No",
         "4\t.\t.\tPUNCT\t.\t_\t2\tpunct\t2:punct\t_"),
         annotate(SENTENCES[0]));
@@ -290,7 +290,7 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "# text = I don't know.",
         "1\tI\tI\tPRON\tPRP\tCase=Nom|Number=Sing|Person=1|PronType=Prs\t4\tnsubj\t4:nsubj\t_",
         "2-3\tdon't\t_\t_\t_\t_\t_\t_\t_\tGloss=do+not",
-        "2\tdo\tdo\tAUX\tVBP\tMood=Ind|Tense=Pres|VerbForm=Fin\t4\taux\t4:aux\t_",
+        "2\tdo\tdo\tAUX\tVBP\tMood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin\t4\taux\t4:aux\t_",
         "3\tn't\tnot\tPART\tRB\tPolarity=Neg\t4\tadvmod\t4:advmod\t_",
         "4\tknow\tknow\tVERB\tVB\tVerbForm=Inf\t0\troot\t0:root\tSpaceAfter=No",
         "5\t.\t.\tPUNCT\t.\t_\t4\tpunct\t4:punct\t_"),
@@ -303,7 +303,7 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "# sent_id = empty-node",
         "# text = John bought apples and Mary pears.",
         "1\tJohn\tJohn\tPROPN\tNNP\tNumber=Sing\t2\tnsubj\t2:nsubj\t_",
-        "2\tbought\tbuy\tVERB\tVBD\tMood=Ind|Tense=Past|VerbForm=Fin\t0\troot\t0:root\t_",
+        "2\tbought\tbuy\tVERB\tVBD\tMood=Ind|Number=Sing|Person=3|Tense=Past|VerbForm=Fin\t0\troot\t0:root\t_",
         "3\tapples\tapple\tNOUN\tNNS\tNumber=Plur\t2\tobj\t2:obj\t_",
         "4\tand\tand\tCCONJ\tCC\t_\t5\tcc\t5:cc\t_",
         "5\tMary\tMary\tPROPN\tNNP\tNumber=Sing\t2\tconj\t5.1:nsubj\t_",
@@ -637,6 +637,75 @@ public class UniversalDependenciesFeatureAnnotatorITest {
         "2\tany\tany\tDET\tDT\t_\t3\tdet\t3:det\t_",
         "3\tideas\tidea\tNOUN\tNNS\t_\t1\tobj\t1:obj\tSpaceAfter=No",
         "4\t?\t?\tPUNCT\t.\t_\t1\tpunct\t1:punct\t_"));
+  }
+
+  /** The Person and Number of a word, written as "1 Sing" */
+  static String agreement(String written, String word) {
+    String feats = column(written, word, 5);
+    assertNotNull(word + " should have a line of its own", feats);
+    String person = "-";
+    String number = "-";
+    for (String feature : feats.split("\\|")) {
+      if (feature.startsWith("Person=")) {
+        person = feature.substring(7);
+      } else if (feature.startsWith("Number=")) {
+        number = feature.substring(7);
+      }
+    }
+    return person + " " + number;
+  }
+
+  @Test
+  public void testVerbAgreement() throws Exception {
+    // past tense and non-3rd-person present verbs agree with their subject
+    String written = annotateWithoutTrees(new Sentence("agreement", null,
+        "# sent_id = agreement",
+        "# text = We were here, the police are here, John and I left, and all who volunteered stayed.",
+        "1\tWe\twe\tPRON\tPRP\t_\t3\tnsubj\t3:nsubj\t_",
+        "2\twere\tbe\tAUX\tVBD\t_\t3\tcop\t3:cop\t_",
+        "3\there\there\tADV\tRB\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "4\t,\t,\tPUNCT\t,\t_\t8\tpunct\t8:punct\t_",
+        "5\tthe\tthe\tDET\tDT\t_\t6\tdet\t6:det\t_",
+        "6\tpolice\tpolice\tNOUN\tNN\t_\t8\tnsubj\t8:nsubj\t_",
+        "7\tare\tbe\tAUX\tVBP\t_\t8\tcop\t8:cop\t_",
+        "8\there\there\tADV\tRB\t_\t3\tconj\t3:conj\tSpaceAfter=No",
+        "9\t,\t,\tPUNCT\t,\t_\t13\tpunct\t13:punct\t_",
+        "10\tJohn\tJohn\tPROPN\tNNP\t_\t13\tnsubj\t13:nsubj\t_",
+        "11\tand\tand\tCCONJ\tCC\t_\t12\tcc\t12:cc\t_",
+        "12\tI\tI\tPRON\tPRP\t_\t10\tconj\t10:conj:and\t_",
+        "13\tleft\tleave\tVERB\tVBD\t_\t3\tconj\t3:conj\tSpaceAfter=No",
+        "14\t,\t,\tPUNCT\t,\t_\t19\tpunct\t19:punct\t_",
+        "15\tand\tand\tCCONJ\tCC\t_\t19\tcc\t19:cc\t_",
+        "16\tall\tall\tDET\tDT\t_\t19\tnsubj\t19:nsubj\t_",
+        "17\twho\twho\tPRON\tWP\t_\t18\tnsubj\t18:nsubj\t_",
+        "18\tvolunteered\tvolunteer\tVERB\tVBD\t_\t16\tacl:relcl\t16:acl:relcl\t_",
+        "19\tstayed\tstay\tVERB\tVBD\t_\t3\tconj\t3:conj:and\tSpaceAfter=No",
+        "20\t.\t.\tPUNCT\t.\t_\t3\tpunct\t3:punct\t_"));
+    assertEquals("1 Plur", agreement(written, "were"));
+    // a VBP cannot be 3rd person singular, so "the police" is plural
+    assertEquals("3 Plur", agreement(written, "are"));
+    // the lowest person of the conjuncts, and plural
+    assertEquals("1 Plur", agreement(written, "left"));
+    // a relative pronoun agrees with its antecedent
+    assertEquals("3 Plur", agreement(written, "volunteered"));
+    assertEquals("3 Plur", agreement(written, "stayed"));
+  }
+
+  @Test
+  public void testVerbAgreementWithoutSubject() throws Exception {
+    // a VBP with no subject is first person, as in a diary, and "was" is
+    // third person
+    String written = annotateWithoutTrees(new Sentence("no-subject", null,
+        "# sent_id = no-subject",
+        "# text = Love it, was great.",
+        "1\tLove\tlove\tVERB\tVBP\t_\t0\troot\t0:root\t_",
+        "2\tit\tit\tPRON\tPRP\t_\t1\tobj\t1:obj\tSpaceAfter=No",
+        "3\t,\t,\tPUNCT\t,\t_\t5\tpunct\t5:punct\t_",
+        "4\twas\tbe\tAUX\tVBD\t_\t5\tcop\t5:cop\t_",
+        "5\tgreat\tgreat\tADJ\tJJ\t_\t1\tparataxis\t1:parataxis\tSpaceAfter=No",
+        "6\t.\t.\tPUNCT\t.\t_\t1\tpunct\t1:punct\t_"));
+    assertEquals("1 Sing", agreement(written, "Love"));
+    assertEquals("3 Sing", agreement(written, "was"));
   }
 
   @Test

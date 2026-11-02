@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -261,13 +262,11 @@ public class UniversalDependenciesFeatureAnnotator  {
       features.put("Case", pronounCase(sg, word));
     }
 
-    /* Determine the person of "was". */
-    if (word.tag().equals("VBD") &&
-        word.value().equalsIgnoreCase("was")) {
-      String person = wasPerson(sg, word);
-      if (person != null) {
-        features.put("Person", person);
-      }
+    /* Person and Number of past tense and non-3rd-person present verbs, from their subject. */
+    if (word.tag().equals("VBD") || word.tag().equals("VBP")) {
+      String[] agreement = verbAgreement(sg, word);
+      features.put("Person", agreement[0]);
+      features.put("Number", agreement[1]);
     }
 
     /* Determine features of relative and interrogative pronouns. */
@@ -332,61 +331,184 @@ public class UniversalDependenciesFeatureAnnotator  {
   }
 
 
+  private static final String[] FIRST_SING = { "1", "Sing" };
+  private static final String[] FIRST_PLUR = { "1", "Plur" };
+  private static final String[] SECOND_SING = { "2", "Sing" };
+  private static final String[] SECOND_PLUR = { "2", "Plur" };
+  private static final String[] THIRD_SING = { "3", "Sing" };
+  private static final String[] THIRD_PLUR = { "3", "Plur" };
+
   /**
-   * Determine the person of "was".
+   * The Person and Number of a pronoun, demonstrative or quantifier as a
+   * subject.  "You" is singular, as it nearly always is in EWT and GUM.
    */
-  private static String wasPerson(SemanticGraph sg, IndexedWord word) {
-    IndexedWord subj = sg.getChildWithReln(word, UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
+  private static final Map<String, String[]> SUBJECT_WORD_AGREEMENT = Map.ofEntries(
+    Map.entry("i", FIRST_SING), Map.entry("me", FIRST_SING),
+    Map.entry("we", FIRST_PLUR), Map.entry("us", FIRST_PLUR),
+    Map.entry("you", SECOND_SING), Map.entry("u", SECOND_SING), Map.entry("ya", SECOND_SING),
+    Map.entry("ye", SECOND_SING), Map.entry("thou", SECOND_SING),
+    Map.entry("y'all", SECOND_PLUR), Map.entry("yall", SECOND_PLUR),
+    Map.entry("he", THIRD_SING), Map.entry("she", THIRD_SING), Map.entry("it", THIRD_SING),
+    Map.entry("him", THIRD_SING), Map.entry("her", THIRD_SING),
+    Map.entry("they", THIRD_PLUR), Map.entry("them", THIRD_PLUR),
+    Map.entry("this", THIRD_SING), Map.entry("that", THIRD_SING),
+    Map.entry("these", THIRD_PLUR), Map.entry("those", THIRD_PLUR),
+    Map.entry("all", THIRD_PLUR), Map.entry("both", THIRD_PLUR), Map.entry("many", THIRD_PLUR),
+    Map.entry("few", THIRD_PLUR), Map.entry("several", THIRD_PLUR));
 
-    if (subj == null) {
-      subj = sg.getChildWithReln(word, UniversalEnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT);
+  /** The tags of the words in SUBJECT_WORD_AGREEMENT */
+  private static final Set<String> SUBJECT_WORD_TAGS = Set.of("PRP", "DT", "PDT", "JJ");
+
+  /** Relative pronouns, which agree with their antecedent */
+  private static final Set<String> RELATIVE_PRONOUNS = Set.of("that", "who", "which", "whom");
+
+  /**
+   * The Person and Number of a verb tagged VBD or VBP, as in EWT and GUM.
+   *<br>
+   * They come from the subject of the verb, or of its head if the verb is
+   * an auxiliary or a copula.  A conjunct without a subject shares the
+   * subject of the first conjunct, and a reduced relative agrees with the
+   * noun it modifies.  The form of the verb settles the number where it
+   * can: a third person subject of a VBP or "were" is plural, and "was" is
+   * singular.  Without a subject, a VBP is first person singular ("Love
+   * it"), "were" is plural, and other verbs are third person singular
+   * ("Was great").
+   */
+  private static String[] verbAgreement(SemanticGraph sg, IndexedWord verb) {
+    String[] agreement = subjectAgreement(sg, verb);
+    String word = verb.value().toLowerCase();
+    if (agreement == null) {
+      if (verb.tag().equals("VBP")) {
+        agreement = FIRST_SING;
+      } else if (word.equals("were")) {
+        agreement = THIRD_PLUR;
+      } else {
+        agreement = THIRD_SING;
+      }
     }
-
-    /* A subject of its own settles the person: only "I" is first person. */
-    if (subj != null) {
-      return subj.word().equalsIgnoreCase("i") ? "1" : "3";
+    if (agreement[0].equals("3") && (verb.tag().equals("VBP") || word.equals("were"))) {
+      agreement = THIRD_PLUR;
     }
+    if (word.equals("was")) {
+      agreement = new String[] { agreement[0], "Sing" };
+    }
+    return agreement;
+  }
 
-    /* So does a clausal subject or an expletive, which are third person. */
-    for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(word)) {
-      GrammaticalRelation rel = edge.getRelation();
-      if (UniversalEnglishGrammaticalRelations.SUBJECT.isAncestor(rel) ||
-          UniversalEnglishGrammaticalRelations.EXPLETIVE.equals(rel)) {
-        return "3";
+  /**
+   * The Person and Number of the subject of a verb, or null if neither it
+   * nor anything it shares a subject with has one.  A clausal subject or an
+   * expletive is third person singular.
+   */
+  private static String[] subjectAgreement(SemanticGraph sg, IndexedWord verb) {
+    IndexedWord head = verb;
+    IndexedWord parent = sg.getParent(verb);
+    if (parent != null) {
+      GrammaticalRelation rel = sg.getEdge(parent, verb).getRelation();
+      if (UniversalEnglishGrammaticalRelations.AUX_MODIFIER.equals(rel) ||
+          UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER.equals(rel) ||
+          UniversalEnglishGrammaticalRelations.COPULA.equals(rel)) {
+        head = parent;
       }
     }
 
-    /* Without a subject, look for one on the head of an auxiliary,
-       a copula or a conjunct. */
-    IndexedWord parent = sg.getParent(word);
-    if (parent == null) {
-      return null;
+    // the depth limit is only a guard against a malformed graph
+    for (int depth = 0; head != null && depth < 20; depth++) {
+      boolean expletive = false;
+      for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(head)) {
+        GrammaticalRelation rel = edge.getRelation();
+        if (UniversalEnglishGrammaticalRelations.CLAUSAL_SUBJECT.isAncestor(rel)) {
+          return THIRD_SING;
+        }
+        if (UniversalEnglishGrammaticalRelations.SUBJECT.isAncestor(rel)) {
+          return nounAgreement(sg, edge.getDependent(), 0, true);
+        }
+        if (UniversalEnglishGrammaticalRelations.EXPLETIVE.equals(rel)) {
+          expletive = true;
+        }
+      }
+      if (expletive) {
+        return THIRD_SING;
+      }
+
+      parent = sg.getParent(head);
+      if (parent == null) {
+        return null;
+      }
+      GrammaticalRelation rel = sg.getEdge(parent, head).getRelation();
+      if (UniversalEnglishGrammaticalRelations.CONJUNCT.isAncestor(rel)) {
+        head = parent;
+      } else if (UniversalEnglishGrammaticalRelations.CLAUSAL_MODIFIER.equals(rel)) {
+        return nounAgreement(sg, parent, 0, true);
+      } else {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * The Person and Number of a word as a subject.  Pronouns, demonstratives
+   * and quantifiers have their own; nouns are third person, plural if they
+   * are tagged plural; a relative pronoun agrees with its antecedent.
+   * Subjects joined by "and" are plural, and take the lowest person among
+   * them ("my wife and I" is first person), while subjects joined by "or"
+   * or "nor" agree with the last of them.
+   */
+  private static String[] nounAgreement(SemanticGraph sg, IndexedWord word, int depth, boolean coordination) {
+    String lower = word.value().toLowerCase();
+    String tag = word.tag();
+    if (SUBJECT_WORD_TAGS.contains(tag) && SUBJECT_WORD_AGREEMENT.containsKey(lower)) {
+      return SUBJECT_WORD_AGREEMENT.get(lower);
     }
 
-    SemanticGraphEdge edge = sg.getEdge(parent, word);
-    if (edge == null) {
-      return null;
+    if (coordination) {
+      IndexedWord last = null;
+      List<IndexedWord> members = new ArrayList<>();
+      members.add(word);
+      for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(word)) {
+        if (UniversalEnglishGrammaticalRelations.CONJUNCT.isAncestor(edge.getRelation())) {
+          IndexedWord conjunct = edge.getDependent();
+          members.add(conjunct);
+          if (last == null || conjunct.index() > last.index()) {
+            last = conjunct;
+          }
+        }
+      }
+      if (last != null) {
+        for (IndexedWord cc : sg.getChildrenWithReln(last, UniversalEnglishGrammaticalRelations.COORDINATION)) {
+          String conjunction = cc.value().toLowerCase();
+          if (conjunction.equals("or") || conjunction.equals("nor")) {
+            return nounAgreement(sg, last, depth + 1, false);
+          }
+        }
+        String person = "3";
+        for (IndexedWord member : members) {
+          String memberPerson = nounAgreement(sg, member, depth + 1, false)[0];
+          if (memberPerson.compareTo(person) < 0) {
+            person = memberPerson;
+          }
+        }
+        return new String[] { person, "Plur" };
+      }
     }
 
-    if (UniversalEnglishGrammaticalRelations.AUX_MODIFIER.equals(edge.getRelation()) ||
-        UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER.equals(edge.getRelation())) {
-      return wasPerson(sg, parent);
+    if (depth < 5 && (tag.equals("WDT") || tag.equals("WP")) && RELATIVE_PRONOUNS.contains(lower)) {
+      IndexedWord clause = sg.getParent(word);
+      IndexedWord antecedent = clause == null ? null : sg.getParent(clause);
+      if (antecedent != null &&
+          UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER.equals(sg.getEdge(antecedent, clause).getRelation())) {
+        return nounAgreement(sg, antecedent, depth + 1, true);
+      }
     }
 
-    /* As a copula, "was" shares the subject of the predicate.  A predicate
-       with a clausal subject or no subject leaves it third person, as in
-       "What triggered the clash was a skirmish". */
-    if (UniversalEnglishGrammaticalRelations.COPULA.equals(edge.getRelation())) {
-      String person = wasPerson(sg, parent);
-      return person != null ? person : "3";
+    if (tag.equals("NNS") || tag.equals("NNPS") || tag.equals("JJ") || tag.equals("JJS")) {
+      return THIRD_PLUR;
     }
-
-    if (UniversalEnglishGrammaticalRelations.CONJUNCT.isAncestor(edge.getRelation())) {
-      /* Check if the subject of the head of a conjunction is "I". */
-      return wasPerson(sg, parent);
+    if (tag.equals("CD")) {
+      return (lower.equals("one") || lower.equals("1")) ? THIRD_SING : THIRD_PLUR;
     }
-
-    return "3";
+    return THIRD_SING;
   }
 
 
