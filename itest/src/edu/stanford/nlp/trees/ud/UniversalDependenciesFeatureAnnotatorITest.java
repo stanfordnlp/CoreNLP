@@ -541,6 +541,31 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
+  public void testOrdinals() throws Exception {
+    // ordinal adjectives and adverbs are NumType=Ord, and so are ordinal
+    // nouns written with digits, but not a noun such as "second"
+    String[] conllu = {
+        "# sent_id = ordinals",
+        "# text = First , the eighth and twenty-first second of Dec. 10th",
+        "1\tFirst\tfirst\tADV\tRB\t_\t7\tadvmod\t7:advmod\t_",
+        "2\t,\t,\tPUNCT\t,\t_\t1\tpunct\t1:punct\t_",
+        "3\tthe\tthe\tDET\tDT\t_\t7\tdet\t7:det\t_",
+        "4\teighth\teighth\tADJ\tJJ\t_\t7\tamod\t7:amod\t_",
+        "5\tand\tand\tCCONJ\tCC\t_\t6\tcc\t6:cc\t_",
+        "6\ttwenty-first\ttwenty-first\tADJ\tJJ\t_\t4\tconj\t4:conj:and\t_",
+        "7\tsecond\tsecond\tNOUN\tNN\t_\t0\troot\t0:root\t_",
+        "8\tof\tof\tADP\tIN\t_\t10\tcase\t10:case\t_",
+        "9\tDec.\tDec.\tPROPN\tNNP\t_\t10\tcompound\t10:compound\t_",
+        "10\t10th\t10th\tNOUN\tNN\t_\t7\tnmod\t7:nmod:of\t_"};
+    String written = annotateWithoutTrees(new Sentence("ordinals", null, conllu));
+    assertEquals("NumForm=Word|NumType=Ord", column(written, "First", 5));
+    assertEquals("Degree=Pos|NumForm=Word|NumType=Ord", column(written, "eighth", 5));
+    assertEquals("Degree=Pos|NumForm=Word|NumType=Ord", column(written, "twenty-first", 5));
+    assertEquals("Number=Sing", column(written, "second", 5));
+    assertEquals("Number=Sing|NumForm=Combi|NumType=Ord", column(written, "10th", 5));
+  }
+
+  @Test
   public void testCopularWasWithI() throws Exception {
     // the subject of a copula is on its predicate
     assertEquals("Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin", featsWithoutTrees("was",

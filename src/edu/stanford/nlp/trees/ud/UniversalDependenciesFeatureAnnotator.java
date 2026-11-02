@@ -117,7 +117,17 @@ public class UniversalDependenciesFeatureAnnotator  {
     return features;
   }
 
-  private static final String ORDINAL_EXPRESSION = "^(first|second|third|fourth|fifth|sixth|seventh|eigth|ninth|tenth|([0-9,.]+(th|st|nd|rd)))$";
+  private static final String ORDINAL_UNITS = "first|second|third|fourth|fifth|sixth|seventh|eigth|eighth|ninth";
+
+  /**
+   * Ordinals written as words up to ninety-ninth, or with digits.
+   * "Hundredth" and above are left out, since they are usually fractions.
+   */
+  private static final String ORDINAL_EXPRESSION =
+    "^((twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)-(" + ORDINAL_UNITS + ")|" +
+    ORDINAL_UNITS + "|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|" +
+    "seventeenth|eighteenth|nineteenth|twentieth|thirtieth|fortieth|fiftieth|sixtieth|" +
+    "seventieth|eightieth|ninetieth|([0-9,.]+(th|st|nd|rd)))$";
 
   private static final String MULTIPLICATIVE_EXPRESSION = "^(once|twice)$";
 
@@ -165,12 +175,20 @@ public class UniversalDependenciesFeatureAnnotator  {
     return previous != null && "CD".equals(previous.tag()) && previous.value().matches(".*\\p{N}.*");
   }
 
+  /**
+   * Ordinal adjectives and adverbs, as in EWT and GUM.  An ordinal noun is
+   * only counted when it is written with digits, as in "Dec. 10th": "a
+   * second" and "a third" are usually a unit of time and a fraction.
+   */
   private static boolean isOrdinal(String word, String pos) {
-
-    if ( ! pos.equals("JJ"))
+    String lower = word.toLowerCase();
+    if ( ! lower.matches(ORDINAL_EXPRESSION))
       return false;
 
-    return word.toLowerCase().matches(ORDINAL_EXPRESSION);
+    if (pos.equals("JJ") || pos.equals("RB"))
+      return true;
+
+    return pos.equals("NN") && lower.matches(".*[0-9].*");
   }
 
   private static boolean isMultiplicative(String word, String pos) {
