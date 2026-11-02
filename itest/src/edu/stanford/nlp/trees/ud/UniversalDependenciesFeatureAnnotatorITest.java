@@ -541,6 +541,19 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
+  public void testRomanNumeral() {
+    // Roman letters are a numeral unless a number written with digits comes
+    // right before them, in which case they are a multiplier such as M
+    assertTrue(UniversalDependenciesFeatureAnnotator.isRomanNumeral("IV", "Title", "NNP"));
+    assertTrue(UniversalDependenciesFeatureAnnotator.isRomanNumeral("iv", ",", ","));
+    assertTrue(UniversalDependenciesFeatureAnnotator.isRomanNumeral("XIII", null, null));
+    assertTrue(UniversalDependenciesFeatureAnnotator.isRomanNumeral("M", "two", "CD"));
+    assertTrue(!UniversalDependenciesFeatureAnnotator.isRomanNumeral("M", "5", "CD"));
+    assertTrue(!UniversalDependenciesFeatureAnnotator.isRomanNumeral("mm", "10", "CD"));
+    assertTrue(!UniversalDependenciesFeatureAnnotator.isRomanNumeral("IVY", "Title", "NNP"));
+  }
+
+  @Test
   public void testOrdinals() throws Exception {
     // ordinal adjectives and adverbs are NumType=Ord, and so are ordinal
     // nouns written with digits, but not a noun such as "second"
