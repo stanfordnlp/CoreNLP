@@ -2131,6 +2131,65 @@ public class SemgrexTest {
                  SemgrexPattern.matchComment(name, new SemgrexMatch(pattern, matcher)));
   }
 
+  /**
+   * A pattern file has one pattern to a line, with blank lines and
+   * comments skipped, and a line which is not a pattern is an error
+   * naming that line
+   */
+  @Test
+  public void testReadPatterns() {
+    List<SemgrexPattern> patterns = SemgrexPattern.readPatterns(String.join("\n",
+                                                                            "# subjects",
+                                                                            "{} >nsubj {}",
+                                                                            "",
+                                                                            "   ",
+                                                                            "# and objects",
+                                                                            "{} >obj {}",
+                                                                            ""));
+    assertEquals(2, patterns.size());
+    assertEquals(SemgrexPattern.compile("{} >nsubj {}"), patterns.get(0));
+    assertEquals(SemgrexPattern.compile("{} >obj {}"), patterns.get(1));
+
+    // a pattern given on the command line is a file of one line
+    assertEquals(1, SemgrexPattern.readPatterns("{} >nsubj {}").size());
+
+    SemgrexParseException e = assertThrows(SemgrexParseException.class, () ->
+      SemgrexPattern.readPatterns("{} >nsubj {}\n\n{} >obj\n"));
+    assertTrue(e.getMessage(), e.getMessage().contains("line 3"));
+    assertThrows(SemgrexParseException.class, () -> SemgrexPattern.readPatterns("# nothing but a comment\n\n"));
+  }
+
+  /**
+   * The matches of several patterns are put together by sentence, in
+   * corpus order, so that a sentence matched by more than one is
+   * reported once, with the matches of the first pattern first
+   */
+  @Test
+  public void testMatchAllPatterns() {
+    List<CoreMap> sentences = new ArrayList<>();
+    for (String parse : new String[] { "[ate subj>Bill obj>muffins]", "[ran subj>Bill]", "[saw obj>muffins]", "[slept]" }) {
+      CoreMap sentence = new ArrayCoreMap();
+      sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, SemanticGraph.valueOf(parse));
+      sentences.add(sentence);
+    }
+    SemgrexPattern objects = SemgrexPattern.compile("{} >obj {}=obj");
+    SemgrexPattern subjects = SemgrexPattern.compile("{} >subj {}=subj");
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = SemgrexPattern.matchAll(Arrays.asList(objects, subjects), sentences);
+
+    assertEquals(3, matches.size());
+    assertSame(sentences.get(0), matches.get(0).first());
+    assertSame(sentences.get(1), matches.get(1).first());
+    assertSame(sentences.get(2), matches.get(2).first());
+    // the first sentence once, with the object first, as that pattern came first
+    assertEquals(2, matches.get(0).second().size());
+    assertEquals("muffins", matches.get(0).second().get(0).getNode("obj").word());
+    assertEquals("Bill", matches.get(0).second().get(1).getNode("subj").word());
+
+    // the comment of each match names its own pattern
+    String comment = SemgrexPattern.matchComment(matches.get(0).second().get(1).matchedPattern.toString().trim(), matches.get(0).second().get(1));
+    assertTrue(comment, comment.contains(subjects.toString().trim()));
+  }
+
   public static void outputBatchResults(SemgrexPattern pattern, List<CoreMap> sentences) {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = pattern.matchSentences(sentences, false);
     for (Pair<CoreMap, List<SemgrexMatch>> sentenceMatch : matches) {

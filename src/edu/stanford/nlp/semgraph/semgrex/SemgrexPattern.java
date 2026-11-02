@@ -1020,10 +1020,67 @@ public abstract class SemgrexPattern implements Serializable  {
     return comment.toString();
   }
 
+  /**
+   * Reads the patterns of a pattern file, one to a line.  Blank lines and
+   * lines starting with {@code #}, which no pattern can, are skipped, so
+   * the patterns can be spaced out and commented.
+   *
+   * @param text the text of the file
+   * @return the patterns, in the order they appear
+   * @throws SemgrexParseException naming the line, if a line is not a pattern, or there are no patterns
+   */
+  static List<SemgrexPattern> readPatterns(String text) {
+    List<SemgrexPattern> patterns = new ArrayList<>();
+    String[] lines = text.split("\\R");
+    for (int i = 0; i < lines.length; ++i) {
+      String line = lines[i].trim();
+      if (line.isEmpty() || line.startsWith("#")) {
+        continue;
+      }
+      try {
+        patterns.add(SemgrexPattern.compile(line));
+      } catch (SemgrexParseException e) {
+        throw new SemgrexParseException("Could not read the pattern on line " + (i + 1) + ": " + line, e);
+      }
+    }
+    if (patterns.isEmpty()) {
+      throw new SemgrexParseException("No semgrex patterns found, only blank lines and comments");
+    }
+    return patterns;
+  }
+
+  /**
+   * Matches each pattern against the sentences, and puts each sentence's
+   * matches together, so that a sentence more than one pattern matches is
+   * reported once.  The sentences are in corpus order, and a sentence's
+   * matches are in the order of the patterns.
+   *
+   * @param patterns the patterns
+   * @param sentences the sentences, each with its graphs
+   * @return each sentence with at least one match, with its matches
+   */
+  static List<Pair<CoreMap, List<SemgrexMatch>>> matchAll(List<SemgrexPattern> patterns, List<CoreMap> sentences) {
+    Map<CoreMap, List<SemgrexMatch>> bySentence = new IdentityHashMap<>();
+    for (SemgrexPattern pattern : patterns) {
+      for (Pair<CoreMap, List<SemgrexMatch>> sentenceMatches : pattern.matchSentences(sentences, false)) {
+        bySentence.computeIfAbsent(sentenceMatches.first(), k -> new ArrayList<>()).addAll(sentenceMatches.second());
+      }
+    }
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = new ArrayList<>();
+    for (CoreMap sentence : sentences) {
+      List<SemgrexMatch> sentenceMatches = bySentence.get(sentence);
+      if (sentenceMatches != null) {
+        matches.add(new Pair<>(sentence, sentenceMatches));
+      }
+    }
+    return matches;
+  }
+
   /** Logs the command line arguments {@link #main} accepts. */
   public static void help() {
     log.info("Possible arguments for SemgrexPattern:");
-    log.info(PATTERN + ": what pattern to use for matching");
+    log.info(PATTERN + ": what pattern to use for matching, or a file of patterns, one to a line.");
+    log.info("  Blank lines and lines starting with # are skipped.  A sentence matched by several patterns is printed once.");
     log.info(TREE_FILE + ": one or more files of trees to process");
     log.info(CONLLU_FILE + ": one or more CoNLL-U files of dependency trees to process.");
     log.info("  Each may be a file, a directory, or a pattern such as 'es_gsd-ud-*.conllu'.");
@@ -1038,7 +1095,11 @@ public abstract class SemgrexPattern implements Serializable  {
   }
 
   /**
-   * Prints out all matches of a semgrex pattern on a file of dependencies.
+   * Prints out all matches of one or more semgrex patterns on files of dependencies.
+   *<br>
+   * The {@code -pattern} is a pattern, or a file of patterns, one to a
+   * line, as {@link #readPatterns} describes.  A sentence which more than
+   * one of them matches is printed once, with the matches of each.
    * <p>
    * Usage:<br>
    * java edu.stanford.nlp.semgraph.semgrex.SemgrexPattern [args]
@@ -1055,13 +1116,14 @@ public abstract class SemgrexPattern implements Serializable  {
       help();
       System.exit(2);
     }
-    SemgrexPattern semgrex;
     String patternArg = SemgrexUtils.firstArg(argsMap, PATTERN, null);
+    String patternText;
     try {
-      semgrex = SemgrexPattern.compile(IOUtils.slurpFile(patternArg));
+      patternText = IOUtils.slurpFile(patternArg);
     } catch(IOException e) {
-      semgrex = SemgrexPattern.compile(patternArg);
+      patternText = patternArg;
     }
+    List<SemgrexPattern> patterns = readPatterns(patternText);
 
     // ROOT, since this is matched against the names of enum constants
     // rather than against text.  in a Turkish locale the default would
@@ -1108,7 +1170,7 @@ public abstract class SemgrexPattern implements Serializable  {
       }
     }
 
-    List<Pair<CoreMap, List<SemgrexMatch>>> matches = semgrex.matchSentences(sentences, false);
+    List<Pair<CoreMap, List<SemgrexMatch>>> matches = matchAll(patterns, sentences);
 
     // UTF-8 whatever the locale, as the treebanks are, rather than letting
     // a terminal in the C locale turn every accented letter into ?
@@ -1123,6 +1185,9 @@ public abstract class SemgrexPattern implements Serializable  {
         for (SemgrexMatch matcher : sentenceMatches.second()) {
           i++;
           log.info("Match " + i + " at: " + matcher.getMatch().toString(CoreLabel.OutputFormat.VALUE_INDEX));
+          if (patterns.size() > 1) {
+            log.info("  pattern: " + matcher.matchedPattern.toString().trim());
+          }
           List<String> nodeNames = Generics.newArrayList();
           nodeNames.addAll(matcher.getNodeNames());
           Collections.sort(nodeNames);
@@ -1144,14 +1209,13 @@ public abstract class SemgrexPattern implements Serializable  {
             sentenceFiles.getOrDefault(sentence, ""));
       } else if (outputFormat == OutputFormat.CONLLU) {
         CoNLLUDocumentWriter writer = new CoNLLUDocumentWriter();
-        String semgrexName = semgrex.toString().trim();
         List<String> comments = new ArrayList<>(sentence.get(CoreAnnotations.CommentsAnnotation.class));
         // TODO: maybe stop putting comments on the graphs?
         if (comments.size() == 0) {
           comments.addAll(graph.getComments());
         }
         for (SemgrexMatch matcher : sentenceMatches.second()) {
-          comments.add(matchComment(semgrexName, matcher));
+          comments.add(matchComment(matcher.matchedPattern.toString().trim(), matcher));
         }
         comments.addAll(highlightComments(sentenceMatches.second()));
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);
