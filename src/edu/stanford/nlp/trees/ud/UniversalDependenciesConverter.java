@@ -141,18 +141,39 @@ public class UniversalDependenciesConverter {
 
   private static Morphology MORPH = new Morphology();
 
+  /**
+   * The lemma of a word, given the word before it.  A Roman numeral keeps
+   * its form, in either case, as in EWT and GUM ("II", "iv"); every other
+   * word gets its lemma from Morphology.
+   */
+  private static String lemma(String word, String tag, CoreLabel previous) {
+    if (("CD".equals(tag) || "LS".equals(tag)) &&
+        UniversalDependenciesFeatureAnnotator.isRomanNumeral(word,
+                                                             previous == null ? null : previous.word(),
+                                                             previous == null ? null : previous.tag())) {
+      return word;
+    }
+    return MORPH.lemma(word, tag);
+  }
+
   private static void replaceAllLemmata(SemanticGraph sg) {
-    sg.vertexListSorted().forEach(w -> {
-        w.setLemma(MORPH.lemma(w.word(), w.tag()));
-    });
+    List<IndexedWord> words = sg.vertexListSorted();
+    for (int i = 0; i < words.size(); i++) {
+      IndexedWord w = words.get(i);
+      CoreLabel previous = i > 0 ? words.get(i - 1).backingLabel() : null;
+      w.setLemma(lemma(w.word(), w.tag(), previous));
+    }
   }
 
   private static void addLemmata(SemanticGraph sg) {
-    sg.vertexListSorted().forEach(w -> {
-      if(w.lemma() == null && !isGoesWith(sg, w)) {
-        w.setLemma(MORPH.lemma(w.word(), w.tag()));
+    List<IndexedWord> words = sg.vertexListSorted();
+    for (int i = 0; i < words.size(); i++) {
+      IndexedWord w = words.get(i);
+      if (w.lemma() == null && !isGoesWith(sg, w)) {
+        CoreLabel previous = i > 0 ? words.get(i - 1).backingLabel() : null;
+        w.setLemma(lemma(w.word(), w.tag(), previous));
       }
-    });
+    }
   }
 
   /**
@@ -171,12 +192,14 @@ public class UniversalDependenciesConverter {
   }
 
   private static void addLemmata(Tree tree) {
-    tree.yield().forEach(l -> {
-      CoreLabel w = (CoreLabel) l;
-      if(w.lemma() == null) {
-        w.setLemma(MORPH.lemma(w.word(), w.tag()));
+    List<Label> leaves = tree.yield();
+    for (int i = 0; i < leaves.size(); i++) {
+      CoreLabel w = (CoreLabel) leaves.get(i);
+      if (w.lemma() == null) {
+        CoreLabel previous = i > 0 ? (CoreLabel) leaves.get(i - 1) : null;
+        w.setLemma(lemma(w.word(), w.tag(), previous));
       }
-    });
+    }
   }
 
   /** variables for accessing NERClassifierCombiner via reflection **/

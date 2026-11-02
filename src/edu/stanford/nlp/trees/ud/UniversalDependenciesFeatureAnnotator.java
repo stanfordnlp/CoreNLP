@@ -163,16 +163,26 @@ public class UniversalDependenciesFeatureAnnotator  {
     if (word.matches(".*\\p{N}.*")) {
       return word.matches(".*\\p{L}.*") ? "Combi" : "Digit";
     }
-    if (word.matches(ROMAN_EXPRESSION) && !followsNumber(sg, index)) {
-      return "Roman";
+    if (word.matches(ROMAN_EXPRESSION)) {
+      IndexedWord previous = sg.getNodeByIndexSafe(index - 1);
+      if (isRomanNumeral(word, previous == null ? null : previous.value(), previous == null ? null : previous.tag())) {
+        return "Roman";
+      }
     }
     return "Word";
   }
 
-  /** Whether the word before this one is a number written with digits */
-  private static boolean followsNumber(SemanticGraph sg, int index) {
-    IndexedWord previous = sg.getNodeByIndexSafe(index - 1);
-    return previous != null && "CD".equals(previous.tag()) && previous.value().matches(".*\\p{N}.*");
+  /**
+   * Whether a word is a Roman numeral, given the word before it and that
+   * word's tag.  Roman letters right after a number written with digits are
+   * a multiplier instead, as in "5 M" or "10 mm" for millions.
+   */
+  static boolean isRomanNumeral(String word, String previousWord, String previousTag) {
+    if ( ! word.matches(ROMAN_EXPRESSION))
+      return false;
+
+    boolean afterNumber = "CD".equals(previousTag) && previousWord != null && previousWord.matches(".*\\p{N}.*");
+    return ! afterNumber;
   }
 
   /**
