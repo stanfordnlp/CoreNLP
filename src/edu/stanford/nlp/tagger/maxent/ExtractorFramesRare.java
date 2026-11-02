@@ -935,7 +935,7 @@ class ExtractorCapDistLC extends RareExtractor {
 /**
  * This feature applies when the word is capitalized
  * and the previous lower case is infinity
- * and the lower cased version of it has occured 2 or more times with tag t
+ * and the lower cased version of it has occurred 2 or more times with tag t
  * false if the word was not seen.
  * create features only for tags that are the same as the tag t
  */

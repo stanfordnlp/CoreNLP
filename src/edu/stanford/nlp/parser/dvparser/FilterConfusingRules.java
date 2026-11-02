@@ -23,7 +23,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * <br>
  * One situation where this happens often is when grammar compaction
  * is turned on; this can often result in a Tree where there is no
- * BinaryRule which could explicitely create a particular node, but
+ * BinaryRule which could explicitly create a particular node, but
  * the Tree is still valid.  However, for various applications of the
  * DVParser, this kind of Tree is useless.  A good way to eliminate
  * most of this kind of tree is to make sure the parser is trained

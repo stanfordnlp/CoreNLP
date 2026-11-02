@@ -340,7 +340,7 @@ public abstract class AbstractStochasticCachingDiffFunction extends AbstractCach
     }else{
 
       //
-      //If we dont want to calculate anything we just want the last values.  This is especially usefull if you know
+      //If we dont want to calculate anything we just want the last values.  This is especially useful if you know
       //   the values have already been calculated, and you don't want to waste time comparing the entire
       //   array of x's and v's.
       //

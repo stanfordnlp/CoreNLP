@@ -101,7 +101,7 @@ public class TransformXML<T>  {
       // echo it than ignore it
       outWriter.print(XMLUtils.escapeXML(textToBeTransformed.toString()));
       // we need to flush because there are no other ways we
-      // explicitely flush
+      // explicitly flush
       outWriter.flush();
     }
     
