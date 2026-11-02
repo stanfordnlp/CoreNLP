@@ -711,8 +711,8 @@ public class UniversalDependenciesFeatureAnnotator  {
       log.info("java " +
                UniversalDependenciesFeatureAnnotator.class.getCanonicalName() +
                " -conlluFile conllu_file (-treeFile tree_file | -noTrees) [-addUPOS -escapeParenthesis]");
-      log.info("  -noTrees annotates without constituency trees.  The trees are how an imperative is");
-      log.info("  told apart from an infinitive, so without them every VB is marked as an infinitive.");
+      log.info("  -noTrees annotates without constituency trees.  Imperatives are then found from the");
+      log.info("  dependencies alone, without the S-IMP tags of the trees.");
   }
 
   /**
@@ -721,11 +721,11 @@ public class UniversalDependenciesFeatureAnnotator  {
    * conlluFile is the treebank and treeFile holds the constituency trees of
    * the same sentences in the same order.  The trees are how an imperative
    * is told apart from an infinitive, which the PTB tags alone do not do.
-   * noTrees annotates without them instead, marking every VB as an
-   * infinitive; it is a flag of its own so that leaving out treeFile by
-   * accident is not taken as asking for that.  addUPOS takes the UPOS tags
-   * from the trees as well, and escapeParenthesis leaves parentheses
-   * escaped in the output.
+   * noTrees annotates without them instead, finding imperatives from the
+   * dependencies alone; it is a flag of its own so that leaving out
+   * treeFile by accident is not taken as asking for that.  addUPOS takes
+   * the UPOS tags from the trees as well, and escapeParenthesis leaves
+   * parentheses escaped in the output.
    */
   public static void annotate(Properties props, PrintStream out) throws IOException {
     String treeFile = props.getProperty("treeFile");
