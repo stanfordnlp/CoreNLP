@@ -296,10 +296,8 @@ public class UniversalDependenciesFeatureAnnotator  {
     }
 
     /* Voice feature. */
-    if (word.tag().equals("VBN")) {
-      if (sg.hasChildWithReln(word, UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER)) {
-        features.put("Voice", "Pass");
-      }
+    if (word.tag().equals("VBN") && isPassive(sg, word)) {
+      features.put("Voice", "Pass");
     }
 
     return features;
@@ -603,6 +601,76 @@ public class UniversalDependenciesFeatureAnnotator  {
     }
 
     return false;
+  }
+
+  /**
+   * Whether {@code word} has an auxiliary which is not passive and not a
+   * modal: a form of "have", as in "has eaten", or "'s" for "has".  "'d"
+   * counts even if it is tagged MD, since "would" takes a bare verb: with
+   * a participle, as in "he 'd cooked", it is "had".
+   */
+  private static boolean hasNonModalAux(SemanticGraph sg, IndexedWord word) {
+    for (IndexedWord aux : sg.getChildrenWithReln(word, UniversalEnglishGrammaticalRelations.AUX_MODIFIER)) {
+      if ( ! "MD".equals(aux.tag()) || aux.value().equals("'d") || aux.value().equals("\u2019d")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Whether {@code word} has an auxiliary of any kind */
+  private static boolean hasAnyAux(SemanticGraph sg, IndexedWord word) {
+    return sg.hasChildWithReln(word, UniversalEnglishGrammaticalRelations.AUX_MODIFIER) ||
+      sg.hasChildWithReln(word, UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER);
+  }
+
+  /**
+   * Whether a VBN is passive, as in EWT and GUM.  A VBN with a passive
+   * auxiliary is passive, and so is a VBN with no auxiliary but a modal,
+   * as in "born in 1950" or "suspected osteoporosis".  A VBN with any other
+   * auxiliary is not: that is a perfect, as in "has eaten" or "he 's
+   * said", or a stative such as "I 'm supposed to", and so is a conjunct
+   * which shares that auxiliary with the first conjunct, as in "has eaten
+   * and drunk".  "Been" as an auxiliary or a copula is not passive, and
+   * neither is "got" without an auxiliary, which is "have got" with the
+   * "have" left out: "Got ta go".
+   */
+  private static boolean isPassive(SemanticGraph sg, IndexedWord word) {
+    IndexedWord parent = sg.getParent(word);
+    if (parent != null) {
+      GrammaticalRelation rel = sg.getEdge(parent, word).getRelation();
+      if (UniversalEnglishGrammaticalRelations.AUX_MODIFIER.equals(rel) ||
+          UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER.equals(rel) ||
+          UniversalEnglishGrammaticalRelations.COPULA.equals(rel) ||
+          rel.getShortName().equals("goeswith")) {
+        return false;
+      }
+    }
+    if (sg.hasChildWithReln(word, UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER)) {
+      return true;
+    }
+    if (hasNonModalAux(sg, word)) {
+      return false;
+    }
+    if (word.value().equalsIgnoreCase("got") || word.value().equalsIgnoreCase("gotten")) {
+      return false;
+    }
+    if ( ! hasAnyAux(sg, word)) {
+      // a conjunct with no auxiliary of its own shares the auxiliaries of the first conjunct
+      IndexedWord first = word;
+      IndexedWord head = parent;
+      while (head != null &&
+             UniversalEnglishGrammaticalRelations.CONJUNCT.isAncestor(sg.getEdge(head, first).getRelation()) &&
+             ! hasAnyAux(sg, first)) {
+        first = head;
+        head = sg.getParent(first);
+      }
+      if (first != word && "VBN".equals(first.tag()) && hasNonModalAux(sg, first) &&
+          ! sg.hasChildWithReln(first, UniversalEnglishGrammaticalRelations.AUX_PASSIVE_MODIFIER)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

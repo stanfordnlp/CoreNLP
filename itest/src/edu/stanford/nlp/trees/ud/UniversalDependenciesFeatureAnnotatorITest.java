@@ -579,6 +579,67 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
+  public void testPassiveParticiples() throws Exception {
+    // a VBN with no auxiliary is passive, as is one with a passive
+    // auxiliary, but a perfect is not, and neither is a conjunct which
+    // shares the perfect's auxiliary, or "been"
+    String[] conllu = {
+        "# sent_id = passive",
+        "# text = Born in Paris , the suspected thief has been arrested , and he has eaten and drunk .",
+        "1\tBorn\tbear\tVERB\tVBN\t_\t10\tadvcl\t10:advcl\t_",
+        "2\tin\tin\tADP\tIN\t_\t3\tcase\t3:case\t_",
+        "3\tParis\tParis\tPROPN\tNNP\t_\t1\tobl\t1:obl:in\t_",
+        "4\t,\t,\tPUNCT\t,\t_\t1\tpunct\t1:punct\t_",
+        "5\tthe\tthe\tDET\tDT\t_\t7\tdet\t7:det\t_",
+        "6\tsuspected\tsuspect\tVERB\tVBN\t_\t7\tamod\t7:amod\t_",
+        "7\tthief\tthief\tNOUN\tNN\t_\t10\tnsubj:pass\t10:nsubj:pass\t_",
+        "8\thas\thave\tAUX\tVBZ\t_\t10\taux\t10:aux\t_",
+        "9\tbeen\tbe\tAUX\tVBN\t_\t10\taux:pass\t10:aux:pass\t_",
+        "10\tarrested\tarrest\tVERB\tVBN\t_\t0\troot\t0:root\t_",
+        "11\t,\t,\tPUNCT\t,\t_\t15\tpunct\t15:punct\t_",
+        "12\tand\tand\tCCONJ\tCC\t_\t15\tcc\t15:cc\t_",
+        "13\the\the\tPRON\tPRP\t_\t15\tnsubj\t15:nsubj\t_",
+        "14\thas\thave\tAUX\tVBZ\t_\t15\taux\t15:aux\t_",
+        "15\teaten\teat\tVERB\tVBN\t_\t10\tconj\t10:conj:and\t_",
+        "16\tand\tand\tCCONJ\tCC\t_\t17\tcc\t17:cc\t_",
+        "17\tdrunk\tdrink\tVERB\tVBN\t_\t15\tconj\t15:conj:and\t_",
+        "18\t.\t.\tPUNCT\t.\t_\t10\tpunct\t10:punct\t_"};
+    String written = annotateWithoutTrees(new Sentence("passive", null, conllu));
+    assertEquals("Tense=Past|VerbForm=Part|Voice=Pass", column(written, "Born", 5));
+    assertEquals("Tense=Past|VerbForm=Part|Voice=Pass", column(written, "suspected", 5));
+    assertEquals("Tense=Past|VerbForm=Part|Voice=Pass", column(written, "arrested", 5));
+    assertEquals("Tense=Past|VerbForm=Part", column(written, "been", 5));
+    assertEquals("Tense=Past|VerbForm=Part", column(written, "eaten", 5));
+    assertEquals("Tense=Past|VerbForm=Part", column(written, "drunk", 5));
+  }
+
+  @Test
+  public void testContractedHadIsNotPassive() throws Exception {
+    // "would" takes a bare verb, so 'd with a participle is "had", even
+    // when it is tagged MD
+    assertEquals("Tense=Past|VerbForm=Part", featsWithoutTrees("cooked",
+        "# sent_id = contracted-had",
+        "# text = He'd cooked.",
+        "1-2\tHe'd\t_\t_\t_\t_\t_\t_\t_\t_",
+        "1\tHe\the\tPRON\tPRP\t_\t3\tnsubj\t3:nsubj\t_",
+        "2\t'd\twould\tAUX\tMD\t_\t3\taux\t3:aux\t_",
+        "3\tcooked\tcook\tVERB\tVBN\t_\t0\troot\t0:root\tSpaceAfter=No",
+        "4\t.\t.\tPUNCT\t.\t_\t3\tpunct\t3:punct\t_"));
+  }
+
+  @Test
+  public void testBareGotIsNotPassive() throws Exception {
+    // "got" without an auxiliary is "have got" with the "have" left out
+    assertEquals("Tense=Past|VerbForm=Part", featsWithoutTrees("Got",
+        "# sent_id = got",
+        "# text = Got any ideas?",
+        "1\tGot\tget\tVERB\tVBN\t_\t0\troot\t0:root\t_",
+        "2\tany\tany\tDET\tDT\t_\t3\tdet\t3:det\t_",
+        "3\tideas\tidea\tNOUN\tNNS\t_\t1\tobj\t1:obj\tSpaceAfter=No",
+        "4\t?\t?\tPUNCT\t.\t_\t1\tpunct\t1:punct\t_"));
+  }
+
+  @Test
   public void testCopularWasWithI() throws Exception {
     // the subject of a copula is on its predicate
     assertEquals("Mood=Ind|Number=Sing|Person=1|Tense=Past|VerbForm=Fin", featsWithoutTrees("was",
