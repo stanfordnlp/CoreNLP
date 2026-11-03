@@ -1053,8 +1053,14 @@ public class UniversalEnglishGrammaticalRelations {
           // complement clauses of nouns: "the fact that you are honest"
           // JJ catches a couple of funny NPs with heads like "enough"
           // Note that we eliminate SBAR which also match an vmod pattern
-          "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )");
-          // [todo [cdm2019]: Add somthing for clause acl not acl:relcl like: (NP (NP no question) (SBAR that (S (NP some) (VP contracted (NP diseases)))))
+          "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
+          // the same clauses adjoined to the NP, which is not the PTB shape
+          // but which PTB uses when something comes between the noun and the
+          // clause, and which parsers produce.  These are acl, not acl:relcl:
+          // (NP (NP no question) (SBAR that (S (NP some) (VP contracted (NP diseases)))))
+          // A clause right after a CC is a conjunct, as in
+          // "assume reinvestment of dividends and that current yields continue"
+          "@NP < (@NP $++ (SBAR=target <, (IN < /^(?i:that|whether)$/) < S !$- CC|CONJP))");
 
   /**
    * The "relative clause modifier" grammatical relation.  A relative clause
