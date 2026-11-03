@@ -799,6 +799,7 @@ public class SemgrexStats {
   private static final String NO_BIDI = "-noBidi";
   private static final String FORMAT = "-format";
   private static final String NO_TOTAL = "-noTotal";
+  private static final String CORPUS_FLAG = "-corpus";
 
   /**
    * Logs a description of the command line arguments and the script format.
@@ -811,6 +812,9 @@ public class SemgrexStats {
                          + "with no flag in front of them are read the same way, so a list of files "
                          + "can simply be separated by spaces.  Each path is one corpus, named by "
                          + "its last component, which a command can use as the key " + CORPUS_KEY);
+    log.info(CORPUS_FLAG + " NEW=OLD: call the corpus OLD by the name NEW instead, where OLD is the name "
+                         + "it would have, such as UD_Spanish-AnCora, or the path it is read from.  "
+                         + "May be repeated.  Giving two corpora the same name counts them as one");
     log.info(CONLLU_EXTENSION_FLAG + ": which extensions to pick up when a directory is given, "
                          + "separated by , or ; .  Default " + CONLLU_EXTENSION + ".  A file named "
                          + "explicitly is always read whatever it is called");
@@ -881,50 +885,60 @@ public class SemgrexStats {
    *   a directory has no files to read, or there are no files at all
    */
   static List<Pair<File, String>> expandCorpora(List<String> paths, List<String> extensions) {
-    List<Pair<File, String>> files = new ArrayList<>();
-    for (String arg : paths) {
-      for (String path : arg.split("[,;]")) {
-        path = path.trim();
-        if (path.isEmpty()) {
-          continue;
-        }
+    List<String> split = splitPaths(paths);
+    return expandNamedCorpora(split, nameCorpora(split, Collections.emptyList()), extensions);
+  }
 
-        File file = new File(path);
-        String corpus = corpusName(file);
-        if (file.isDirectory()) {
-          File[] contents = file.listFiles();
-          if (contents == null) {
-            throw new IllegalArgumentException("Could not read the directory " + path);
-          }
-          List<File> found = new ArrayList<>();
-          List<String> skipped = new ArrayList<>();
-          for (File child : contents) {
-            if (!child.isFile()) {
-              continue;
-            }
-            if (matchesExtension(child.getName(), extensions)) {
-              found.add(child);
-            } else {
-              skipped.add(child.getName());
-            }
-          }
-          if (found.isEmpty()) {
-            throw new IllegalArgumentException("Found no " + extensions + " files in the directory " + path);
-          }
-          Collections.sort(found);
-          if (!skipped.isEmpty()) {
-            Collections.sort(skipped);
-            log.warn("Skipped " + skipped.size() + " file(s) in " + path + " which do not end in " +
-                     extensions + ": " + skipped + "  (use " + CONLLU_EXTENSION_FLAG + " to include them)");
-          }
-          for (File child : found) {
-            files.add(new Pair<>(child, corpus));
-          }
-        } else if (file.isFile()) {
-          files.add(new Pair<>(file, corpus));
-        } else {
-          throw new IllegalArgumentException("Not a file or a directory: " + path);
+  /**
+   * As {@link #expandCorpora(List, List)}, for paths which are already
+   * split, each of them one corpus, with the name of each corpus given.
+   *
+   * @param paths the paths, one file or directory each
+   * @param corpora the name of the corpus of each path
+   * @param extensions the extensions of the files to read in a directory
+   * @return each file, in the order to read them, with its corpus
+   * @throws IllegalArgumentException if a path is neither a file nor a directory,
+   *   a directory has no files to read, or there are no files at all
+   */
+  static List<Pair<File, String>> expandNamedCorpora(List<String> paths, List<String> corpora, List<String> extensions) {
+    List<Pair<File, String>> files = new ArrayList<>();
+    for (int idx = 0; idx < paths.size(); ++idx) {
+      String path = paths.get(idx);
+      File file = new File(path);
+      String corpus = corpora.get(idx);
+      if (file.isDirectory()) {
+        File[] contents = file.listFiles();
+        if (contents == null) {
+          throw new IllegalArgumentException("Could not read the directory " + path);
         }
+        List<File> found = new ArrayList<>();
+        List<String> skipped = new ArrayList<>();
+        for (File child : contents) {
+          if (!child.isFile()) {
+            continue;
+          }
+          if (matchesExtension(child.getName(), extensions)) {
+            found.add(child);
+          } else {
+            skipped.add(child.getName());
+          }
+        }
+        if (found.isEmpty()) {
+          throw new IllegalArgumentException("Found no " + extensions + " files in the directory " + path);
+        }
+        Collections.sort(found);
+        if (!skipped.isEmpty()) {
+          Collections.sort(skipped);
+          log.warn("Skipped " + skipped.size() + " file(s) in " + path + " which do not end in " +
+                   extensions + ": " + skipped + "  (use " + CONLLU_EXTENSION_FLAG + " to include them)");
+        }
+        for (File child : found) {
+          files.add(new Pair<>(child, corpus));
+        }
+      } else if (file.isFile()) {
+        files.add(new Pair<>(file, corpus));
+      } else {
+        throw new IllegalArgumentException("Not a file or a directory: " + path);
       }
     }
     if (files.isEmpty()) {
@@ -944,6 +958,103 @@ public class SemgrexStats {
       name = absolute.getName();
     }
     return name.isEmpty() ? path.getPath() : name;
+  }
+
+  /** The paths in the -conlluFile arguments, each of which may be several separated by , or ; */
+  private static List<String> splitPaths(List<String> args) {
+    List<String> paths = new ArrayList<>();
+    for (String arg : args) {
+      for (String path : arg.split("[,;]")) {
+        path = path.trim();
+        if (!path.isEmpty()) {
+          paths.add(path);
+        }
+      }
+    }
+    return paths;
+  }
+
+  /**
+   * The name of the corpus read through each path: the last component of
+   * the path, unless a -corpus argument gives it another.  A -corpus
+   * argument NEW=OLD names a path NEW when OLD is the path's own corpus
+   * name, or when OLD is a path to the same file or directory, which
+   * tells apart two corpora with the same last component.
+   *
+   * @param paths the paths, each of them one corpus
+   * @param names the -corpus arguments, each as its new name and the corpus it names
+   * @return the name of each path's corpus, in the same order
+   * @throws IllegalArgumentException if a -corpus argument names none of the
+   *   corpora, or two give one corpus different names
+   */
+  static List<String> nameCorpora(List<String> paths, List<Pair<String, String>> names) {
+    List<String> defaults = new ArrayList<>();
+    List<String> corpora = new ArrayList<>();
+    boolean[] used = new boolean[names.size()];
+    for (String path : paths) {
+      File file = new File(path);
+      String corpus = corpusName(file);
+      defaults.add(corpus);
+      String renamed = null;
+      for (int i = 0; i < names.size(); ++i) {
+        if (!namesCorpus(names.get(i).second(), file, corpus)) {
+          continue;
+        }
+        String name = names.get(i).first();
+        if (renamed != null && !renamed.equals(name)) {
+          throw new IllegalArgumentException(CORPUS_FLAG + " gives " + path + " two names, " + renamed + " and " + name);
+        }
+        renamed = name;
+        used[i] = true;
+      }
+      corpora.add(renamed == null ? corpus : renamed);
+    }
+    for (int i = 0; i < names.size(); ++i) {
+      if (!used[i]) {
+        throw new IllegalArgumentException(CORPUS_FLAG + " " + names.get(i).first() + "=" + names.get(i).second() +
+                                           ": " + names.get(i).second() + " is not one of the corpora read, " + defaults +
+                                           ".  The path has to be given as well, as " + CONLLU_FILE + " or a bare path");
+      }
+    }
+    return corpora;
+  }
+
+  /**
+   * Whether the OLD of a -corpus argument means the corpus read through
+   * this file: the same file or directory, if OLD is a path which exists,
+   * and otherwise the same corpus name
+   */
+  private static boolean namesCorpus(String old, File file, String corpus) {
+    File oldFile = new File(old);
+    if (oldFile.exists() && file.exists()) {
+      try {
+        return oldFile.getCanonicalFile().equals(file.getCanonicalFile());
+      } catch (IOException e) {
+        // fall back on the name
+      }
+    }
+    return corpusName(oldFile).equals(corpus);
+  }
+
+  /**
+   * Splits a -corpus argument, NEW=OLD, at its first =, so OLD, which may
+   * be a path, can have an = of its own but NEW cannot.
+   *
+   * @param arg the argument
+   * @return the new name and the corpus it names
+   * @throws IllegalArgumentException if the argument has no =, or nothing on one side of it
+   */
+  static Pair<String, String> parseCorpusArg(String arg) {
+    int equals = arg.indexOf('=');
+    if (equals < 0) {
+      throw new IllegalArgumentException(CORPUS_FLAG + " takes NEW=OLD, such as AnCora=UD_Spanish-AnCora, not " + arg);
+    }
+    String name = arg.substring(0, equals).trim();
+    String old = arg.substring(equals + 1).trim();
+    if (name.isEmpty() || old.isEmpty()) {
+      throw new IllegalArgumentException(CORPUS_FLAG + " needs both a new name and a corpus: " + arg);
+    }
+    return new Pair<>(name, old);
   }
 
   private static boolean matchesExtension(String filename, List<String> extensions) {
@@ -1000,6 +1111,7 @@ public class SemgrexStats {
     flagMap.put(FORMAT, 1);
     flagMap.put(NO_TOTAL, 0);
     flagMap.put(CONLLU_EXTENSION_FLAG, 1);
+    flagMap.put(CORPUS_FLAG, 1);
 
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
 
@@ -1062,6 +1174,30 @@ public class SemgrexStats {
       System.exit(2);
     }
 
+    List<Pair<String, String>> corpusNames = new ArrayList<>();
+    List<String> treeFiles = argsMap.containsKey(TREE_FILE) ? Arrays.asList(argsMap.get(TREE_FILE)) : Collections.emptyList();
+    List<String> conlluSplit = splitPaths(conlluPaths);
+    List<String> treeCorpora;
+    List<String> conlluCorpora;
+    try {
+      if (argsMap.containsKey(CORPUS_FLAG)) {
+        for (String arg : argsMap.get(CORPUS_FLAG)) {
+          corpusNames.add(parseCorpusArg(arg));
+        }
+      }
+      // every -corpus has to name something, so check them against the
+      // tree files and the CoNLL-U paths together
+      List<String> allPaths = new ArrayList<>(treeFiles);
+      allPaths.addAll(conlluSplit);
+      List<String> allCorpora = nameCorpora(allPaths, corpusNames);
+      treeCorpora = allCorpora.subList(0, treeFiles.size());
+      conlluCorpora = allCorpora.subList(treeFiles.size(), allCorpora.size());
+    } catch (IllegalArgumentException e) {
+      log.err(e.getMessage());
+      System.exit(2);
+      return;
+    }
+
     List<Pair<File, String>> conlluFiles = Collections.emptyList();
     if (!conlluPaths.isEmpty()) {
       // expand the whole list before reading anything, so that a typo
@@ -1072,7 +1208,7 @@ public class SemgrexStats {
         if (argsMap.containsKey(CONLLU_EXTENSION_FLAG) && argsMap.get(CONLLU_EXTENSION_FLAG).length > 0) {
           extensions = parseExtensions(argsMap.get(CONLLU_EXTENSION_FLAG)[0]);
         }
-        conlluFiles = expandCorpora(conlluPaths, extensions);
+        conlluFiles = expandNamedCorpora(conlluSplit, conlluCorpora, extensions);
       } catch (IllegalArgumentException e) {
         log.err(e.getMessage());
         System.exit(2);
@@ -1088,13 +1224,12 @@ public class SemgrexStats {
         log.info("Stage " + (stage + 1) + " of " + stats.numStages());
       }
 
-      if (argsMap.containsKey(TREE_FILE)) {
-        for (String treeFile : argsMap.get(TREE_FILE)) {
-          log.info("Loading file " + treeFile);
-          List<CoreMap> sentences = SemgrexUtils.readTreeFile(treeFile, mode, useExtras);
-          setCorpus(sentences, corpusName(new File(treeFile)));
-          stats.accumulate(stage, sentences);
-        }
+      for (int idx = 0; idx < treeFiles.size(); ++idx) {
+        String treeFile = treeFiles.get(idx);
+        log.info("Loading file " + treeFile);
+        List<CoreMap> sentences = SemgrexUtils.readTreeFile(treeFile, mode, useExtras);
+        setCorpus(sentences, treeCorpora.get(idx));
+        stats.accumulate(stage, sentences);
       }
 
       if (!conlluFiles.isEmpty()) {

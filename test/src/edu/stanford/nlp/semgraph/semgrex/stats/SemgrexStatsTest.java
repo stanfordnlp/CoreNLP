@@ -1288,6 +1288,86 @@ public class SemgrexStatsTest {
   }
 
   /**
+   * -corpus NEW=OLD renames the corpus OLD, given as its name or as its
+   * path, and leaves the others named by their last component
+   */
+  @Test
+  public void testNameCorpora() throws IOException {
+    File parent = Files.createTempDirectory("semgrexStats").toFile();
+    parent.deleteOnExit();
+    File gsd = new File(parent, "UD_Spanish-GSD");
+    File ancora = new File(parent, "UD_Spanish-AnCora");
+    for (File treebank : new File[] {gsd, ancora}) {
+      assertTrue(treebank.mkdir());
+      treebank.deleteOnExit();
+    }
+    List<String> paths = List.of(gsd.toString(), ancora + File.separator);
+
+    // by the name the corpus would have, as on the command line
+    assertEquals(List.of("UD_Spanish-GSD", "AnCora"),
+                 SemgrexStats.nameCorpora(paths, List.of(SemgrexStats.parseCorpusArg("AnCora=UD_Spanish-AnCora"))));
+    // by its path, with or without the trailing /
+    assertEquals(List.of("GSD", "UD_Spanish-AnCora"),
+                 SemgrexStats.nameCorpora(paths, List.of(new Pair<>("GSD", gsd + File.separator))));
+    assertEquals(List.of("UD_Spanish-GSD", "AnCora"),
+                 SemgrexStats.nameCorpora(paths, List.of(new Pair<>("AnCora", ancora.toString()))));
+    // two corpora with one name are counted as one
+    assertEquals(List.of("Spanish", "Spanish"),
+                 SemgrexStats.nameCorpora(paths, List.of(new Pair<>("Spanish", "UD_Spanish-GSD"),
+                                                         new Pair<>("Spanish", "UD_Spanish-AnCora"))));
+    // the same name twice for one corpus is fine
+    assertEquals(List.of("GSD", "UD_Spanish-AnCora"),
+                 SemgrexStats.nameCorpora(paths, List.of(new Pair<>("GSD", "UD_Spanish-GSD"),
+                                                         new Pair<>("GSD", gsd.toString()))));
+
+    // a name for a corpus which is not being read is a mistake, such as a typo
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () ->
+      SemgrexStats.nameCorpora(paths, List.of(new Pair<>("PUD", "UD_Spanish-PUD"))));
+    assertTrue(e.getMessage(), e.getMessage().contains("[UD_Spanish-GSD, UD_Spanish-AnCora]"));
+    // as are two names for one corpus
+    assertThrows(IllegalArgumentException.class, () ->
+      SemgrexStats.nameCorpora(paths, List.of(new Pair<>("GSD", "UD_Spanish-GSD"), new Pair<>("Other", "UD_Spanish-GSD"))));
+  }
+
+  /**
+   * Two corpora with the same last component, such as one treebank from
+   * two UD releases, can be told apart by their paths
+   */
+  @Test
+  public void testNameCorporaByPath() throws IOException {
+    File parent = Files.createTempDirectory("semgrexStats").toFile();
+    parent.deleteOnExit();
+    List<String> paths = new ArrayList<>();
+    for (String release : new String[] {"ud-treebanks-v2.16", "ud-treebanks-v2.17"}) {
+      File dir = new File(new File(parent, release), "UD_Spanish-GSD");
+      assertTrue(dir.mkdirs());
+      dir.deleteOnExit();
+      dir.getParentFile().deleteOnExit();
+      File file = new File(dir, "train.conllu");
+      file.createNewFile();
+      file.deleteOnExit();
+      paths.add(dir.toString());
+    }
+    List<Pair<String, String>> names = List.of(new Pair<>("v2.16", paths.get(0)), new Pair<>("v2.17", paths.get(1)));
+    assertEquals(List.of("v2.16", "v2.17"), SemgrexStats.nameCorpora(paths, names));
+    List<Pair<File, String>> corpora = SemgrexStats.expandNamedCorpora(paths, SemgrexStats.nameCorpora(paths, names), CONLLU_EXTENSIONS);
+    assertEquals("v2.16", corpora.get(0).second());
+    assertEquals("v2.17", corpora.get(1).second());
+    // by name alone, both are renamed together
+    assertEquals(List.of("GSD", "GSD"), SemgrexStats.nameCorpora(paths, List.of(new Pair<>("GSD", "UD_Spanish-GSD"))));
+  }
+
+  /** NEW=OLD splits at the first =, and needs both sides */
+  @Test
+  public void testParseCorpusArg() {
+    assertEquals(new Pair<>("AnCora", "UD_Spanish-AnCora"), SemgrexStats.parseCorpusArg("AnCora=UD_Spanish-AnCora"));
+    assertEquals(new Pair<>("odd", "a=b.conllu"), SemgrexStats.parseCorpusArg("odd=a=b.conllu"));
+    assertThrows(IllegalArgumentException.class, () -> SemgrexStats.parseCorpusArg("UD_Spanish-AnCora"));
+    assertThrows(IllegalArgumentException.class, () -> SemgrexStats.parseCorpusArg("=UD_Spanish-AnCora"));
+    assertThrows(IllegalArgumentException.class, () -> SemgrexStats.parseCorpusArg("AnCora="));
+  }
+
+  /**
    * A directory contributes its .conllu files, sorted, and skips the
    * README and LICENSE which every UD treebank also contains
    */
