@@ -833,6 +833,38 @@ public class SemgrexStatsTest {
     assertFalse(ascii.contains("\u200E") || ascii.contains("\u2068"));
   }
 
+  /**
+   * -noTotal leaves out the TOTAL row and column and the subtotals, and
+   * keeps everything else
+   */
+  @Test
+  public void testCountNoTotal() {
+    String report = runScript(lines("pattern {}=word <=relation {}",
+                                    "count -noTotal relation")).report();
+    assertChartRows(report, "count -noTotal relation", "nsubj", "nmod", "obj");
+    assertChartRow(report, "nsubj", "4", "50.00%");
+    assertFalse(report, report.contains("TOTAL"));
+    // the command, the header, the rule under it, and the three rows: the rule above the total goes
+    assertEquals(6, report.split("\\R").length);
+
+    report = runScript(lines("pattern {}=word <=relation {}",
+                             "count -noTotal word relation")).report();
+    assertEquals(Arrays.asList("word", "nsubj", "nmod", "obj"), chartRow(report, "word"));
+    assertChartRow(report, "Bill", "3", "0", "0");
+    assertFalse(report, report.contains("TOTAL"));
+
+    report = runScript(lines("pattern {}=gov >=relation {}=word",
+                             "count -noTotal gov word relation")).report();
+    assertFalse(report, report.contains("TOTAL"));
+    assertFalse(report, report.contains("subtotal"));
+    assertChartRow(report, "his", "0", "1", "0");
+
+    // the flat listing has no totals to leave out
+    String flat = lines("pattern {}=word <=relation {}", "count -flat word relation");
+    assertEquals(runScript(flat).report().replace("# count -flat", "# count -flat -noTotal"),
+                 runScript(flat.replace("-flat", "-flat -noTotal")).report());
+  }
+
   /** Sentences whose objects are the same clitic spelled three ways, and one other */
   private static List<CoreMap> cliticSentences() {
     List<CoreMap> sentences = new ArrayList<>();
