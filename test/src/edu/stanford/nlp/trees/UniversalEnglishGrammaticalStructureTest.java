@@ -249,6 +249,24 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "cop(honest-8, are-7)\n" +
            "acl(fact-4, honest-8)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (EX There)) (VP (VBZ is) (NP (NP (DT a) (NN chance)) (SBAR (IN that) (S (NP (PRP he)) (VP (VBD left)))))) (. .)))",
+          "expl(is-2, There-1)\n" +
+           "root(ROOT-0, is-2)\n" +
+           "det(chance-4, a-3)\n" +
+           "nsubj(is-2, chance-4)\n" +
+           "mark(left-7, that-5)\n" +
+           "nsubj(left-7, he-6)\n" +
+           "acl(chance-4, left-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Yields)) (VP (VBP assume) (NP (NP (NN reinvestment)) (CC and) (SBAR (IN that) (S (NP (NNS yields)) (VP (VBP continue)))))) (. .)))",
+          "nsubj(assume-2, Yields-1)\n" +
+           "root(ROOT-0, assume-2)\n" +
+           "obj(assume-2, reinvestment-3)\n" +
+           "cc(continue-7, and-4)\n" +
+           "mark(continue-7, that-5)\n" +
+           "nsubj(continue-7, yields-6)\n" +
+           "conj(reinvestment-3, continue-7)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +
