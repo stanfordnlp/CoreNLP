@@ -239,6 +239,16 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "ccomp(certain-3, did-6)\n" +
            "obj(did-6, it-7)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP admire) (NP (DT the) (NN fact) (SBAR (IN that) (S (NP (PRP you)) (VP (VBP are) (ADJP (JJ honest))))))) (. .)))",
+          "nsubj(admire-2, I-1)\n" +
+           "root(ROOT-0, admire-2)\n" +
+           "det(fact-4, the-3)\n" +
+           "obj(admire-2, fact-4)\n" +
+           "mark(honest-8, that-5)\n" +
+           "nsubj(honest-8, you-6)\n" +
+           "cop(honest-8, are-7)\n" +
+           "acl(fact-4, honest-8)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +
