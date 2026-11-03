@@ -62,20 +62,21 @@ public interface SemgrexStat {
   String report();
 
   /**
-   * Render the accumulated results as the run presents them, knowing the
-   * label of the stage they are in, the comment lines above its pattern,
-   * for a report which has a use for it, such as the caption of a LaTeX
-   * table.
+   * Render the accumulated results as the run presents them, knowing
+   * their label, for a report which has a use for it, such as the caption
+   * of a LaTeX table.  The label is the comment lines directly above the
+   * command, or if there are none, those directly above the pattern of
+   * its stage.
    *<br>
    * A command with no LaTeX form of its own has its text report written
    * as LaTeX comments, so that a report in LaTeX can go into a document
    * whatever commands it has.
    *
    * @param presentation how to write the report
-   * @param stageLabels the label of the stage, empty if it has none
+   * @param labels the label of the command, or of its stage, empty if neither has one
    * @return the report
    */
-  default String report(SemgrexStats.Presentation presentation, List<String> stageLabels) {
+  default String report(SemgrexStats.Presentation presentation, List<String> labels) {
     String report = report();
     if (presentation.format() == SemgrexStats.Format.TEXT) {
       return report;

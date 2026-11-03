@@ -57,8 +57,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  *<br>
  * The comment lines directly above a {@code pattern} line, with no blank
  * line between them, label its stage, and the report repeats them at
- * the top of the stage's results as {@code ## } lines.  Other comments
- * are left out of the report.
+ * the top of the stage's results as {@code ## } lines.  In the same way,
+ * the comment lines directly above a command label that command, and
+ * are repeated above its results.  Other comments, such as those with a
+ * blank line under them, are left out of the report.
  *<br>
  * Besides the names in its pattern, a command can use the key
  * {@code $corpus}, the corpus each sentence came from.  Each path given
@@ -74,9 +76,16 @@ import edu.stanford.nlp.util.logging.Redwood;
  * How the results are written is up to the run rather than the script:
  * {@code -format latex} writes each {@code count} chart as a LaTeX
  * {@code tabular}, and {@code -format latexFloat} as a {@code table}
- * float, with the label of its stage as its caption.  The rest of the
- * report becomes {@code %} comments, so that the whole report can go
- * into a document.  {@code -noTotal} leaves the totals out of every
+ * float.  A chart's caption is the label of its command, or if it has
+ * none, the label of its stage:
+ *<pre>{@code
+ * # Count of acl vs acl:relcl, showing a deficit in AnCora UD 2.17
+ * pattern {} </acl|acl:relcl/=edge {}
+ * count -sort edge -sort $corpus edge $corpus
+ * }</pre>
+ * A float with no label is captioned with its command, and an inline
+ * tabular with no label has no caption.  The rest of the report becomes
+ * {@code %} comments, so that the whole report can go into a document.  {@code -noTotal} leaves the totals out of every
  * chart, as {@code count -noTotal} does for one.
  *<br>
  * A script with more than one stage runs one pass over the corpus per
@@ -108,9 +117,13 @@ public class SemgrexStats {
   public enum Format {
     /** charts as columns of text, with # comments */
     TEXT,
-    /** charts as LaTeX tabulars, booktabs style, with % comments */
+    /**
+     * charts as LaTeX tabulars, booktabs style, with % comments, and with
+     * a caption below if the chart has a label, which needs the caption
+     * or capt-of package
+     */
     LATEX,
-    /** charts as LaTeX tabulars in table floats, each captioned with the label of its stage */
+    /** charts as LaTeX tabulars in table floats, each captioned with its label or its command */
     LATEX_FLOAT;
 
     /**
@@ -242,11 +255,20 @@ public class SemgrexStats {
     private final SemgrexPattern pattern;
     private final List<SemgrexStat> stats;
     private final List<String> labels;
+    private final List<List<String>> commandLabels;
 
-    Stage(SemgrexPattern pattern, List<SemgrexStat> stats, List<String> labels) {
+    Stage(SemgrexPattern pattern, List<SemgrexStat> stats, List<String> labels, List<List<String>> commandLabels) {
+      if (stats.size() != commandLabels.size()) {
+        throw new IllegalArgumentException("Every command needs a label, empty if it has none");
+      }
       this.pattern = pattern;
       this.stats = Collections.unmodifiableList(new ArrayList<>(stats));
       this.labels = Collections.unmodifiableList(new ArrayList<>(labels));
+      List<List<String>> copied = new ArrayList<>();
+      for (List<String> label : commandLabels) {
+        copied.add(Collections.unmodifiableList(new ArrayList<>(label)));
+      }
+      this.commandLabels = Collections.unmodifiableList(copied);
     }
 
     /**
@@ -257,6 +279,17 @@ public class SemgrexStats {
      */
     public List<String> getLabels() {
       return labels;
+    }
+
+    /**
+     * Returns the label of each command: the comment lines directly above
+     * it, without their {@code #}.
+     *
+     * @return An unmodifiable list with a label for each of {@link #getStats()},
+     *   in the same order, each empty if that command has no label
+     */
+    public List<List<String>> getCommandLabels() {
+      return commandLabels;
     }
 
     /**
@@ -291,23 +324,29 @@ public class SemgrexStats {
     String report(Presentation presentation) {
       String marker = presentation.format().commentMarker();
       StringBuilder sb = new StringBuilder();
-      for (String label : labels) {
+      appendLabel(sb, marker, labels);
+      for (int idx = 0; idx < stats.size(); ++idx) {
+        if (idx > 0) {
+          sb.append(System.lineSeparator());
+        }
+        SemgrexStat stat = stats.get(idx);
+        List<String> commandLabel = commandLabels.get(idx);
+        appendLabel(sb, marker, commandLabel);
+        sb.append(marker).append(" ").append(stat.toString()).append(System.lineSeparator());
+        sb.append(stat.report(presentation, commandLabel.isEmpty() ? labels : commandLabel));
+      }
+      return sb.toString();
+    }
+
+    /** The lines of a label, as doubled comment markers */
+    private static void appendLabel(StringBuilder sb, String marker, List<String> label) {
+      for (String line : label) {
         sb.append(marker).append(marker);
-        if (!label.isEmpty()) {
-          sb.append(" ").append(label);
+        if (!line.isEmpty()) {
+          sb.append(" ").append(line);
         }
         sb.append(System.lineSeparator());
       }
-      boolean first = true;
-      for (SemgrexStat stat : stats) {
-        if (!first) {
-          sb.append(System.lineSeparator());
-        }
-        first = false;
-        sb.append(marker).append(" ").append(stat.toString()).append(System.lineSeparator());
-        sb.append(stat.report(presentation, labels));
-      }
-      return sb.toString();
     }
   }
 
@@ -484,7 +523,7 @@ public class SemgrexStats {
   /**
    * Parses the lines of a script.  Blank lines and comments are skipped;
    * each {@code pattern} line starts a new stage, labelled by the comment
-   * lines directly above it.
+   * lines directly above it, and each command is labelled the same way.
    *
    * @param lines The lines of the script
    * @param bidiAllowed Whether commands may add Unicode bidi controls to their output
@@ -520,6 +559,7 @@ public class SemgrexStats {
     List<Stage> stages = new ArrayList<>();
     Context context = null;
     List<SemgrexStat> stats = new ArrayList<>();
+    List<List<String>> commandLabels = new ArrayList<>();
     List<String> labels = Collections.emptyList();
 
     for (Pair<String, List<String>> meaningfulLine : meaningful) {
@@ -530,8 +570,9 @@ public class SemgrexStats {
 
       if (PATTERN_COMMAND.equals(command)) {
         if (context != null) {
-          stages.add(finishStage(context, stats, labels));
+          stages.add(finishStage(context, stats, labels, commandLabels));
           stats = new ArrayList<>();
+          commandLabels = new ArrayList<>();
         }
         labels = meaningfulLine.second();
         if (rest.isEmpty()) {
@@ -549,18 +590,20 @@ public class SemgrexStats {
         throw new SemgrexParseException("Found the command '" + command + "' before any '" + PATTERN_COMMAND + "' line");
       }
       stats.add(parseCommand(context, command, rest));
+      commandLabels.add(meaningfulLine.second());
     }
 
-    stages.add(finishStage(context, stats, labels));
+    stages.add(finishStage(context, stats, labels, commandLabels));
     return new SemgrexStats(stages);
   }
 
-  private static Stage finishStage(Context context, List<SemgrexStat> stats, List<String> labels) {
+  private static Stage finishStage(Context context, List<SemgrexStat> stats, List<String> labels,
+                                   List<List<String>> commandLabels) {
     if (stats.isEmpty()) {
       throw new SemgrexParseException("A '" + PATTERN_COMMAND + "' line had no statistics commands after it.  " +
                                       "Known commands: " + knownCommands());
     }
-    return new Stage(context.getPattern(), stats, labels);
+    return new Stage(context.getPattern(), stats, labels, commandLabels);
   }
 
   /**
@@ -826,8 +869,10 @@ public class SemgrexStats {
                      + "when the data needs them, which is right for a browser or a chat client "
                      + "but not for a terminal which mangles them");
     log.info(FORMAT + ": how to write the charts: text, the default; latex, as LaTeX tabulars with the rules "
-                    + "of the booktabs package; or latexFloat, as tabulars in table floats captioned with the "
-                    + "label of their stage.  In LaTeX, the rest of the report is % comments");
+                    + "of the booktabs package; or latexFloat, as tabulars in table floats.  A chart's caption "
+                    + "is the comment directly above its command, or else the one directly above its pattern.  "
+                    + "An inline caption needs the caption or capt-of package.  In LaTeX, the rest of the "
+                    + "report is % comments");
     log.info(NO_TOTAL + ": leave the TOTAL rows and columns, and the subtotals, out of every chart, "
                     + "as count -noTotal does for one chart");
     log.info();

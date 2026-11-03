@@ -737,8 +737,8 @@ public class SemgrexStatsTest {
 
   /**
    * The comment lines directly above a pattern label its stage in the
-   * report.  A comment separated from the pattern by a blank line, or one
-   * among the commands, is left out.
+   * report, and those directly above a command label the command.  A
+   * comment with a blank line under it is left out.
    */
   @Test
   public void testStageCommentLabels() {
@@ -748,17 +748,22 @@ public class SemgrexStatsTest {
                                          "#",
                                          "# from nmod",
                                          "pattern {}=word <nmod {}",
-                                         "# not a label",
+                                         "# the words themselves",
                                          "collect word as possessed",
                                          "",
                                          "pattern {}=word <=relation {}",
+                                         "# not a label",
+                                         "",
                                          "count -restrict word=possessed word"));
     assertEquals(Arrays.asList("possessed words", "", "from nmod"), stats.getStages().get(0).getLabels());
+    assertEquals(Arrays.asList(Arrays.asList("the words themselves")), stats.getStages().get(0).getCommandLabels());
     assertEquals(Collections.emptyList(), stats.getStages().get(1).getLabels());
+    assertEquals(Arrays.asList(Collections.emptyList()), stats.getStages().get(1).getCommandLabels());
 
     List<String> report = Arrays.asList(stats.report().split("\\R"));
-    assertEquals(Arrays.asList("## stage 1", "## possessed words", "##", "## from nmod", "# collect word as possessed"),
-                 report.subList(0, 5));
+    assertEquals(Arrays.asList("## stage 1", "## possessed words", "##", "## from nmod",
+                               "## the words themselves", "# collect word as possessed"),
+                 report.subList(0, 6));
     assertFalse(report.toString(), report.contains("## a header for the whole script"));
     assertFalse(report.toString(), report.contains("## not a label"));
     int stage2 = report.indexOf("## stage 2");
@@ -980,6 +985,46 @@ public class SemgrexStatsTest {
     for (String line : lines) {
       assertFalse(line, line.startsWith("#"));
     }
+  }
+
+  /**
+   * A chart's caption is the label of its command, or else of its stage.
+   * Inline, a chart with a caption is centered with \\captionof, and one
+   * without is the tabular alone; in a float, one without is captioned
+   * with its command.
+   */
+  @Test
+  public void testLatexCaptions() {
+    String script = lines("# Count of relations",
+                          "pattern {}=word <=relation {}",
+                          "count relation",
+                          "# Count of words",
+                          "# by relation",
+                          "count word relation",
+                          "",
+                          "pattern {}=word <nsubj {}",
+                          "count word");
+    String inline = runScript(script).report(SemgrexStats.Format.LATEX);
+    List<String> lines = Arrays.asList(inline.split("\\R"));
+    assertEquals(Arrays.asList("%% stage 1", "%% Count of relations", "% count relation",
+                               "\\begin{center}", "\\begin{tabular}{lrr}"),
+                 lines.subList(0, 5));
+    assertTrue(inline, inline.contains("\\end{tabular}\n\\captionof{table}{Count of relations}\n\\end{center}".replace("\n", System.lineSeparator())));
+    // the command's own label, joined into one line, rather than the stage's
+    assertTrue(inline, inline.contains("%% Count of words" + System.lineSeparator() + "%% by relation" + System.lineSeparator() + "% count word relation"));
+    assertTrue(inline, inline.contains("\\captionof{table}{Count of words by relation}"));
+    // no label at all, so no caption
+    int stage2 = lines.indexOf("%% stage 2");
+    assertEquals(Arrays.asList("% count word", "\\begin{tabular}{lrr}"), lines.subList(stage2 + 1, stage2 + 3));
+    assertEquals(2, lines.stream().filter(line -> line.startsWith("\\captionof")).count());
+    assertEquals(2, lines.stream().filter(line -> line.equals("\\begin{center}")).count());
+
+    String floating = runScript(script).report(SemgrexStats.Format.LATEX_FLOAT);
+    assertTrue(floating, floating.contains("\\caption{Count of relations}"));
+    assertTrue(floating, floating.contains("\\caption{Count of words by relation}"));
+    assertTrue(floating, floating.contains("\\caption{count word}"));
+    assertFalse(floating, floating.contains("captionof"));
+    assertFalse(floating, floating.contains("{center}"));
   }
 
   /**
