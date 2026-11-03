@@ -71,6 +71,13 @@ import edu.stanford.nlp.util.logging.Redwood;
  * the other has not.  {@code $} cannot be part of a semgrex name, so the
  * key never means anything in a pattern.
  *<br>
+ * How the results are written is up to the run rather than the script:
+ * {@code -format latex} writes each {@code count} chart as a LaTeX
+ * {@code tabular}, and {@code -format latexFloat} as a {@code table}
+ * float, with the label of its stage as its caption.  The rest of the
+ * report becomes {@code %} comments, so that the whole report can go
+ * into a document.
+ *<br>
  * A script with more than one stage runs one pass over the corpus per
  * stage, in order.  A later stage can be restricted to values gathered
  * by an earlier one, which is a question a single pattern cannot ask,
@@ -95,6 +102,37 @@ import edu.stanford.nlp.util.logging.Redwood;
  */
 public class SemgrexStats {
   private static final Redwood.RedwoodChannels log = Redwood.channels(SemgrexStats.class);
+
+  /** How a report is written */
+  public enum Format {
+    /** charts as columns of text, with # comments */
+    TEXT,
+    /** charts as LaTeX tabulars, booktabs style, with % comments */
+    LATEX,
+    /** charts as LaTeX tabulars in table floats, each captioned with the label of its stage */
+    LATEX_FLOAT;
+
+    /**
+     * The format named on the command line: text, latex, or latexFloat, in any case.
+     *
+     * @param name the name
+     * @return the format
+     * @throws IllegalArgumentException if the name is not a format
+     */
+    public static Format fromName(String name) {
+      for (Format format : values()) {
+        if (format.toString().replace("_", "").equalsIgnoreCase(name)) {
+          return format;
+        }
+      }
+      throw new IllegalArgumentException("Unknown format " + name + ".  Known formats: text, latex, latexFloat");
+    }
+
+    /** What starts a comment line in this format */
+    String commentMarker() {
+      return this == TEXT ? COMMENT : "%";
+    }
+  }
 
   /** Opens a new stage.  Handled by the script parser, not by the registry. */
   public static final String PATTERN_COMMAND = "pattern";
@@ -207,10 +245,11 @@ public class SemgrexStats {
       }
     }
 
-    String report() {
+    String report(Format format) {
+      String marker = format.commentMarker();
       StringBuilder sb = new StringBuilder();
       for (String label : labels) {
-        sb.append(COMMENT).append(COMMENT);
+        sb.append(marker).append(marker);
         if (!label.isEmpty()) {
           sb.append(" ").append(label);
         }
@@ -222,8 +261,8 @@ public class SemgrexStats {
           sb.append(System.lineSeparator());
         }
         first = false;
-        sb.append(COMMENT).append(" ").append(stat.toString()).append(System.lineSeparator());
-        sb.append(stat.report());
+        sb.append(marker).append(" ").append(stat.toString()).append(System.lineSeparator());
+        sb.append(stat.report(format, labels));
       }
       return sb.toString();
     }
@@ -658,22 +697,35 @@ public class SemgrexStats {
   }
 
   /**
-   * Formats the results of every stage.  When there is more than one
-   * stage, each is headed by a {@code ## stage N} line.  A stage with a
+   * Formats the results of every stage as text.  When there is more than
+   * one stage, each is headed by a {@code ## stage N} line.  A stage with a
    * label has it next, as {@code ## } lines.
    *
    * @return The report text
    */
   public String report() {
+    return report(Format.TEXT);
+  }
+
+  /**
+   * Formats the results of every stage, as {@link #report()} does, in the
+   * given format.  In LaTeX, the comment lines start with {@code %} rather
+   * than {@code #}, so the whole report can go into a document.
+   *
+   * @param format how to write the report
+   * @return The report text
+   */
+  public String report(Format format) {
+    String marker = format.commentMarker();
     StringBuilder sb = new StringBuilder();
     for (int idx = 0; idx < stages.size(); ++idx) {
       if (sb.length() > 0) {
         sb.append(System.lineSeparator());
       }
       if (stages.size() > 1) {
-        sb.append(COMMENT).append(COMMENT).append(" stage ").append(idx + 1).append(System.lineSeparator());
+        sb.append(marker).append(marker).append(" stage ").append(idx + 1).append(System.lineSeparator());
       }
-      sb.append(stages.get(idx).report());
+      sb.append(stages.get(idx).report(format));
     }
     return sb.toString();
   }
@@ -691,6 +743,7 @@ public class SemgrexStats {
   private static final String CONLLU_EXTENSION = ".conllu";
   private static final String CONLLU_EXTENSION_FLAG = "-conlluExtension";
   private static final String NO_BIDI = "-noBidi";
+  private static final String FORMAT = "-format";
 
   /**
    * Logs a description of the command line arguments and the script format.
@@ -713,6 +766,9 @@ public class SemgrexStats {
                      + "script from reversing a chart's columns.  They are added automatically "
                      + "when the data needs them, which is right for a browser or a chat client "
                      + "but not for a terminal which mangles them");
+    log.info(FORMAT + ": how to write the charts: text, the default; latex, as LaTeX tabulars with the rules "
+                    + "of the booktabs package; or latexFloat, as tabulars in table floats captioned with the "
+                    + "label of their stage.  In LaTeX, the rest of the report is % comments");
     log.info();
     log.info(SCRIPT + " is required, as is one of " + CONLLU_FILE + " or " + TREE_FILE);
     log.info();
@@ -884,6 +940,7 @@ public class SemgrexStats {
     flagMap.put(MODE, 1);
     flagMap.put(EXTRAS, 1);
     flagMap.put(NO_BIDI, 0);
+    flagMap.put(FORMAT, 1);
     flagMap.put(CONLLU_EXTENSION_FLAG, 1);
 
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
@@ -903,6 +960,15 @@ public class SemgrexStats {
       return;
     }
     SemgrexStats stats = SemgrexStats.parse(script, !argsMap.containsKey(NO_BIDI));
+    Format format = Format.TEXT;
+    if (argsMap.containsKey(FORMAT) && argsMap.get(FORMAT).length > 0) {
+      try {
+        format = Format.fromName(argsMap.get(FORMAT)[0]);
+      } catch (IllegalArgumentException e) {
+        log.err(e.getMessage());
+        System.exit(2);
+      }
+    }
 
     String modeString = DEFAULT_MODE;
     if (argsMap.containsKey(MODE) && argsMap.get(MODE).length > 0) {
@@ -990,7 +1056,7 @@ public class SemgrexStats {
     // UTF-8 whatever the locale, as the treebanks are, rather than letting
     // a terminal in the C locale turn every accented letter into ?
     PrintStream stdout = new PrintStream(new FileOutputStream(FileDescriptor.out), true, "utf-8");
-    stdout.print(stats.report());
+    stdout.print(stats.report(format));
     stdout.flush();
   }
 }

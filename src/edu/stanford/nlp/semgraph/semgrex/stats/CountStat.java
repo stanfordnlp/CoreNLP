@@ -41,6 +41,9 @@ import edu.stanford.nlp.util.CoreMap;
  * column of a one key chart stays, as it is each row's share of the
  * total.
  *<br>
+ * How the chart is written, as text or in LaTeX, is up to the run, as
+ * {@link SemgrexStats} describes.
+ *<br>
  * The values of each key are ordered by how often they occur, most
  * first.  {@code -sort KEY} orders that key's values alphabetically
  * instead, so that the same query on two treebanks lays its rows or
@@ -324,11 +327,30 @@ public class CountStat implements SemgrexStat {
 
   @Override
   public String report() {
-    detectBidi();
+    return report(SemgrexStats.Format.TEXT, Collections.emptyList());
+  }
+
+  /**
+   * The chart, as text or in LaTeX.  A LaTeX float takes the label of the
+   * stage as its caption, joined into one line, or this command if the
+   * stage has no label.
+   */
+  @Override
+  public String report(SemgrexStats.Format format, List<String> stageLabels) {
     if (counts.isEmpty()) {
-      return "No matches, nothing to count." + System.lineSeparator();
+      // a comment in LaTeX, so it can sit in a document without breaking it
+      return (format == SemgrexStats.Format.TEXT ? "" : "% ") + "No matches, nothing to count." + System.lineSeparator();
     }
-    return chart().toText(bidi);
+    switch (format) {
+      case LATEX:
+        return chart().toLatex(null);
+      case LATEX_FLOAT:
+        String caption = String.join(" ", stageLabels).trim();
+        return chart().toLatex(caption.isEmpty() ? toString() : caption);
+      default:
+        detectBidi();
+        return chart().toText(bidi);
+    }
   }
 
   /** The chart this command reports, in the form its keys call for */

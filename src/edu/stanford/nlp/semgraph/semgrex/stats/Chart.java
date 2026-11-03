@@ -194,6 +194,110 @@ final class Chart {
     return sb.toString();
   }
 
+  /**
+   * Lays the chart out as a LaTeX {@code tabular} with the rules of the
+   * booktabs package, which the document has to load: labels aligned left and
+   * numbers right, a block label across the whole row, the rows of a
+   * block indented under it, and each note as a {@code %} comment.  The
+   * cells are escaped, so a value such as {@code UD_English-EWT} or
+   * {@code 50.00%} comes out as written.
+   *<br>
+   * With {@code caption} not null, the tabular is in a {@code table}
+   * float, centered, with that caption.
+   *
+   * @param caption the caption of a floating table, or null for the tabular alone
+   * @return the chart, each line ending with a line separator
+   */
+  String toLatex(String caption) {
+    String nl = System.lineSeparator();
+    StringBuilder sb = new StringBuilder();
+    for (Line line : lines) {
+      if (line.type == LineType.NOTE) {
+        sb.append("% ").append(line.cells.get(0)).append(nl);
+      }
+    }
+    if (caption != null) {
+      sb.append("\\begin{table}[htbp]").append(nl);
+      sb.append("\\centering").append(nl);
+    }
+    sb.append("\\begin{tabular}{");
+    for (boolean left : leftAligned) {
+      sb.append(left ? 'l' : 'r');
+    }
+    sb.append("}").append(nl);
+    sb.append("\\toprule").append(nl);
+    for (Line line : lines) {
+      switch (line.type) {
+        case NOTE:
+          break;
+        case BLOCK:
+          sb.append("\\multicolumn{").append(columns()).append("}{l}{").append(escapeLatex(line.cells.get(0))).append("} \\\\").append(nl);
+          break;
+        case BLANK:
+          sb.append("\\addlinespace").append(nl);
+          break;
+        case RULE:
+          sb.append("\\midrule").append(nl);
+          break;
+        case ROW:
+          for (int c = 0; c < columns(); ++c) {
+            if (c > 0) {
+              sb.append(" & ");
+            }
+            if (c < line.cells.size()) {
+              if (c == 0 && line.indented) {
+                sb.append("\\quad ");
+              }
+              sb.append(escapeLatex(line.cells.get(c)));
+            }
+          }
+          sb.append(" \\\\").append(nl);
+          break;
+        default:
+          throw new AssertionError("Unknown line type " + line.type);
+      }
+    }
+    sb.append("\\bottomrule").append(nl);
+    sb.append("\\end{tabular}").append(nl);
+    if (caption != null) {
+      sb.append("\\caption{").append(escapeLatex(caption)).append("}").append(nl);
+      sb.append("\\end{table}").append(nl);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Escapes the characters LaTeX treats specially, so that the text comes
+   * out as written.  A {@code --}, as an unbound value is shown, is left
+   * as it is, and comes out as a dash.
+   *
+   * @param text the text
+   * @return the text, escaped
+   */
+  static String escapeLatex(String text) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < text.length(); ++i) {
+      char c = text.charAt(i);
+      switch (c) {
+        case '\\':
+          sb.append("\\textbackslash{}");
+          break;
+        case '~':
+          sb.append("\\textasciitilde{}");
+          break;
+        case '^':
+          sb.append("\\textasciicircum{}");
+          break;
+        case '&': case '%': case '$': case '#': case '_': case '{': case '}':
+          sb.append('\\').append(c);
+          break;
+        default:
+          sb.append(c);
+      }
+    }
+    return sb.toString();
+  }
+
   /** One padded cell, isolated if the chart needs the bidi controls */
   private static String cell(String value, int width, boolean leftAlign, boolean bidi) {
     StringBuilder padding = new StringBuilder();
