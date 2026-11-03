@@ -228,13 +228,14 @@ public class UniversalDependenciesFeatureAnnotator  {
   }
 
   /**
-   * Ordinal adjectives and adverbs, as in EWT and GUM.  An ordinal noun is
-   * only counted when it is written with digits, as in "Dec. 10th": "a
-   * second" and "a third" are usually a unit of time and a fraction.
+   * Ordinal adjectives, adverbs and proper nouns, as in EWT and GUM: "the
+   * first", "First, ...", "First Union", "17th Street".  An ordinal common
+   * noun is only counted when it is written with digits, as in "Dec. 10th":
+   * "a second" and "a third" are usually a unit of time and a fraction.
    * The tag is checked first, since this is asked of every word.
    */
   private static boolean isOrdinal(String word, String pos) {
-    if (pos.equals("JJ") || pos.equals("RB"))
+    if (pos.equals("JJ") || pos.equals("RB") || pos.equals("NNP"))
       return ORDINAL_PATTERN.matcher(word).matches();
 
     if (pos.equals("NN"))

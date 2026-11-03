@@ -579,6 +579,25 @@ public class UniversalDependenciesFeatureAnnotatorITest {
   }
 
   @Test
+  public void testProperNounOrdinals() throws Exception {
+    // an ordinal in a name is NumType=Ord as well, written as a word or
+    // with digits
+    String[] conllu = {
+        "# sent_id = proper-ordinals",
+        "# text = First Union is on 17th Street",
+        "1\tFirst\tFirst\tPROPN\tNNP\t_\t2\tcompound\t2:compound\t_",
+        "2\tUnion\tUnion\tPROPN\tNNP\t_\t6\tnsubj\t6:nsubj\t_",
+        "3\tis\tbe\tAUX\tVBZ\t_\t6\tcop\t6:cop\t_",
+        "4\ton\ton\tADP\tIN\t_\t6\tcase\t6:case\t_",
+        "5\t17th\t17th\tPROPN\tNNP\t_\t6\tcompound\t6:compound\t_",
+        "6\tStreet\tStreet\tPROPN\tNNP\t_\t0\troot\t0:root\t_"};
+    String written = annotateWithoutTrees(new Sentence("proper-ordinals", null, conllu));
+    assertEquals("Number=Sing|NumForm=Word|NumType=Ord", column(written, "First", 5));
+    assertEquals("Number=Sing|NumForm=Combi|NumType=Ord", column(written, "17th", 5));
+    assertEquals("Number=Sing", column(written, "Union", 5));
+  }
+
+  @Test
   public void testPassiveParticiples() throws Exception {
     // a VBN with no auxiliary is passive, as is one with a passive
     // auxiliary, but a perfect is not, and neither is a conjunct which
