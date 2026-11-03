@@ -202,13 +202,17 @@ final class Chart {
    * cells are escaped, so a value such as {@code UD_English-EWT} or
    * {@code 50.00%} comes out as written.
    *<br>
-   * With {@code caption} not null, the tabular is in a {@code table}
-   * float, centered, with that caption.
+   * With {@code floating}, the tabular is in a {@code table} float,
+   * centered, with the caption below it.  Otherwise, a tabular with a
+   * caption is centered with the caption below it by {@code \captionof},
+   * which needs the caption or capt-of package, and a tabular without
+   * one is on its own.
    *
-   * @param caption the caption of a floating table, or null for the tabular alone
+   * @param caption the caption, or null for none
+   * @param floating whether to put the tabular in a table float
    * @return the chart, each line ending with a line separator
    */
-  String toLatex(String caption) {
+  String toLatex(String caption, boolean floating) {
     String nl = System.lineSeparator();
     StringBuilder sb = new StringBuilder();
     for (Line line : lines) {
@@ -216,9 +220,11 @@ final class Chart {
         sb.append("% ").append(line.cells.get(0)).append(nl);
       }
     }
-    if (caption != null) {
+    if (floating) {
       sb.append("\\begin{table}[htbp]").append(nl);
       sb.append("\\centering").append(nl);
+    } else if (caption != null) {
+      sb.append("\\begin{center}").append(nl);
     }
     sb.append("\\begin{tabular}{");
     for (boolean left : leftAligned) {
@@ -259,9 +265,14 @@ final class Chart {
     }
     sb.append("\\bottomrule").append(nl);
     sb.append("\\end{tabular}").append(nl);
-    if (caption != null) {
-      sb.append("\\caption{").append(escapeLatex(caption)).append("}").append(nl);
+    if (floating) {
+      if (caption != null) {
+        sb.append("\\caption{").append(escapeLatex(caption)).append("}").append(nl);
+      }
       sb.append("\\end{table}").append(nl);
+    } else if (caption != null) {
+      sb.append("\\captionof{table}{").append(escapeLatex(caption)).append("}").append(nl);
+      sb.append("\\end{center}").append(nl);
     }
     return sb.toString();
   }

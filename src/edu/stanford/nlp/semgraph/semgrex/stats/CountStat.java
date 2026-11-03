@@ -333,24 +333,24 @@ public class CountStat implements SemgrexStat {
 
   /**
    * The chart, as text or in LaTeX, with its totals unless this command
-   * or the run leaves them out.  A LaTeX float takes the label of the
-   * stage as its caption, joined into one line, or this command if the
-   * stage has no label.
+   * or the run leaves them out.  In LaTeX, the label is the caption,
+   * joined into one line.  A float with no label is captioned with this
+   * command, and an inline tabular with no label has no caption.
    */
   @Override
-  public String report(SemgrexStats.Presentation presentation, List<String> stageLabels) {
+  public String report(SemgrexStats.Presentation presentation, List<String> labels) {
     SemgrexStats.Format format = presentation.format();
     if (counts.isEmpty()) {
       // a comment in LaTeX, so it can sit in a document without breaking it
       return (format == SemgrexStats.Format.TEXT ? "" : "% ") + "No matches, nothing to count." + System.lineSeparator();
     }
     Chart chart = chart(totals && presentation.totals());
+    String caption = String.join(" ", labels).trim();
     switch (format) {
       case LATEX:
-        return chart.toLatex(null);
+        return chart.toLatex(caption.isEmpty() ? null : caption, false);
       case LATEX_FLOAT:
-        String caption = String.join(" ", stageLabels).trim();
-        return chart.toLatex(caption.isEmpty() ? toString() : caption);
+        return chart.toLatex(caption.isEmpty() ? toString() : caption, true);
       default:
         detectBidi();
         return chart.toText(bidi);
