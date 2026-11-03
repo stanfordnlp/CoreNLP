@@ -62,6 +62,31 @@ public interface SemgrexStat {
   String report();
 
   /**
+   * Render the accumulated results in the given format, knowing the label
+   * of the stage they are in, the comment lines above its pattern, for a
+   * report which has a use for it, such as the caption of a LaTeX table.
+   *<br>
+   * A command with no LaTeX form of its own has its text report written
+   * as LaTeX comments, so that a report in LaTeX can go into a document
+   * whatever commands it has.
+   *
+   * @param format how to write the report
+   * @param stageLabels the label of the stage, empty if it has none
+   * @return the report
+   */
+  default String report(SemgrexStats.Format format, List<String> stageLabels) {
+    String report = report();
+    if (format == SemgrexStats.Format.TEXT) {
+      return report;
+    }
+    StringBuilder sb = new StringBuilder();
+    for (String line : report.split("\\R")) {
+      sb.append(line.isEmpty() ? "%" : "% ").append(line).append(System.lineSeparator());
+    }
+    return sb.toString();
+  }
+
+  /**
    * Builds a SemgrexStat from the arguments on one line of a script.
    *<br>
    * The context carries the pattern of the stage this command belongs

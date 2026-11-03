@@ -865,6 +865,132 @@ public class SemgrexStatsTest {
                  runScript(flat.replace("-flat", "-flat -noTotal")).report());
   }
 
+  /** The characters LaTeX treats specially come out as written */
+  @Test
+  public void testEscapeLatex() {
+    assertEquals("UD\\_English-EWT", Chart.escapeLatex("UD_English-EWT"));
+    assertEquals("50.00\\%", Chart.escapeLatex("50.00%"));
+    assertEquals("\\$corpus \\& \\# \\{x\\}", Chart.escapeLatex("$corpus & # {x}"));
+    assertEquals("a\\textbackslash{}b\\textasciitilde{}c\\textasciicircum{}d", Chart.escapeLatex("a\\b~c^d"));
+    assertEquals("acl:relcl", Chart.escapeLatex("acl:relcl"));
+  }
+
+  /** The formats as they are named on the command line */
+  @Test
+  public void testFormatFromName() {
+    assertEquals(SemgrexStats.Format.TEXT, SemgrexStats.Format.fromName("text"));
+    assertEquals(SemgrexStats.Format.LATEX, SemgrexStats.Format.fromName("latex"));
+    assertEquals(SemgrexStats.Format.LATEX_FLOAT, SemgrexStats.Format.fromName("latexFloat"));
+    assertEquals(SemgrexStats.Format.LATEX_FLOAT, SemgrexStats.Format.fromName("LATEXFLOAT"));
+    assertThrows(IllegalArgumentException.class, () -> SemgrexStats.Format.fromName("html"));
+  }
+
+  /**
+   * In LaTeX, a chart is a booktabs tabular, and its notes and the
+   * command are % comments
+   */
+  @Test
+  public void testCountLatex() {
+    List<String> report = Arrays.asList(runScript(lines("pattern {}=word <=relation {}",
+                                                        "count relation")).report(SemgrexStats.Format.LATEX).split("\\R"));
+    assertEquals(Arrays.asList("% count relation",
+                               "\\begin{tabular}{lrr}",
+                               "\\toprule",
+                               "relation & count & pct \\\\",
+                               "\\midrule",
+                               "nsubj & 4 & 50.00\\% \\\\",
+                               "nmod & 2 & 25.00\\% \\\\",
+                               "obj & 2 & 25.00\\% \\\\",
+                               "\\midrule",
+                               "TOTAL & 8 &  \\\\",
+                               "\\bottomrule",
+                               "\\end{tabular}"),
+                 report);
+
+    // a grid without its totals
+    report = Arrays.asList(runScript(lines("pattern {}=word <=relation {}",
+                                           "count -noTotal word relation")).report(SemgrexStats.Format.LATEX).split("\\R"));
+    assertEquals("% rows: word, columns: relation", report.get(1));
+    assertEquals("\\begin{tabular}{lrrr}", report.get(2));
+    assertEquals("word & nsubj & nmod & obj \\\\", report.get(4));
+    assertTrue(report.toString(), report.contains("Bill & 3 & 0 & 0 \\\\"));
+    assertFalse(report.toString(), report.toString().contains("TOTAL"));
+
+    // blocks
+    String blocks = runScript(lines("pattern {}=gov >=relation {}=word",
+                                    "count gov word relation")).report(SemgrexStats.Format.LATEX);
+    assertTrue(blocks, blocks.contains("\\multicolumn{5}{l}{ate} \\\\"));
+    assertTrue(blocks, blocks.contains("\\quad Bill & 1 & 0 & 0 & 1 \\\\"));
+    assertTrue(blocks, blocks.contains("\\addlinespace"));
+
+    // the same script still writes text by default
+    SemgrexStats stats = runScript(lines("pattern {}=word <=relation {}", "count relation"));
+    assertEquals(stats.report(), stats.report(SemgrexStats.Format.TEXT));
+    assertTrue(stats.report(), stats.report().startsWith("# count relation"));
+  }
+
+  /**
+   * In a LaTeX float, the tabular is in a table, captioned with the label
+   * of the stage, or the command without one.  The stage lines are %
+   * comments, so the whole report is LaTeX.
+   */
+  @Test
+  public void testCountLatexFloat() {
+    String report = runScript(lines("# relations of the words",
+                                    "pattern {}=word <=relation {}",
+                                    "count relation",
+                                    "",
+                                    "pattern {}=word <nsubj {}",
+                                    "count word")).report(SemgrexStats.Format.LATEX_FLOAT);
+    List<String> lines = Arrays.asList(report.split("\\R"));
+    assertEquals("%% stage 1", lines.get(0));
+    assertEquals("%% relations of the words", lines.get(1));
+    assertEquals("% count relation", lines.get(2));
+    assertEquals("\\begin{table}[htbp]", lines.get(3));
+    assertTrue(report, report.contains("\\caption{relations of the words}"));
+    assertTrue(report, report.contains("%% stage 2"));
+    // the second stage has no label, so its caption is its command
+    assertTrue(report, report.contains("\\caption{count word}"));
+    for (String line : lines) {
+      assertFalse(line, line.startsWith("#"));
+    }
+  }
+
+  /**
+   * The commands with no LaTeX form of their own, and a count with
+   * nothing to count, are written as % comments, so the report is still
+   * LaTeX
+   */
+  @Test
+  public void testLatexComments() {
+    String script = lines("pattern {}=word <=relation {}",
+                          "collect relation as relations",
+                          "sample -count 2 relation",
+                          "",
+                          "pattern {}=word <xcomp {}",
+                          "count word");
+    SemgrexStats stats = runScript(script);
+    List<String> textLines = Arrays.asList(stats.report().split("\\R"));
+    List<String> latexLines = Arrays.asList(stats.report(SemgrexStats.Format.LATEX).split("\\R"));
+    assertEquals(textLines.size(), latexLines.size());
+    for (int i = 0; i < textLines.size(); ++i) {
+      String line = textLines.get(i);
+      // the leading # markers become %, every other line is commented
+      // out, a blank line inside a command's report is a bare %, and the
+      // blank lines between commands and between stages stay blank
+      if (line.isEmpty()) {
+        assertTrue(latexLines.get(i), latexLines.get(i).isEmpty() || latexLines.get(i).equals("%"));
+      } else if (line.startsWith("#")) {
+        assertEquals(line.replaceFirst("^##?", line.startsWith("##") ? "%%" : "%"), latexLines.get(i));
+      } else {
+        assertEquals("% " + line, latexLines.get(i));
+      }
+    }
+    // sample separates its combinations with blank lines
+    assertTrue(latexLines.toString(), latexLines.contains("%"));
+    assertTrue(latexLines.toString(), latexLines.contains("% No matches, nothing to count."));
+  }
+
   /** Sentences whose objects are the same clitic spelled three ways, and one other */
   private static List<CoreMap> cliticSentences() {
     List<CoreMap> sentences = new ArrayList<>();
