@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoNLLUReader;
@@ -59,6 +60,17 @@ import edu.stanford.nlp.util.logging.Redwood;
  * the top of the stage's results as {@code ## } lines.  Other comments
  * are left out of the report.
  *<br>
+ * Besides the names in its pattern, a command can use the key
+ * {@code $corpus}, the corpus each sentence came from.  Each path given
+ * on the command line is one corpus, named by its last component, so
+ *<pre>
+ * java edu.stanford.nlp.semgraph.semgrex.stats.SemgrexStats -script none.stats UD_English-EWT/ UD_English-GUM/
+ *</pre>
+ * with {@code count form pron $corpus} in the script gives one chart with
+ * a column for each treebank, with 0 where one treebank has a value
+ * the other has not.  {@code $} cannot be part of a semgrex name, so the
+ * key never means anything in a pattern.
+ *<br>
  * A script with more than one stage runs one pass over the corpus per
  * stage, in order.  A later stage can be restricted to values gathered
  * by an earlier one, which is a question a single pattern cannot ask,
@@ -86,6 +98,24 @@ public class SemgrexStats {
 
   /** Opens a new stage.  Handled by the script parser, not by the registry. */
   public static final String PATTERN_COMMAND = "pattern";
+
+  /** The key whose value is the corpus a sentence came from */
+  public static final String CORPUS_KEY = "$corpus";
+
+  /**
+   * The corpus a sentence came from, which a command reads as the key
+   * {@link #CORPUS_KEY}.  {@link #main} sets it to the last component of
+   * the path the sentence's file was found through.
+   */
+  public static class CorpusAnnotation implements CoreAnnotation<String> {
+    /** Creates the key; the annotation has no state of its own. */
+    public CorpusAnnotation() { }
+
+    @Override
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
 
   /**
    * The option which lowercases the values of one key, so that, say, "Lo"
@@ -487,13 +517,15 @@ public class SemgrexStats {
    * {@code Locale.ROOT}, so the result does not depend on where the
    * script is run.
    *
+   * @param sentence the sentence of the match, which knows its corpus
    * @param match the match
-   * @param key the name of a node, edge, or regex group in the pattern
+   * @param key the name of a node, edge, or regex group in the pattern, or {@link #CORPUS_KEY}
    * @param lowered the keys the command lowercases
-   * @return the value, or null if the key was not bound in this match
+   * @return the value, or null if the key was not bound in this match, or
+   *   the key is {@link #CORPUS_KEY} and the sentence has no corpus
    */
-  public static String keyValue(SemgrexMatch match, String key, Set<String> lowered) {
-    String value = SemgrexUtils.getKey(match, key);
+  public static String keyValue(CoreMap sentence, SemgrexMatch match, String key, Set<String> lowered) {
+    String value = CORPUS_KEY.equals(key) ? sentence.get(CorpusAnnotation.class) : SemgrexUtils.getKey(match, key);
     if (value != null && lowered.contains(key)) {
       value = value.toLowerCase(Locale.ROOT);
     }
@@ -550,6 +582,8 @@ public class SemgrexStats {
    * @param command The command being built, used in error messages
    * @param keys The names to check
    * @throws IllegalArgumentException if {@code pattern} is not a RootPattern
+   * {@link #CORPUS_KEY} is not in the pattern, and is always allowed.
+   *
    * @throws SemgrexParseException if a key is unknown or ambiguous
    */
   public static void validateKeys(SemgrexPattern pattern, String command, List<String> keys) {
@@ -563,6 +597,9 @@ public class SemgrexStats {
     Set<String> edges = root.getKnownEdges();
 
     for (String key : keys) {
+      if (CORPUS_KEY.equals(key)) {
+        continue;
+      }
       int found = 0;
       if (variables.contains(key)) {
         ++found;
@@ -580,7 +617,7 @@ public class SemgrexStats {
         available.addAll(varGroups);
         available.addAll(edges);
         throw new SemgrexParseException(command + " was asked for '" + key + "', which does not exist in the pattern " +
-                                        "(as a node, regex, or edge).  Available names: " + available);
+                                        "(as a node, regex, or edge).  Available names: " + available + ", and " + CORPUS_KEY);
       }
       if (found > 1) {
         throw new SemgrexParseException(command + " was asked for '" + key + "', which is very confusing, as it is " +
@@ -592,6 +629,18 @@ public class SemgrexStats {
   // ------------------------------------------------------------------
   // running
   // ------------------------------------------------------------------
+
+  /**
+   * Marks sentences as coming from a corpus, which a command reads as {@link #CORPUS_KEY}.
+   *
+   * @param sentences the sentences
+   * @param corpus the name of their corpus
+   */
+  public static void setCorpus(List<CoreMap> sentences, String corpus) {
+    for (CoreMap sentence : sentences) {
+      sentence.set(CorpusAnnotation.class, corpus);
+    }
+  }
 
   /**
    * Feed a batch of sentences to one stage.
@@ -652,7 +701,8 @@ public class SemgrexStats {
     log.info(CONLLU_FILE + ": CoNLL-U dependency trees to process.  May be a file, a directory, "
                          + "several of either separated by , or ; or the flag repeated.  Bare paths "
                          + "with no flag in front of them are read the same way, so a list of files "
-                         + "can simply be separated by spaces");
+                         + "can simply be separated by spaces.  Each path is one corpus, named by "
+                         + "its last component, which a command can use as the key " + CORPUS_KEY);
     log.info(CONLLU_EXTENSION_FLAG + ": which extensions to pick up when a directory is given, "
                          + "separated by , or ; .  Default " + CONLLU_EXTENSION + ".  A file named "
                          + "explicitly is always read whatever it is called");
@@ -700,6 +750,25 @@ public class SemgrexStats {
    */
   static List<File> expandConlluFiles(List<String> paths, List<String> extensions) {
     List<File> files = new ArrayList<>();
+    for (Pair<File, String> file : expandCorpora(paths, extensions)) {
+      files.add(file.first());
+    }
+    return files;
+  }
+
+  /**
+   * As {@link #expandConlluFiles}, with the corpus of each file: the last
+   * component of the path it was found through, such as
+   * {@code UD_English-EWT} for every file in {@code UD_English-EWT/}.
+   *
+   * @param paths the -conlluFile arguments
+   * @param extensions the extensions of the files to read in a directory
+   * @return each file, in the order to read them, with its corpus
+   * @throws IllegalArgumentException if a path is neither a file nor a directory,
+   *   a directory has no files to read, or there are no files at all
+   */
+  static List<Pair<File, String>> expandCorpora(List<String> paths, List<String> extensions) {
+    List<Pair<File, String>> files = new ArrayList<>();
     for (String arg : paths) {
       for (String path : arg.split("[,;]")) {
         path = path.trim();
@@ -708,6 +777,7 @@ public class SemgrexStats {
         }
 
         File file = new File(path);
+        String corpus = corpusName(file);
         if (file.isDirectory()) {
           File[] contents = file.listFiles();
           if (contents == null) {
@@ -734,9 +804,11 @@ public class SemgrexStats {
             log.warn("Skipped " + skipped.size() + " file(s) in " + path + " which do not end in " +
                      extensions + ": " + skipped + "  (use " + CONLLU_EXTENSION_FLAG + " to include them)");
           }
-          files.addAll(found);
+          for (File child : found) {
+            files.add(new Pair<>(child, corpus));
+          }
         } else if (file.isFile()) {
-          files.add(file);
+          files.add(new Pair<>(file, corpus));
         } else {
           throw new IllegalArgumentException("Not a file or a directory: " + path);
         }
@@ -746,6 +818,19 @@ public class SemgrexStats {
       throw new IllegalArgumentException("No files to read");
     }
     return files;
+  }
+
+  /**
+   * The name of the corpus read through a path: its last component, or
+   * the path as given if it has none, such as {@code .}
+   */
+  static String corpusName(File path) {
+    String name = path.getName();
+    if (name.isEmpty() || name.equals(".") || name.equals("..")) {
+      File absolute = path.getAbsoluteFile().toPath().normalize().toFile();
+      name = absolute.getName();
+    }
+    return name.isEmpty() ? path.getPath() : name;
   }
 
   private static boolean matchesExtension(String filename, List<String> extensions) {
@@ -853,7 +938,7 @@ public class SemgrexStats {
       System.exit(2);
     }
 
-    List<File> conlluFiles = Collections.emptyList();
+    List<Pair<File, String>> conlluFiles = Collections.emptyList();
     if (!conlluPaths.isEmpty()) {
       // expand the whole list before reading anything, so that a typo
       // in the last filename is reported now rather than after an hour
@@ -863,7 +948,7 @@ public class SemgrexStats {
         if (argsMap.containsKey(CONLLU_EXTENSION_FLAG) && argsMap.get(CONLLU_EXTENSION_FLAG).length > 0) {
           extensions = parseExtensions(argsMap.get(CONLLU_EXTENSION_FLAG)[0]);
         }
-        conlluFiles = expandConlluFiles(conlluPaths, extensions);
+        conlluFiles = expandCorpora(conlluPaths, extensions);
       } catch (IllegalArgumentException e) {
         log.err(e.getMessage());
         System.exit(2);
@@ -882,18 +967,21 @@ public class SemgrexStats {
       if (argsMap.containsKey(TREE_FILE)) {
         for (String treeFile : argsMap.get(TREE_FILE)) {
           log.info("Loading file " + treeFile);
-          stats.accumulate(stage, SemgrexUtils.readTreeFile(treeFile, mode, useExtras));
+          List<CoreMap> sentences = SemgrexUtils.readTreeFile(treeFile, mode, useExtras);
+          setCorpus(sentences, corpusName(new File(treeFile)));
+          stats.accumulate(stage, sentences);
         }
       }
 
       if (!conlluFiles.isEmpty()) {
         CoNLLUReader reader = new CoNLLUReader();
-        for (File conlluFile : conlluFiles) {
-          log.info("Loading file " + conlluFile);
+        for (Pair<File, String> conlluFile : conlluFiles) {
+          log.info("Loading file " + conlluFile.first());
           List<CoreMap> sentences = new ArrayList<>();
-          for (Annotation doc : reader.readCoNLLUFile(conlluFile.toString())) {
+          for (Annotation doc : reader.readCoNLLUFile(conlluFile.first().toString())) {
             sentences.addAll(doc.get(CoreAnnotations.SentencesAnnotation.class));
-            }
+          }
+          setCorpus(sentences, conlluFile.second());
           stats.accumulate(stage, sentences);
         }
       }

@@ -22,6 +22,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexParseException;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * @author John Bauer
@@ -1002,6 +1003,79 @@ public class SemgrexStatsTest {
   // ------------------------------------------------------------------
   // expanding the -conlluFile arguments
   // ------------------------------------------------------------------
+
+  /**
+   * $corpus is the corpus each sentence came from, which any command can
+   * use as a key, so one chart can compare two treebanks, with 0 where
+   * one has a value the other has not
+   */
+  @Test
+  public void testCorpusKey() {
+    List<CoreMap> first = sentences(new String[] { "[vi-1 obj> lo-2]", "[vi-1 obj> la-2]" }, null);
+    List<CoreMap> second = sentences(new String[] { "[vi-1 obj> lo-2]", "[vi-1 iobj> le-2]" }, null);
+    SemgrexStats.setCorpus(first, "UD_Spanish-AnCora");
+    SemgrexStats.setCorpus(second, "UD_Spanish-GSD");
+    List<CoreMap> both = new ArrayList<>(first);
+    both.addAll(second);
+
+    SemgrexStats stats = runScript(lines("pattern {}=word <=relation {}",
+                                         "count word $corpus",
+                                         "sample relation $corpus"), both);
+    String report = stats.report();
+    assertEquals(Arrays.asList("word", "UD_Spanish-AnCora", "UD_Spanish-GSD", "TOTAL"), chartRow(report, "word"));
+    assertChartRow(report, "lo", "1", "1", "2");
+    assertChartRow(report, "la", "1", "0", "1");
+    assertChartRow(report, "le", "0", "1", "1");
+    SampleStat sample = (SampleStat) stats.getStages().get(0).getStats().get(1);
+    assertEquals(1, sample.getMatches(Arrays.asList("iobj", "UD_Spanish-GSD")));
+
+    // a set can be collected per corpus, and a sentence with no corpus is unbound
+    stats = runScript(lines("pattern {}=word <=relation {}",
+                            "collect $corpus as corpora",
+                            "count $corpus"), sentences(new String[] { "[vi-1 obj> lo-2]" }, null));
+    assertChartRows(stats.report(), "count $corpus", CountStat.UNBOUND);
+    stats = runScript(lines("pattern {}=word <=relation {}",
+                            "collect $corpus as corpora"), both);
+    assertEquals(new HashSet<>(Arrays.asList("UD_Spanish-AnCora", "UD_Spanish-GSD")),
+                 ((CollectStat) stats.getStages().get(0).getStats().get(0)).getValues());
+
+    // it can be lowercased and sorted like any key, and is the only $ key there is
+    SemgrexStats.parse(lines("pattern {}=word <=relation {}", "count -lower $corpus -sort $corpus $corpus word"));
+    assertThrows(SemgrexParseException.class, () ->
+      SemgrexStats.parse(lines("pattern {}=word <=relation {}", "count $treebank")));
+  }
+
+  /**
+   * Each path names a corpus by its last component: every file of a
+   * directory is in the directory's corpus, and a file named on its own
+   * is in a corpus of its own name
+   */
+  @Test
+  public void testExpandCorpora() throws IOException {
+    File parent = Files.createTempDirectory("semgrexStats").toFile();
+    parent.deleteOnExit();
+    File treebank = new File(parent, "UD_English-EWT");
+    assertTrue(treebank.mkdir());
+    treebank.deleteOnExit();
+    for (String name : new String[] {"en_ewt-ud-train.conllu", "en_ewt-ud-dev.conllu"}) {
+      File file = new File(treebank, name);
+      file.createNewFile();
+      file.deleteOnExit();
+    }
+    File single = new File(parent, "extra.conllu");
+    single.createNewFile();
+    single.deleteOnExit();
+
+    List<Pair<File, String>> corpora = SemgrexStats.expandCorpora(List.of(treebank + File.separator, single.toString()), CONLLU_EXTENSIONS);
+    assertEquals(3, corpora.size());
+    assertEquals("en_ewt-ud-dev.conllu", corpora.get(0).first().getName());
+    assertEquals("UD_English-EWT", corpora.get(0).second());
+    assertEquals("UD_English-EWT", corpora.get(1).second());
+    assertEquals("extra.conllu", corpora.get(2).second());
+
+    // a path with no last component of its own is named by the directory it means
+    assertEquals(new File("").getAbsoluteFile().getName(), SemgrexStats.corpusName(new File(".")));
+  }
 
   /**
    * A directory contributes its .conllu files, sorted, and skips the
