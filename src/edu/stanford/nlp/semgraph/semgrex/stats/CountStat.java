@@ -20,7 +20,7 @@ import edu.stanford.nlp.util.CoreMap;
  *<br>
  * Script syntax:
  *<pre>
- * count [-flat] [-maxColumns N] [-lower KEY ...] [-sort KEY ...] KEY [KEY ...]
+ * count [-flat] [-maxColumns N] [-noTotal] [-lower KEY ...] [-sort KEY ...] KEY [KEY ...]
  *</pre>
  * With one key, this produces a ranked list of the values that key took
  * and how often.  With two keys, it produces a contingency table of the
@@ -35,6 +35,11 @@ import edu.stanford.nlp.util.CoreMap;
  * {@code -lower KEY} counts the values of that key lowercased, so that
  * "Lo", "lo", and "LO" are one row.  It can be given for more than one
  * key, and applies to a {@code -restrict} on the same key as well.
+ *<br>
+ * {@code -noTotal} leaves out the TOTAL row and column, and the subtotal
+ * rows of a chart with blocks, for a chart going into a paper.  The pct
+ * column of a one key chart stays, as it is each row's share of the
+ * total.
  *<br>
  * The values of each key are ordered by how often they occur, most
  * first.  {@code -sort KEY} orders that key's values alphabetically
@@ -62,6 +67,7 @@ public class CountStat implements SemgrexStat {
   private static final String SUBTOTAL = "subtotal";
   private static final String RESTRICT = "-restrict";
   private static final String SORT = "-sort";
+  private static final String NO_TOTAL = "-noTotal";
   private static final String NO_BIDI = "-noBidi";
 
   private final List<String> keys;
@@ -73,6 +79,8 @@ public class CountStat implements SemgrexStat {
 
   private final int maxColumns;
   private final boolean flat;
+  /** whether the chart has its TOTAL row and column, and its subtotals */
+  private final boolean totals;
   private final boolean bidiAllowed;
 
   /** a key, and the set of values from an earlier stage that key is allowed to take */
@@ -101,7 +109,8 @@ public class CountStat implements SemgrexStat {
    */
   private boolean bidi = false;
 
-  CountStat(List<String> keys, Set<String> lowered, Set<String> sorted, boolean flat, int maxColumns, List<Restriction> restrictions, boolean bidiAllowed) {
+  CountStat(List<String> keys, Set<String> lowered, Set<String> sorted, boolean flat, boolean totals, int maxColumns,
+            List<Restriction> restrictions, boolean bidiAllowed) {
     if (keys.isEmpty()) {
       throw new SemgrexParseException("count needs at least one key to count");
     }
@@ -109,13 +118,14 @@ public class CountStat implements SemgrexStat {
     this.lowered = Collections.unmodifiableSet(new LinkedHashSet<>(lowered));
     this.sorted = Collections.unmodifiableSet(new LinkedHashSet<>(sorted));
     this.flat = flat;
+    this.totals = totals;
     this.maxColumns = maxColumns;
     this.restrictions = Collections.unmodifiableList(new ArrayList<>(restrictions));
     this.bidiAllowed = bidiAllowed;
   }
 
   /**
-   * Parses "count [-flat] [-maxColumns N] [-noBidi] [-restrict KEY=SET ...] [-lower KEY ...] [-sort KEY ...] KEY [KEY ...]"
+   * Parses "count [-flat] [-maxColumns N] [-noBidi] [-noTotal] [-restrict KEY=SET ...] [-lower KEY ...] [-sort KEY ...] KEY [KEY ...]"
    *
    * @param context the stage this command is in, used to validate keys and look up sets
    * @param args the arguments after "count"
@@ -131,6 +141,7 @@ public class CountStat implements SemgrexStat {
     Set<String> lowered = new LinkedHashSet<>();
     Set<String> sorted = new LinkedHashSet<>();
     boolean flat = false;
+    boolean totals = true;
     int maxColumns = DEFAULT_MAX_COLUMNS;
     // the run decides by default, since it is a property of whatever is
     // displaying the chart, but a script may still turn it off itself
@@ -155,6 +166,8 @@ public class CountStat implements SemgrexStat {
         }
       } else if (NO_BIDI.equals(arg)) {
         bidiAllowed = false;
+      } else if (NO_TOTAL.equals(arg)) {
+        totals = false;
       } else if (RESTRICT.equals(arg)) {
         if (idx + 1 >= args.size()) {
           throw new SemgrexParseException(RESTRICT + " needs KEY=SET after it");
@@ -180,7 +193,7 @@ public class CountStat implements SemgrexStat {
         sorted.add(args.get(idx));
       } else if (arg.startsWith("-")) {
         throw new SemgrexParseException("Unknown option '" + arg + "' for count.  Known options: " +
-                                        FLAT + ", " + MAX_COLUMNS + ", " + NO_BIDI + ", " + RESTRICT + ", " + SemgrexStats.LOWER + ", " + SORT);
+                                        FLAT + ", " + MAX_COLUMNS + ", " + NO_BIDI + ", " + NO_TOTAL + ", " + RESTRICT + ", " + SemgrexStats.LOWER + ", " + SORT);
       } else {
         keys.add(arg);
       }
@@ -197,7 +210,7 @@ public class CountStat implements SemgrexStat {
     SemgrexStats.checkLowered("count", lowered, used);
     SemgrexStats.checkOptionKeys("count", SORT, sorted, keys);
 
-    return new CountStat(keys, lowered, sorted, flat, maxColumns, restrictions, bidiAllowed);
+    return new CountStat(keys, lowered, sorted, flat, totals, maxColumns, restrictions, bidiAllowed);
   }
 
   @Override
@@ -352,6 +365,9 @@ public class CountStat implements SemgrexStat {
     if (flat) {
       sb.append(" ").append(FLAT);
     }
+    if (!totals) {
+      sb.append(" ").append(NO_TOTAL);
+    }
     if (maxColumns != DEFAULT_MAX_COLUMNS) {
       sb.append(" ").append(MAX_COLUMNS).append(" ").append(maxColumns);
     }
@@ -401,8 +417,10 @@ public class CountStat implements SemgrexStat {
     for (Map.Entry<List<String>, Integer> entry : sortedEntries()) {
       chart.row(entry.getKey().get(0), Integer.toString(entry.getValue()), percent(entry.getValue(), totalMatches));
     }
-    chart.rule();
-    chart.row("TOTAL", Long.toString(totalMatches));
+    if (totals) {
+      chart.rule();
+      chart.row("TOTAL", Long.toString(totalMatches));
+    }
     return chart;
   }
 
@@ -414,13 +432,16 @@ public class CountStat implements SemgrexStat {
     Map<String, Integer> rowTotals = marginal(0);
     Map<String, Integer> columnTotals = marginal(1);
 
-    Chart chart = new Chart(alignments(1, columnValues.size() + 1), minimumWidths(columnValues.size() + 2, false));
+    int totalColumns = totals ? 1 : 0;
+    Chart chart = new Chart(alignments(1, columnValues.size() + totalColumns), minimumWidths(columnValues.size() + 1 + totalColumns, false));
     chart.note("rows: " + keys.get(0) + ", columns: " + keys.get(1));
 
     List<String> header = new ArrayList<>();
     header.add(keys.get(0));
     header.addAll(columnValues);
-    header.add("TOTAL");
+    if (totals) {
+      header.add("TOTAL");
+    }
     chart.row(header);
     chart.rule();
 
@@ -430,10 +451,15 @@ public class CountStat implements SemgrexStat {
       for (String column : columnValues) {
         cells.add(Integer.toString(get(row, column)));
       }
-      cells.add(Integer.toString(rowTotals.getOrDefault(row, 0)));
+      if (totals) {
+        cells.add(Integer.toString(rowTotals.getOrDefault(row, 0)));
+      }
       chart.row(cells);
     }
 
+    if (!totals) {
+      return chart;
+    }
     chart.rule();
     List<String> footer = new ArrayList<>();
     footer.add("TOTAL");
@@ -458,13 +484,16 @@ public class CountStat implements SemgrexStat {
     List<String> blockValues = distinctValues(0);
     Map<String, Integer> columnTotals = marginal(2);
 
-    Chart chart = new Chart(alignments(1, columnValues.size() + 1), minimumWidths(columnValues.size() + 2, false));
+    int totalColumns = totals ? 1 : 0;
+    Chart chart = new Chart(alignments(1, columnValues.size() + totalColumns), minimumWidths(columnValues.size() + 1 + totalColumns, false));
     chart.note("blocks: " + keys.get(0) + ", rows: " + keys.get(1) + ", columns: " + keys.get(2));
 
     List<String> header = new ArrayList<>();
     header.add(keys.get(0));
     header.addAll(columnValues);
-    header.add("TOTAL");
+    if (totals) {
+      header.add("TOTAL");
+    }
     chart.row(header);
     chart.rule();
 
@@ -488,10 +517,15 @@ public class CountStat implements SemgrexStat {
           cells.add(Integer.toString(value));
         }
         blockTotal += rowTotal;
-        cells.add(Integer.toString(rowTotal));
+        if (totals) {
+          cells.add(Integer.toString(rowTotal));
+        }
         chart.indentedRow(cells);
       }
 
+      if (!totals) {
+        continue;
+      }
       List<String> subtotal = new ArrayList<>();
       subtotal.add(SUBTOTAL);
       for (int value : subtotals) {
@@ -501,6 +535,9 @@ public class CountStat implements SemgrexStat {
       chart.indentedRow(subtotal);
     }
 
+    if (!totals) {
+      return chart;
+    }
     chart.rule();
     List<String> footer = new ArrayList<>();
     footer.add("TOTAL");
