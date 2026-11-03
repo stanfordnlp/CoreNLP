@@ -323,10 +323,15 @@ import edu.stanford.nlp.util.logging.Redwood;
  * <p>
  * A node, a variable group, and an edge may not share a name.
  *
- * <h2>TODO</h2>
- * At present a Semgrex pattern will match only once at a root node, even if there is more than one way of satisfying
- * it under the root node. Probably its semantics should be changed, or at least the option should be given, to return
- * all matches, as is the case for Tregex.  (Is this still true?  It seems to match multiple times from root.)
+ * <h2>Matching more than once at a node</h2>
+ *
+ * A pattern can match at one node in more than one way, and
+ * {@link SemgrexMatcher#find} returns each of them, as Tregex does: with
+ * three dependents, {@code {word:ate} > {}=x} matches at "ate" three
+ * times, once with each dependent as {@code x}.  To move on to the next
+ * node instead, use {@link SemgrexMatcher#findNextMatchingNode}, which
+ * returns the first match at each node.  {@code :: uniq} keeps one match
+ * for each value of the keys it is given.
  *
  * @author Chloe Kiddon
  */

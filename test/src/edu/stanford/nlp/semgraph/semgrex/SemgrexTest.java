@@ -50,6 +50,38 @@ public class SemgrexTest {
     assertFalse(matcher.findNextMatchingNode());
   }
 
+  /**
+   * find returns every way a pattern matches at a node, and
+   * findNextMatchingNode moves on to the next node after the first
+   */
+  @Test
+  public void testMatchesPerNode() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate-1 nsubj> Bill-2 obj> muffins-3 obl> fork-4]");
+    SemgrexPattern pattern = compile("{word:ate} > {}=x");
+
+    List<String> found = new ArrayList<>();
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    while (matcher.find()) {
+      assertEquals("ate", matcher.getMatch().word());
+      found.add(matcher.getNode("x").word());
+    }
+    Collections.sort(found);
+    assertEquals(Arrays.asList("Bill", "fork", "muffins"), found);
+
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.findNextMatchingNode());
+    assertEquals("ate", matcher.getMatch().word());
+    assertFalse(matcher.findNextMatchingNode());
+
+    // two names give every combination of the dependents
+    int matches = 0;
+    matcher = compile("{word:ate} > {}=x > {}=y").matcher(graph);
+    while (matcher.find()) {
+      ++matches;
+    }
+    assertEquals(9, matches);
+  }
+
   @Test
   public void testTest() {
     runTest("{}", "[ate subj>Bill obj>[muffins compound>blueberry]]",
