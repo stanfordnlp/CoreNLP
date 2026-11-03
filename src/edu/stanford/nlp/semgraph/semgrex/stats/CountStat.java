@@ -58,9 +58,6 @@ public class CountStat implements SemgrexStat {
   /** width of the percentage column, wide enough for "100.00%" */
   private static final int PCT_WIDTH = 6;
 
-  /** how far the rows of a block chart are indented under their block */
-  private static final String INDENT = "  ";
-
   /** label of a block's summary row */
   private static final String SUBTOTAL = "subtotal";
   private static final String RESTRICT = "-restrict";
@@ -265,13 +262,6 @@ public class CountStat implements SemgrexStat {
   // rendering
   // ------------------------------------------------------------------
 
-  /** first strong isolate: makes a cell pick its own direction without affecting its neighbours */
-  private static final String FSI = "\u2068";
-  /** pop directional isolate */
-  private static final String PDI = "\u2069";
-  /** left to right mark: pins a line's base direction so the columns don't reverse */
-  private static final String LRM = "\u200E";
-
   /**
    * Whether any strong right to left character appears in this string.
    *<br>
@@ -319,43 +309,19 @@ public class CountStat implements SemgrexStat {
     }
   }
 
-  /** Starts a line, pinning its base direction when the chart needs it */
-  private String start() {
-    return bidi ? LRM : "";
-  }
-
-  /**
-   * One padded cell.
-   *<br>
-   * The width is measured on the raw value and the padding goes outside
-   * the isolate: spaces inside it would join the cell's own direction and
-   * end up on the wrong side of the word.
-   */
-  private String cell(String value, int width, boolean leftAlign) {
-    StringBuilder padding = new StringBuilder();
-    for (int i = value.length(); i < width; ++i) {
-      padding.append(' ');
-    }
-    String content = bidi ? FSI + value + PDI : value;
-    return leftAlign ? content + padding : padding + content;
-  }
-
-  private String dashes(int width) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < width; ++i) {
-      sb.append('-');
-    }
-    return cell(sb.toString(), width, true);
-  }
-
   @Override
   public String report() {
     detectBidi();
     if (counts.isEmpty()) {
       return "No matches, nothing to count." + System.lineSeparator();
     }
+    return chart().toText(bidi);
+  }
+
+  /** The chart this command reports, in the form its keys call for */
+  Chart chart() {
     if (flat || keys.size() > 3) {
-      return flatChart();
+      return flatChart(null);
     }
     if (keys.size() == 1) {
       return oneDimensionalChart();
@@ -367,12 +333,8 @@ public class CountStat implements SemgrexStat {
     int columnKey = keys.size() - 1;
     List<String> columnValues = distinctValues(columnKey);
     if (columnValues.size() > maxColumns) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(start()).append("# ").append(keys.get(columnKey)).append(" took ").append(columnValues.size());
-      sb.append(" distinct values, which is more than ").append(MAX_COLUMNS).append(" (").append(maxColumns);
-      sb.append("), so printing the flat form.").append(System.lineSeparator());
-      sb.append(flatChart());
-      return sb.toString();
+      return flatChart(keys.get(columnKey) + " took " + columnValues.size() + " distinct values, which is more than " +
+                       MAX_COLUMNS + " (" + maxColumns + "), so printing the flat form.");
     }
     if (keys.size() == 2) {
       return twoDimensionalChart(columnValues);
@@ -408,123 +370,79 @@ public class CountStat implements SemgrexStat {
     return sb.toString();
   }
 
+  /** Alignments for a chart: the first {@code labels} columns left, the next {@code numbers} right */
+  private static List<Boolean> alignments(int labels, int numbers) {
+    List<Boolean> leftAligned = new ArrayList<>();
+    for (int i = 0; i < labels; ++i) {
+      leftAligned.add(true);
+    }
+    for (int i = 0; i < numbers; ++i) {
+      leftAligned.add(false);
+    }
+    return leftAligned;
+  }
+
+  /** Minimum widths of 0 for every column, with the last at least wide enough for a percentage if {@code pct} */
+  private static List<Integer> minimumWidths(int columns, boolean pct) {
+    List<Integer> widths = new ArrayList<>(Collections.nCopies(columns, 0));
+    if (pct) {
+      widths.set(columns - 1, PCT_WIDTH);
+    }
+    return widths;
+  }
+
   /**
    * count X
    */
-  private String oneDimensionalChart() {
-    List<Map.Entry<List<String>, Integer>> entries = sortedEntries();
-
-    int keyWidth = keys.get(0).length();
-    int countWidth = "count".length();
-    for (Map.Entry<List<String>, Integer> entry : entries) {
-      keyWidth = Math.max(keyWidth, entry.getKey().get(0).length());
-      countWidth = Math.max(countWidth, Integer.toString(entry.getValue()).length());
+  private Chart oneDimensionalChart() {
+    Chart chart = new Chart(alignments(1, 2), minimumWidths(3, true));
+    chart.row(keys.get(0), "count", "pct");
+    chart.rule();
+    for (Map.Entry<List<String>, Integer> entry : sortedEntries()) {
+      chart.row(entry.getKey().get(0), Integer.toString(entry.getValue()), percent(entry.getValue(), totalMatches));
     }
-    keyWidth = Math.max(keyWidth, "TOTAL".length());
-    countWidth = Math.max(countWidth, Long.toString(totalMatches).length());
-
-    StringBuilder sb = new StringBuilder();
-    sb.append(row(keyWidth, countWidth, keys.get(0), "count", "pct"));
-    sb.append(rule(keyWidth, countWidth));
-    for (Map.Entry<List<String>, Integer> entry : entries) {
-      sb.append(row(keyWidth, countWidth, entry.getKey().get(0), Integer.toString(entry.getValue()),
-                    percent(entry.getValue(), totalMatches)));
-    }
-    sb.append(rule(keyWidth, countWidth));
-    sb.append(start());
-    sb.append(cell("TOTAL", keyWidth, true)).append("  ");
-    sb.append(cell(Long.toString(totalMatches), countWidth, false));
-    sb.append(System.lineSeparator());
-    return sb.toString();
-  }
-
-  private String row(int keyWidth, int countWidth, String key, String count, String pct) {
-    StringBuilder sb = new StringBuilder(start());
-    sb.append(cell(key, keyWidth, true)).append("  ");
-    sb.append(cell(count, countWidth, false)).append("  ");
-    sb.append(cell(pct, PCT_WIDTH, false));
-    sb.append(System.lineSeparator());
-    return sb.toString();
-  }
-
-  private String rule(int keyWidth, int countWidth) {
-    StringBuilder sb = new StringBuilder(start());
-    sb.append(dashes(keyWidth)).append("  ");
-    sb.append(dashes(countWidth)).append("  ");
-    sb.append(dashes(PCT_WIDTH));
-    sb.append(System.lineSeparator());
-    return sb.toString();
+    chart.rule();
+    chart.row("TOTAL", Long.toString(totalMatches));
+    return chart;
   }
 
   /**
    * count X Y
    */
-  private String twoDimensionalChart(List<String> columnValues) {
+  private Chart twoDimensionalChart(List<String> columnValues) {
     List<String> rowValues = distinctValues(0);
-
     Map<String, Integer> rowTotals = marginal(0);
     Map<String, Integer> columnTotals = marginal(1);
 
-    int rowHeaderWidth = keys.get(0).length();
-    for (String row : rowValues) {
-      rowHeaderWidth = Math.max(rowHeaderWidth, row.length());
-    }
-    rowHeaderWidth = Math.max(rowHeaderWidth, "TOTAL".length());
+    Chart chart = new Chart(alignments(1, columnValues.size() + 1), minimumWidths(columnValues.size() + 2, false));
+    chart.note("rows: " + keys.get(0) + ", columns: " + keys.get(1));
 
-    // each column is as wide as the widest of its header and its counts
-    List<Integer> columnWidths = new ArrayList<>();
+    List<String> header = new ArrayList<>();
+    header.add(keys.get(0));
+    header.addAll(columnValues);
+    header.add("TOTAL");
+    chart.row(header);
+    chart.rule();
+
+    for (String row : rowValues) {
+      List<String> cells = new ArrayList<>();
+      cells.add(row);
+      for (String column : columnValues) {
+        cells.add(Integer.toString(get(row, column)));
+      }
+      cells.add(Integer.toString(rowTotals.getOrDefault(row, 0)));
+      chart.row(cells);
+    }
+
+    chart.rule();
+    List<String> footer = new ArrayList<>();
+    footer.add("TOTAL");
     for (String column : columnValues) {
-      int width = column.length();
-      for (String row : rowValues) {
-        width = Math.max(width, Integer.toString(get(row, column)).length());
-      }
-      width = Math.max(width, Integer.toString(columnTotals.getOrDefault(column, 0)).length());
-      columnWidths.add(width);
+      footer.add(Integer.toString(columnTotals.getOrDefault(column, 0)));
     }
-    int totalWidth = Math.max("TOTAL".length(), Long.toString(totalMatches).length());
-
-    StringBuilder sb = new StringBuilder();
-    sb.append(start()).append("# rows: ").append(keys.get(0));
-    sb.append(", columns: ").append(keys.get(1)).append(System.lineSeparator());
-
-    sb.append(start()).append(cell(keys.get(0), rowHeaderWidth, true));
-    for (int i = 0; i < columnValues.size(); ++i) {
-      sb.append("  ").append(cell(columnValues.get(i), columnWidths.get(i), false));
-    }
-    sb.append("  ").append(cell("TOTAL", totalWidth, false)).append(System.lineSeparator());
-
-    sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
-
-    for (String row : rowValues) {
-      sb.append(start()).append(cell(row, rowHeaderWidth, true));
-      for (int i = 0; i < columnValues.size(); ++i) {
-        sb.append("  ").append(cell(Integer.toString(get(row, columnValues.get(i))), columnWidths.get(i), false));
-      }
-      sb.append("  ").append(cell(Integer.toString(rowTotals.getOrDefault(row, 0)), totalWidth, false));
-      sb.append(System.lineSeparator());
-    }
-
-    sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
-
-    sb.append(start()).append(cell("TOTAL", rowHeaderWidth, true));
-    for (int i = 0; i < columnValues.size(); ++i) {
-      sb.append("  ").append(cell(Integer.toString(columnTotals.getOrDefault(columnValues.get(i), 0)), columnWidths.get(i), false));
-    }
-    sb.append("  ").append(cell(Long.toString(totalMatches), totalWidth, false));
-    sb.append(System.lineSeparator());
-
-    return sb.toString();
-  }
-
-  private String gridRule(int rowHeaderWidth, List<Integer> columnWidths, int totalWidth) {
-    StringBuilder sb = new StringBuilder(start());
-    sb.append(dashes(rowHeaderWidth));
-    for (int width : columnWidths) {
-      sb.append("  ").append(dashes(width));
-    }
-    sb.append("  ").append(dashes(totalWidth));
-    sb.append(System.lineSeparator());
-    return sb.toString();
+    footer.add(Long.toString(totalMatches));
+    chart.row(footer);
+    return chart;
   }
 
   /**
@@ -536,131 +454,85 @@ public class CountStat implements SemgrexStat {
    * to the totals at the foot; the rows are not, so each block shows
    * only what occurs in it.
    */
-  private String blockChart(List<String> columnValues) {
+  private Chart blockChart(List<String> columnValues) {
     List<String> blockValues = distinctValues(0);
     Map<String, Integer> columnTotals = marginal(2);
 
-    int rowHeaderWidth = keys.get(0).length();
-    for (String block : blockValues) {
-      rowHeaderWidth = Math.max(rowHeaderWidth, block.length());
-      for (String row : distinctValuesInBlock(block, 1)) {
-        rowHeaderWidth = Math.max(rowHeaderWidth, INDENT.length() + row.length());
-      }
-    }
-    rowHeaderWidth = Math.max(rowHeaderWidth, INDENT.length() + SUBTOTAL.length());
-    rowHeaderWidth = Math.max(rowHeaderWidth, "TOTAL".length());
+    Chart chart = new Chart(alignments(1, columnValues.size() + 1), minimumWidths(columnValues.size() + 2, false));
+    chart.note("blocks: " + keys.get(0) + ", rows: " + keys.get(1) + ", columns: " + keys.get(2));
 
-    List<Integer> columnWidths = new ArrayList<>();
-    for (String column : columnValues) {
-      int width = Math.max(column.length(), Integer.toString(columnTotals.getOrDefault(column, 0)).length());
-      for (String block : blockValues) {
-        for (String row : distinctValuesInBlock(block, 1)) {
-          width = Math.max(width, Integer.toString(get(block, row, column)).length());
-        }
-      }
-      columnWidths.add(width);
-    }
-    int totalWidth = Math.max("TOTAL".length(), Long.toString(totalMatches).length());
-
-    StringBuilder sb = new StringBuilder();
-    sb.append(start()).append("# blocks: ").append(keys.get(0));
-    sb.append(", rows: ").append(keys.get(1));
-    sb.append(", columns: ").append(keys.get(2)).append(System.lineSeparator());
-
-    sb.append(start()).append(cell(keys.get(0), rowHeaderWidth, true));
-    for (int i = 0; i < columnValues.size(); ++i) {
-      sb.append("  ").append(cell(columnValues.get(i), columnWidths.get(i), false));
-    }
-    sb.append("  ").append(cell("TOTAL", totalWidth, false)).append(System.lineSeparator());
-
-    sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
+    List<String> header = new ArrayList<>();
+    header.add(keys.get(0));
+    header.addAll(columnValues);
+    header.add("TOTAL");
+    chart.row(header);
+    chart.rule();
 
     for (int b = 0; b < blockValues.size(); ++b) {
       String block = blockValues.get(b);
       if (b > 0) {
-        sb.append(System.lineSeparator());
+        chart.blank();
       }
-      // the block's own line carries only its label, so there is no
-      // trailing whitespace to strip out of a paste
-      sb.append(start()).append(block).append(System.lineSeparator());
+      chart.block(block);
 
-      List<String> rowValues = distinctValuesInBlock(block, 1);
       int[] subtotals = new int[columnValues.size()];
       int blockTotal = 0;
-
-      for (String row : rowValues) {
-        // the indent goes outside the isolate for the same reason the
-        // padding does: it is neutral, and inside it would join the
-        // cell's own direction and end up on the wrong side of the word
-        sb.append(start()).append(INDENT).append(cell(row, rowHeaderWidth - INDENT.length(), true));
+      for (String row : distinctValuesInBlock(block, 1)) {
+        List<String> cells = new ArrayList<>();
+        cells.add(row);
         int rowTotal = 0;
         for (int i = 0; i < columnValues.size(); ++i) {
           int value = get(block, row, columnValues.get(i));
           subtotals[i] += value;
           rowTotal += value;
-          sb.append("  ").append(cell(Integer.toString(value), columnWidths.get(i), false));
+          cells.add(Integer.toString(value));
         }
         blockTotal += rowTotal;
-        sb.append("  ").append(cell(Integer.toString(rowTotal), totalWidth, false));
-        sb.append(System.lineSeparator());
+        cells.add(Integer.toString(rowTotal));
+        chart.indentedRow(cells);
       }
 
-      sb.append(start()).append(INDENT).append(cell(SUBTOTAL, rowHeaderWidth - INDENT.length(), true));
-      for (int i = 0; i < columnValues.size(); ++i) {
-        sb.append("  ").append(cell(Integer.toString(subtotals[i]), columnWidths.get(i), false));
+      List<String> subtotal = new ArrayList<>();
+      subtotal.add(SUBTOTAL);
+      for (int value : subtotals) {
+        subtotal.add(Integer.toString(value));
       }
-      sb.append("  ").append(cell(Integer.toString(blockTotal), totalWidth, false));
-      sb.append(System.lineSeparator());
+      subtotal.add(Integer.toString(blockTotal));
+      chart.indentedRow(subtotal);
     }
 
-    sb.append(gridRule(rowHeaderWidth, columnWidths, totalWidth));
-
-    sb.append(start()).append(cell("TOTAL", rowHeaderWidth, true));
-    for (int i = 0; i < columnValues.size(); ++i) {
-      sb.append("  ").append(cell(Integer.toString(columnTotals.getOrDefault(columnValues.get(i), 0)), columnWidths.get(i), false));
+    chart.rule();
+    List<String> footer = new ArrayList<>();
+    footer.add("TOTAL");
+    for (String column : columnValues) {
+      footer.add(Integer.toString(columnTotals.getOrDefault(column, 0)));
     }
-    sb.append("  ").append(cell(Long.toString(totalMatches), totalWidth, false));
-    sb.append(System.lineSeparator());
-
-    return sb.toString();
+    footer.add(Long.toString(totalMatches));
+    chart.row(footer);
+    return chart;
   }
 
   /**
    * count W X Y Z ... , or a count too wide to draw
+   *
+   * @param note why the flat form is used for a count which would otherwise be a grid, or null
    */
-  private String flatChart() {
-    List<Map.Entry<List<String>, Integer>> entries = sortedEntries();
-
-    List<Integer> widths = new ArrayList<>();
-    for (int i = 0; i < keys.size(); ++i) {
-      widths.add(keys.get(i).length());
+  private Chart flatChart(String note) {
+    Chart chart = new Chart(alignments(keys.size(), 2), minimumWidths(keys.size() + 2, true));
+    if (note != null) {
+      chart.note(note);
     }
-    int countWidth = "count".length();
-    for (Map.Entry<List<String>, Integer> entry : entries) {
-      for (int i = 0; i < keys.size(); ++i) {
-        widths.set(i, Math.max(widths.get(i), entry.getKey().get(i).length()));
-      }
-      countWidth = Math.max(countWidth, Integer.toString(entry.getValue()).length());
+    List<String> header = new ArrayList<>(keys);
+    header.add("count");
+    header.add("pct");
+    chart.row(header);
+    for (Map.Entry<List<String>, Integer> entry : sortedEntries()) {
+      List<String> cells = new ArrayList<>(entry.getKey());
+      cells.add(Integer.toString(entry.getValue()));
+      cells.add(percent(entry.getValue(), totalMatches));
+      chart.row(cells);
     }
-
-    StringBuilder sb = new StringBuilder(start());
-    for (int i = 0; i < keys.size(); ++i) {
-      sb.append(cell(keys.get(i), widths.get(i), true)).append("  ");
-    }
-    sb.append(cell("count", countWidth, false)).append("  ").append(cell("pct", PCT_WIDTH, false));
-    sb.append(System.lineSeparator());
-
-    for (Map.Entry<List<String>, Integer> entry : entries) {
-      sb.append(start());
-      for (int i = 0; i < keys.size(); ++i) {
-        sb.append(cell(entry.getKey().get(i), widths.get(i), true)).append("  ");
-      }
-      sb.append(cell(Integer.toString(entry.getValue()), countWidth, false));
-      sb.append("  ").append(cell(percent(entry.getValue(), totalMatches), PCT_WIDTH, false));
-      sb.append(System.lineSeparator());
-    }
-
-    return sb.toString();
+    return chart;
   }
 
   // ------------------------------------------------------------------
