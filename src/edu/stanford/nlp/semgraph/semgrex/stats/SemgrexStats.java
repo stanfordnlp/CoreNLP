@@ -510,9 +510,24 @@ public class SemgrexStats {
    * @throws SemgrexParseException if a lowered key is not one the command reads
    */
   public static void checkLowered(String command, Set<String> lowered, Collection<String> used) {
-    for (String key : lowered) {
+    checkOptionKeys(command, LOWER, lowered, used);
+  }
+
+  /**
+   * Checks that each key an option of a command names is one the command
+   * uses, so that a typo is a parse error rather than an option which
+   * does nothing.
+   *
+   * @param command the command being built, used in error messages
+   * @param option the option, such as {@code -sort}
+   * @param named the keys given with the option
+   * @param used the keys the command reads
+   * @throws SemgrexParseException if a named key is not one the command reads
+   */
+  public static void checkOptionKeys(String command, String option, Collection<String> named, Collection<String> used) {
+    for (String key : named) {
       if (!used.contains(key)) {
-        throw new SemgrexParseException(command + " " + LOWER + " " + key + " names a key which " + command + " does not use");
+        throw new SemgrexParseException(command + " " + option + " " + key + " names a key which " + command + " does not use");
       }
     }
   }

@@ -770,6 +770,42 @@ public class SemgrexStatsTest {
     assertEquals(Arrays.asList("## relations", "# count relation"), report.subList(0, 2));
   }
 
+  /**
+   * -sort orders a key's values alphabetically rather than by count, as
+   * rows, as columns, or in a flat listing.  The batch has 4 nsubj, 2
+   * nmod, and 2 obj, so by count nsubj comes first.
+   */
+  @Test
+  public void testCountSort() {
+    String report = runScript(lines("pattern {}=word <=relation {}",
+                                    "count relation")).report();
+    assertChartRows(report, "count relation", "nsubj", "nmod", "obj");
+    report = runScript(lines("pattern {}=word <=relation {}",
+                             "count -sort relation relation")).report();
+    assertChartRows(report, "count -sort relation relation", "nmod", "nsubj", "obj");
+
+    // the columns are sorted, and the rows, which are not, keep their counts' order
+    report = runScript(lines("pattern {}=word <=relation {}",
+                             "count -sort relation word relation")).report();
+    assertEquals(Arrays.asList("word", "nmod", "nsubj", "obj", "TOTAL"), chartRow(report, "word"));
+    assertChartRows(report, "count -sort relation word relation", "Bill", "his", "book", "cake", "her");
+    report = runScript(lines("pattern {}=word <=relation {}",
+                             "count -sort word -sort relation word relation")).report();
+    assertEquals(Arrays.asList("word", "nmod", "nsubj", "obj", "TOTAL"), chartRow(report, "word"));
+    assertChartRows(report, "count -sort word -sort relation word relation", "Bill", "book", "cake", "her", "his");
+
+    // a flat listing is ordered by the sorted key first, then by count
+    report = runScript(lines("pattern {}=word <=relation {}",
+                             "count -flat -sort relation relation word")).report();
+    assertChartRows(report, "count -flat -sort relation relation word", "nmod", "nmod", "nsubj", "nsubj", "obj", "obj");
+    assertEquals(Arrays.asList("nsubj", "Bill", "3", "37.50%"), chartRow(report, "nsubj"));
+
+    for (String command : new String[] { "count -sort", "count -sort -flat relation", "count -sort word relation" }) {
+      assertThrows(command, SemgrexParseException.class, () ->
+        SemgrexStats.parse(lines("pattern {}=word <=relation {}", command)));
+    }
+  }
+
   /** Sentences whose objects are the same clitic spelled three ways, and one other */
   private static List<CoreMap> cliticSentences() {
     List<CoreMap> sentences = new ArrayList<>();
