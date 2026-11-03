@@ -217,7 +217,7 @@ public class CountStat implements SemgrexStat {
   public void accumulate(CoreMap sentence, SemgrexMatch match) {
     for (Restriction restriction : restrictions) {
       // an unbound key is not in any collected set, so it cannot pass a restriction
-      String value = SemgrexStats.keyValue(match, restriction.key, lowered);
+      String value = SemgrexStats.keyValue(sentence, match, restriction.key, lowered);
       if (value == null || !restriction.values.contains(value)) {
         return;
       }
@@ -225,7 +225,7 @@ public class CountStat implements SemgrexStat {
 
     List<String> cleaned = new ArrayList<>(keys.size());
     for (String key : keys) {
-      cleaned.add(clean(SemgrexStats.keyValue(match, key, lowered)));
+      cleaned.add(clean(SemgrexStats.keyValue(sentence, match, key, lowered)));
     }
     counts.merge(Collections.unmodifiableList(cleaned), 1, Integer::sum);
     totalMatches++;

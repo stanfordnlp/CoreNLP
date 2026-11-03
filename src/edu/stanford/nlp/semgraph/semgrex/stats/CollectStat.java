@@ -119,7 +119,7 @@ public class CollectStat implements SemgrexStat {
 
   @Override
   public void accumulate(CoreMap sentence, SemgrexMatch match) {
-    String value = SemgrexStats.keyValue(match, key, lowered);
+    String value = SemgrexStats.keyValue(sentence, match, key, lowered);
     // a key which was not bound in this match, eg under an optional
     // relation, is not a value anyone can restrict on later
     if (value != null) {

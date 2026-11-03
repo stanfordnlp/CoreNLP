@@ -205,7 +205,7 @@ public class SampleStat implements SemgrexStat {
     }
     List<String> values = new ArrayList<>(keys.size());
     for (String key : keys) {
-      values.add(CountStat.clean(SemgrexStats.keyValue(match, key, lowered)));
+      values.add(CountStat.clean(SemgrexStats.keyValue(sentence, match, key, lowered)));
     }
     Combination combination = combinations.computeIfAbsent(Collections.unmodifiableList(values), k -> new Combination());
     ++combination.matches;
