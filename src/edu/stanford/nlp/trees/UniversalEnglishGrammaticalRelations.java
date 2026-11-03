@@ -519,10 +519,9 @@ public class UniversalEnglishGrammaticalRelations {
   /**
    * The "clausal complement" grammatical relation.  A clausal complement of
    * a verb or adjective is a dependent clause with an internal subject which
-   * functions like an object of the verb, or adjective.  Clausal complements
-   * for nouns are limited to complement clauses with a subset of nouns
-   * like "fact" or "report".  We analyze them the same (parallel to the
-   * analysis of this class as "content clauses" in Huddleston and Pullum 2002).
+   * functions like an object of the verb, or adjective.  Complement
+   * clauses of nouns, such as "the fact that you are honest", are
+   * {@code acl} instead, as in UD.
    * Clausal complements are usually finite (though there
    * are occasional exceptions including remnant English subjunctives, and we
    * also classify the complement of causative "have" (She had him arrested)
@@ -532,13 +531,11 @@ public class UniversalEnglishGrammaticalRelations {
    * "He says that you like to swim" &rarr;
    * {@code ccomp}(says, like) <br>
    * "I am certain that he did it" &rarr;
-   * {@code ccomp}(certain, did) <br>
-   * "I admire the fact that you are honest" &rarr;
-   * {@code ccomp}(fact, honest)
+   * {@code ccomp}(certain, did)
    */
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "ccomp", "clausal complement",
-        COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP(?:-.*)?", tregexCompiler,
+        COMPLEMENT, "VP|SINV|S|ADJP|ADVP", tregexCompiler,
             // Weird case of verbs with direct S complement that is not an infinitive or participle
             // ("I saw [him take the cake].", "making [him go crazy]")
             "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP)",
@@ -570,9 +567,6 @@ public class UniversalEnglishGrammaticalRelations {
             "ADJP < (SBAR=target !< (IN < as) < S)", // ADJP is things like "sure (that) he'll lose" or for/to ones or object of comparison with than "than we were led to expect"; Leave aside as in "as clever as we thought.
             // That ... he know
             "S <, (SBAR=target <, (IN < /^(?i:that|whether)$/) !$+ VP)",
-            // JJ catches a couple of funny NPs with heads like "enough"
-            // Note that we eliminate SBAR which also match an vmod pattern
-            "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )",
             // New ones to pick up some more "say" patterns (2019); avoid S-ADV descendants
             "VP < (/^V/ < " + sayVerbRegex + ") < (S|S-CLF|S-TTL|SQ=target <+(S) (VP < /^VB[DZP]$/))",
             "@S < /^S-TPC/=target < VP",
@@ -1031,11 +1025,14 @@ public class UniversalEnglishGrammaticalRelations {
    * The "clausal modifier of noun" relation. {@code acl} is used for
    * finite and non-finite clauses that modify a noun. Note that in
    * English relative clauses get assigned a specific relation
-   * {@code acl:relcl}, a subtype of {@code acl}.
+   * {@code acl:relcl}, a subtype of {@code acl}.  Complement clauses of
+   * nouns, which PTB attaches as sisters of the noun, are also {@code acl}.
    * <br>
    * Examples: <br>
    * "the issues as he sees them" &rarr;
    * {@code acl}(issues, sees) <br>
+   * "I admire the fact that you are honest" &rarr;
+   * {@code acl}(fact, honest)
    */
   public static final GrammaticalRelation CLAUSAL_MODIFIER =
       new GrammaticalRelation(Language.UniversalEnglish, "acl", "clausal modifier of noun",
@@ -1051,7 +1048,12 @@ public class UniversalEnglishGrammaticalRelations {
           // NML in the following rules is to cover some errors by the parser
           // It makes no difference to PTB
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS|NML)",
-          "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS|NML)");
+          "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS|NML)",
+
+          // complement clauses of nouns: "the fact that you are honest"
+          // JJ catches a couple of funny NPs with heads like "enough"
+          // Note that we eliminate SBAR which also match an vmod pattern
+          "@NP < JJ|NN|NNS < (SBAR=target [ !<(S < (VP < TO )) | !$-- NP|NN|NNP|NNS ] )");
           // [todo [cdm2019]: Add somthing for clause acl not acl:relcl like: (NP (NP no question) (SBAR that (S (NP some) (VP contracted (NP diseases)))))
 
   /**
