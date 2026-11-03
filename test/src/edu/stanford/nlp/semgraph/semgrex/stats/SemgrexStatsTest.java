@@ -807,6 +807,32 @@ public class SemgrexStatsTest {
     }
   }
 
+  /**
+   * A chart with a right to left value starts each line with a left to
+   * right mark and isolates each cell, so the columns stay in order.  A
+   * chart with none has no controls, and -noBidi turns them off.
+   */
+  @Test
+  public void testBidi() {
+    List<CoreMap> corpus = sentences(new String[] { "[\u05e1\u05e4\u05e8-1 amod> \u05d8\u05d5\u05d1-2]", "[book-1 amod> good-2]" }, null);
+    for (String command : new String[] { "count head", "count head edge", "count head dep edge", "count -flat head edge" }) {
+      String report = runScript(lines("pattern {}=head >=edge {}=dep", command), corpus).report();
+      for (String line : report.split("\\R")) {
+        if (line.isEmpty() || line.startsWith("# " + command.split(" ")[0])) {
+          continue;
+        }
+        assertTrue(command + ": " + line, line.startsWith("\u200E"));
+      }
+      // a cell is isolated; a block label is alone on its line after the mark
+      assertTrue(command, report.contains("\u2068\u05e1\u05e4\u05e8\u2069") || report.contains("\u200E\u05e1\u05e4\u05e8" + System.lineSeparator()));
+
+      String plain = runScript(lines("pattern {}=head >=edge {}=dep", command.replace("count", "count -noBidi")), corpus).report();
+      assertFalse(command, plain.contains("\u200E") || plain.contains("\u2068"));
+    }
+    String ascii = runScript(lines("pattern {}=head >=edge {}", "count head"), sentences(new String[] { "[book-1 amod> good-2]" }, null)).report();
+    assertFalse(ascii.contains("\u200E") || ascii.contains("\u2068"));
+  }
+
   /** Sentences whose objects are the same clitic spelled three ways, and one other */
   private static List<CoreMap> cliticSentences() {
     List<CoreMap> sentences = new ArrayList<>();
