@@ -20,7 +20,7 @@ import edu.stanford.nlp.util.CoreMap;
  *<br>
  * Script syntax:
  *<pre>
- * count [-flat] [-maxColumns N] [-lower KEY ...] KEY [KEY ...]
+ * count [-flat] [-maxColumns N] [-lower KEY ...] [-sort KEY ...] KEY [KEY ...]
  *</pre>
  * With one key, this produces a ranked list of the values that key took
  * and how often.  With two keys, it produces a contingency table of the
@@ -35,6 +35,13 @@ import edu.stanford.nlp.util.CoreMap;
  * {@code -lower KEY} counts the values of that key lowercased, so that
  * "Lo", "lo", and "LO" are one row.  It can be given for more than one
  * key, and applies to a {@code -restrict} on the same key as well.
+ *<br>
+ * The values of each key are ordered by how often they occur, most
+ * first.  {@code -sort KEY} orders that key's values alphabetically
+ * instead, so that the same query on two treebanks lays its rows or
+ * columns out the same way.  It can be given for more than one key.  In
+ * a listing of whole combinations, the sorted keys order it first, in
+ * the order of the keys, and then how often each combination occurs.
  *
  * @author John Bauer
  */
@@ -57,11 +64,14 @@ public class CountStat implements SemgrexStat {
   /** label of a block's summary row */
   private static final String SUBTOTAL = "subtotal";
   private static final String RESTRICT = "-restrict";
+  private static final String SORT = "-sort";
   private static final String NO_BIDI = "-noBidi";
 
   private final List<String> keys;
   /** the keys whose values are lowercased */
   private final Set<String> lowered;
+  /** the keys whose values are ordered alphabetically rather than by count */
+  private final Set<String> sorted;
   private final Map<List<String>, Integer> counts = new HashMap<>();
 
   private final int maxColumns;
@@ -94,12 +104,13 @@ public class CountStat implements SemgrexStat {
    */
   private boolean bidi = false;
 
-  CountStat(List<String> keys, Set<String> lowered, boolean flat, int maxColumns, List<Restriction> restrictions, boolean bidiAllowed) {
+  CountStat(List<String> keys, Set<String> lowered, Set<String> sorted, boolean flat, int maxColumns, List<Restriction> restrictions, boolean bidiAllowed) {
     if (keys.isEmpty()) {
       throw new SemgrexParseException("count needs at least one key to count");
     }
     this.keys = Collections.unmodifiableList(new ArrayList<>(keys));
     this.lowered = Collections.unmodifiableSet(new LinkedHashSet<>(lowered));
+    this.sorted = Collections.unmodifiableSet(new LinkedHashSet<>(sorted));
     this.flat = flat;
     this.maxColumns = maxColumns;
     this.restrictions = Collections.unmodifiableList(new ArrayList<>(restrictions));
@@ -107,19 +118,21 @@ public class CountStat implements SemgrexStat {
   }
 
   /**
-   * Parses "count [-flat] [-maxColumns N] [-noBidi] [-restrict KEY=SET ...] [-lower KEY ...] KEY [KEY ...]"
+   * Parses "count [-flat] [-maxColumns N] [-noBidi] [-restrict KEY=SET ...] [-lower KEY ...] [-sort KEY ...] KEY [KEY ...]"
    *
    * @param context the stage this command is in, used to validate keys and look up sets
    * @param args the arguments after "count"
    * @return a new CountStat
    * @throws SemgrexParseException if an option is unknown or malformed, there are no keys,
-   *   a key isn't in the pattern, a restriction's set can't be used in this stage, or a
-   *   lowercased key is not one this command counts or restricts
+   *   a key isn't in the pattern, a restriction's set can't be used in this stage, a
+   *   lowercased key is not one this command counts or restricts, or a sorted key is not
+   *   one this command counts
    */
   public static SemgrexStat create(SemgrexStats.Context context, List<String> args) {
     List<String> keys = new ArrayList<>();
     List<Restriction> restrictions = new ArrayList<>();
     Set<String> lowered = new LinkedHashSet<>();
+    Set<String> sorted = new LinkedHashSet<>();
     boolean flat = false;
     int maxColumns = DEFAULT_MAX_COLUMNS;
     // the run decides by default, since it is a property of whatever is
@@ -162,9 +175,15 @@ public class CountStat implements SemgrexStat {
         }
         ++idx;
         lowered.add(args.get(idx));
+      } else if (SORT.equals(arg)) {
+        if (idx + 1 >= args.size() || args.get(idx + 1).startsWith("-")) {
+          throw new SemgrexParseException(SORT + " needs a key after it");
+        }
+        ++idx;
+        sorted.add(args.get(idx));
       } else if (arg.startsWith("-")) {
         throw new SemgrexParseException("Unknown option '" + arg + "' for count.  Known options: " +
-                                        FLAT + ", " + MAX_COLUMNS + ", " + NO_BIDI + ", " + RESTRICT + ", " + SemgrexStats.LOWER);
+                                        FLAT + ", " + MAX_COLUMNS + ", " + NO_BIDI + ", " + RESTRICT + ", " + SemgrexStats.LOWER + ", " + SORT);
       } else {
         keys.add(arg);
       }
@@ -179,8 +198,9 @@ public class CountStat implements SemgrexStat {
       used.add(restriction.key);
     }
     SemgrexStats.checkLowered("count", lowered, used);
+    SemgrexStats.checkOptionKeys("count", SORT, sorted, keys);
 
-    return new CountStat(keys, lowered, flat, maxColumns, restrictions, bidiAllowed);
+    return new CountStat(keys, lowered, sorted, flat, maxColumns, restrictions, bidiAllowed);
   }
 
   @Override
@@ -378,6 +398,9 @@ public class CountStat implements SemgrexStat {
     }
     for (String key : lowered) {
       sb.append(" ").append(SemgrexStats.LOWER).append(" ").append(key);
+    }
+    for (String key : sorted) {
+      sb.append(" ").append(SORT).append(" ").append(key);
     }
     for (String key : keys) {
       sb.append(" ").append(key);
@@ -654,7 +677,8 @@ public class CountStat implements SemgrexStat {
 
   /**
    * The distinct values the key at this position took within one block,
-   * ordered by their totals in that block.
+   * ordered by their totals in that block, or alphabetically for a key
+   * given with {@code -sort}.
    *<br>
    * Blocks are ragged on purpose: a block shows the rows which occur in
    * it rather than every row in the chart.  Padding them to a common set
@@ -669,26 +693,25 @@ public class CountStat implements SemgrexStat {
         totals.merge(entry.getKey().get(position), entry.getValue(), Integer::sum);
       }
     }
-    List<String> values = new ArrayList<>(totals.keySet());
-    Collections.sort(values, new Comparator<String>() {
-      public int compare(String first, String second) {
-        int cmp = totals.get(second).compareTo(totals.get(first));
-        if (cmp != 0) {
-          return cmp;
-        }
-        return first.compareTo(second);
-      }
-    });
-    return values;
+    return ordered(totals, position);
   }
 
   /**
    * The distinct values the key at this position took, ordered by
-   * total count descending, ties broken alphabetically.
+   * total count descending, ties broken alphabetically, or alphabetically
+   * for a key given with {@code -sort}.
    */
   private List<String> distinctValues(int position) {
-    Map<String, Integer> totals = marginal(position);
+    return ordered(marginal(position), position);
+  }
+
+  /** The values of the key at this position, in the order the chart shows them */
+  private List<String> ordered(Map<String, Integer> totals, int position) {
     List<String> values = new ArrayList<>(totals.keySet());
+    if (sorted.contains(keys.get(position))) {
+      Collections.sort(values);
+      return values;
+    }
     Collections.sort(values, new Comparator<String>() {
       public int compare(String first, String second) {
         int cmp = totals.get(second).compareTo(totals.get(first));
@@ -709,10 +732,23 @@ public class CountStat implements SemgrexStat {
     return totals;
   }
 
+  /**
+   * The combinations, ordered by the values of the keys given with
+   * {@code -sort}, in the order of the keys, then by count descending,
+   * then alphabetically.
+   */
   private List<Map.Entry<List<String>, Integer>> sortedEntries() {
     List<Map.Entry<List<String>, Integer>> entries = new ArrayList<>(counts.entrySet());
     Collections.sort(entries, new Comparator<Map.Entry<List<String>, Integer>>() {
       public int compare(Map.Entry<List<String>, Integer> first, Map.Entry<List<String>, Integer> second) {
+        for (int position = 0; position < keys.size(); ++position) {
+          if (sorted.contains(keys.get(position))) {
+            int cmp = first.getKey().get(position).compareTo(second.getKey().get(position));
+            if (cmp != 0) {
+              return cmp;
+            }
+          }
+        }
         int cmp = second.getValue().compareTo(first.getValue());
         if (cmp != 0) {
           return cmp;
