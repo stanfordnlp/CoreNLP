@@ -865,6 +865,32 @@ public class SemgrexStatsTest {
                  runScript(flat.replace("-flat", "-flat -noTotal")).report());
   }
 
+  /**
+   * Leaving the totals out of a whole run gives the charts count -noTotal
+   * gives, but for the command lines, in text and in LaTeX, and a chart
+   * which already leaves them out is the same either way
+   */
+  @Test
+  public void testRunNoTotal() {
+    String[] commands = { "count relation", "count word relation", "count gov word relation", "count -flat word relation" };
+    for (String command : commands) {
+      String pattern = command.startsWith("count gov") ? "pattern {}=gov >=relation {}=word" : "pattern {}=word <=relation {}";
+      String script = lines(pattern, command);
+      String noTotalScript = lines(pattern, command.replace("count", "count -noTotal"));
+      for (SemgrexStats.Format format : SemgrexStats.Format.values()) {
+        SemgrexStats.Presentation run = new SemgrexStats.Presentation(format, false);
+        String expected = runScript(noTotalScript).report(format).replace(" -noTotal", "");
+        assertEquals(command + " " + format, expected, runScript(script).report(run));
+        assertEquals(command + " " + format, runScript(noTotalScript).report(format), runScript(noTotalScript).report(run));
+      }
+    }
+
+    // with the totals, a presentation is the same as the format alone
+    SemgrexStats stats = runScript(lines("pattern {}=word <=relation {}", "count word relation"));
+    assertEquals(stats.report(), stats.report(SemgrexStats.Presentation.DEFAULT));
+    assertTrue(stats.report(), stats.report().contains("TOTAL"));
+  }
+
   /** The characters LaTeX treats specially come out as written */
   @Test
   public void testEscapeLatex() {

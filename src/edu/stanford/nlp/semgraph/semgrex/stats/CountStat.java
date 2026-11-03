@@ -39,7 +39,8 @@ import edu.stanford.nlp.util.CoreMap;
  * {@code -noTotal} leaves out the TOTAL row and column, and the subtotal
  * rows of a chart with blocks, for a chart going into a paper.  The pct
  * column of a one key chart stays, as it is each row's share of the
- * total.
+ * total.  The run can leave the totals out of every chart instead, with
+ * {@code -noTotal} on the command line.
  *<br>
  * How the chart is written, as text or in LaTeX, is up to the run, as
  * {@link SemgrexStats} describes.
@@ -327,39 +328,46 @@ public class CountStat implements SemgrexStat {
 
   @Override
   public String report() {
-    return report(SemgrexStats.Format.TEXT, Collections.emptyList());
+    return report(SemgrexStats.Presentation.DEFAULT, Collections.emptyList());
   }
 
   /**
-   * The chart, as text or in LaTeX.  A LaTeX float takes the label of the
+   * The chart, as text or in LaTeX, with its totals unless this command
+   * or the run leaves them out.  A LaTeX float takes the label of the
    * stage as its caption, joined into one line, or this command if the
    * stage has no label.
    */
   @Override
-  public String report(SemgrexStats.Format format, List<String> stageLabels) {
+  public String report(SemgrexStats.Presentation presentation, List<String> stageLabels) {
+    SemgrexStats.Format format = presentation.format();
     if (counts.isEmpty()) {
       // a comment in LaTeX, so it can sit in a document without breaking it
       return (format == SemgrexStats.Format.TEXT ? "" : "% ") + "No matches, nothing to count." + System.lineSeparator();
     }
+    Chart chart = chart(totals && presentation.totals());
     switch (format) {
       case LATEX:
-        return chart().toLatex(null);
+        return chart.toLatex(null);
       case LATEX_FLOAT:
         String caption = String.join(" ", stageLabels).trim();
-        return chart().toLatex(caption.isEmpty() ? toString() : caption);
+        return chart.toLatex(caption.isEmpty() ? toString() : caption);
       default:
         detectBidi();
-        return chart().toText(bidi);
+        return chart.toText(bidi);
     }
   }
 
-  /** The chart this command reports, in the form its keys call for */
-  Chart chart() {
+  /**
+   * The chart this command reports, in the form its keys call for.
+   *
+   * @param totals whether the chart has its TOTAL row and column, and its subtotals
+   */
+  Chart chart(boolean totals) {
     if (flat || keys.size() > 3) {
       return flatChart(null);
     }
     if (keys.size() == 1) {
-      return oneDimensionalChart();
+      return oneDimensionalChart(totals);
     }
 
     // the last key is always the columns; the keys before it nest
@@ -372,9 +380,9 @@ public class CountStat implements SemgrexStat {
                        MAX_COLUMNS + " (" + maxColumns + "), so printing the flat form.");
     }
     if (keys.size() == 2) {
-      return twoDimensionalChart(columnValues);
+      return twoDimensionalChart(columnValues, totals);
     }
-    return blockChart(columnValues);
+    return blockChart(columnValues, totals);
   }
 
   @Override
@@ -432,7 +440,7 @@ public class CountStat implements SemgrexStat {
   /**
    * count X
    */
-  private Chart oneDimensionalChart() {
+  private Chart oneDimensionalChart(boolean totals) {
     Chart chart = new Chart(alignments(1, 2), minimumWidths(3, true));
     chart.row(keys.get(0), "count", "pct");
     chart.rule();
@@ -449,7 +457,7 @@ public class CountStat implements SemgrexStat {
   /**
    * count X Y
    */
-  private Chart twoDimensionalChart(List<String> columnValues) {
+  private Chart twoDimensionalChart(List<String> columnValues, boolean totals) {
     List<String> rowValues = distinctValues(0);
     Map<String, Integer> rowTotals = marginal(0);
     Map<String, Integer> columnTotals = marginal(1);
@@ -502,7 +510,7 @@ public class CountStat implements SemgrexStat {
    * to the totals at the foot; the rows are not, so each block shows
    * only what occurs in it.
    */
-  private Chart blockChart(List<String> columnValues) {
+  private Chart blockChart(List<String> columnValues, boolean totals) {
     List<String> blockValues = distinctValues(0);
     Map<String, Integer> columnTotals = marginal(2);
 

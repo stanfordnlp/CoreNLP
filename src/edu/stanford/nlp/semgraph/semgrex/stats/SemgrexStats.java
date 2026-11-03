@@ -76,7 +76,8 @@ import edu.stanford.nlp.util.logging.Redwood;
  * {@code tabular}, and {@code -format latexFloat} as a {@code table}
  * float, with the label of its stage as its caption.  The rest of the
  * report becomes {@code %} comments, so that the whole report can go
- * into a document.
+ * into a document.  {@code -noTotal} leaves the totals out of every
+ * chart, as {@code count -noTotal} does for one.
  *<br>
  * A script with more than one stage runs one pass over the corpus per
  * stage, in order.  A later stage can be restricted to values gathered
@@ -131,6 +132,48 @@ public class SemgrexStats {
     /** What starts a comment line in this format */
     String commentMarker() {
       return this == TEXT ? COMMENT : "%";
+    }
+  }
+
+  /**
+   * How a report is presented, as chosen for the whole run: its format,
+   * and whether the charts have their totals.  A script can still leave
+   * the totals out of one chart, with {@code count -noTotal}.
+   */
+  public static final class Presentation {
+    /** Text, with the totals */
+    public static final Presentation DEFAULT = new Presentation(Format.TEXT, true);
+
+    private final Format format;
+    private final boolean totals;
+
+    /**
+     * Creates a presentation.
+     *
+     * @param format how to write the report
+     * @param totals whether the charts have their TOTAL rows and columns and their subtotals
+     */
+    public Presentation(Format format, boolean totals) {
+      this.format = format;
+      this.totals = totals;
+    }
+
+    /**
+     * How to write the report.
+     *
+     * @return the format
+     */
+    public Format format() {
+      return format;
+    }
+
+    /**
+     * Whether the charts have their totals, unless a command leaves them out.
+     *
+     * @return whether to write the totals
+     */
+    public boolean totals() {
+      return totals;
     }
   }
 
@@ -245,8 +288,8 @@ public class SemgrexStats {
       }
     }
 
-    String report(Format format) {
-      String marker = format.commentMarker();
+    String report(Presentation presentation) {
+      String marker = presentation.format().commentMarker();
       StringBuilder sb = new StringBuilder();
       for (String label : labels) {
         sb.append(marker).append(marker);
@@ -262,7 +305,7 @@ public class SemgrexStats {
         }
         first = false;
         sb.append(marker).append(" ").append(stat.toString()).append(System.lineSeparator());
-        sb.append(stat.report(format, labels));
+        sb.append(stat.report(presentation, labels));
       }
       return sb.toString();
     }
@@ -716,7 +759,18 @@ public class SemgrexStats {
    * @return The report text
    */
   public String report(Format format) {
-    String marker = format.commentMarker();
+    return report(new Presentation(format, true));
+  }
+
+  /**
+   * Formats the results of every stage, as {@link #report(Format)} does,
+   * with the charts' totals left out if the presentation says so.
+   *
+   * @param presentation how to write the report
+   * @return The report text
+   */
+  public String report(Presentation presentation) {
+    String marker = presentation.format().commentMarker();
     StringBuilder sb = new StringBuilder();
     for (int idx = 0; idx < stages.size(); ++idx) {
       if (sb.length() > 0) {
@@ -725,7 +779,7 @@ public class SemgrexStats {
       if (stages.size() > 1) {
         sb.append(marker).append(marker).append(" stage ").append(idx + 1).append(System.lineSeparator());
       }
-      sb.append(stages.get(idx).report(format));
+      sb.append(stages.get(idx).report(presentation));
     }
     return sb.toString();
   }
@@ -744,6 +798,7 @@ public class SemgrexStats {
   private static final String CONLLU_EXTENSION_FLAG = "-conlluExtension";
   private static final String NO_BIDI = "-noBidi";
   private static final String FORMAT = "-format";
+  private static final String NO_TOTAL = "-noTotal";
 
   /**
    * Logs a description of the command line arguments and the script format.
@@ -769,6 +824,8 @@ public class SemgrexStats {
     log.info(FORMAT + ": how to write the charts: text, the default; latex, as LaTeX tabulars with the rules "
                     + "of the booktabs package; or latexFloat, as tabulars in table floats captioned with the "
                     + "label of their stage.  In LaTeX, the rest of the report is % comments");
+    log.info(NO_TOTAL + ": leave the TOTAL rows and columns, and the subtotals, out of every chart, "
+                    + "as count -noTotal does for one chart");
     log.info();
     log.info(SCRIPT + " is required, as is one of " + CONLLU_FILE + " or " + TREE_FILE);
     log.info();
@@ -941,6 +998,7 @@ public class SemgrexStats {
     flagMap.put(EXTRAS, 1);
     flagMap.put(NO_BIDI, 0);
     flagMap.put(FORMAT, 1);
+    flagMap.put(NO_TOTAL, 0);
     flagMap.put(CONLLU_EXTENSION_FLAG, 1);
 
     Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
@@ -1056,7 +1114,7 @@ public class SemgrexStats {
     // UTF-8 whatever the locale, as the treebanks are, rather than letting
     // a terminal in the C locale turn every accented letter into ?
     PrintStream stdout = new PrintStream(new FileOutputStream(FileDescriptor.out), true, "utf-8");
-    stdout.print(stats.report(format));
+    stdout.print(stats.report(new Presentation(format, !argsMap.containsKey(NO_TOTAL))));
     stdout.flush();
   }
 }
