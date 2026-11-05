@@ -878,7 +878,12 @@ public abstract class SemgrexPattern implements Serializable  {
     /** Print the line number of each matching sentence and the file it came from */
     OFFSET,
     /** Print each matching sentence in CoNLL-U, with the matches as comments */
-    CONLLU
+    CONLLU,
+    /**
+     * Print each match on a line of its own: the sentence's id, a tab, and
+     * its words, with the match and its named nodes marked as {@code [[word]]}
+     */
+    TEXT
   }
 
   private static final String PATTERN = "-pattern";
@@ -889,18 +894,19 @@ public abstract class SemgrexPattern implements Serializable  {
   private static final String CONLLU_FILE = "-conlluFile";
   private static final String OUTPUT_FORMAT_OPTION = "-outputFormat";
   private static final String DEFAULT_OUTPUT_FORMAT = "LIST";
+  private static final String CONTEXT = "-C";
+  private static final String AFTER_CONTEXT = "-A";
+  private static final String BEFORE_CONTEXT = "-B";
 
 
 
   /** Flags which take one argument; the rest take everything up to the next flag */
   private static final Set<String> SINGLE_VALUED =
-    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PATTERN, MODE, EXTRAS, OUTPUT_FORMAT_OPTION)));
+    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PATTERN, MODE, EXTRAS, OUTPUT_FORMAT_OPTION,
+                                                            CONTEXT, AFTER_CONTEXT, BEFORE_CONTEXT)));
 
   /** Sentence order for words: by index, then empty index or copy count, as in 8, 8.1, 8.2, 9 */
-  private static final Comparator<IndexedWord> SENTENCE_ORDER =
-    Comparator.comparingInt(IndexedWord::index)
-              .thenComparingInt(IndexedWord::getEmptyIndex)
-              .thenComparingInt(IndexedWord::copyCount);
+  private static final Comparator<IndexedWord> SENTENCE_ORDER = SemgrexUtils.SENTENCE_ORDER;
 
   /**
    * The ConlluEditor comments which highlight the matches of a sentence.
@@ -1026,6 +1032,70 @@ public abstract class SemgrexPattern implements Serializable  {
   }
 
   /**
+   * The line {@link #main} writes for a match as text: the sentence's
+   * label, a tab, and its words, with the word the match is at and its
+   * named nodes marked, as {@link SemgrexUtils#markedText} writes them.
+   *
+   * @param label what the sentence is called, such as its {@code sent_id}
+   * @param sentence the sentence
+   * @param match the match
+   * @param before how many words to keep before the first marked word, or a negative number for all of them
+   * @param after how many words to keep after the last marked word, or a negative number for all of them
+   * @return the line, without a line separator
+   */
+  static String matchText(String label, CoreMap sentence, SemgrexMatch match, int before, int after) {
+    Set<IndexedWord> marked = new TreeSet<>(SENTENCE_ORDER);
+    marked.add(match.getMatch());
+    for (String name : match.getNodeNames()) {
+      marked.add(match.getNode(name));
+    }
+    return label + "\t" + SemgrexUtils.markedText(sentence, marked, before, after);
+  }
+
+  /**
+   * What a sentence is called in a line of text: its {@code sent_id}, or
+   * else the file it came from and the line it starts on, or else its
+   * position among the sentences read.
+   */
+  private static String sentenceLabel(CoreMap sentence, String file, int position) {
+    String id = SemgrexUtils.sentenceId(sentence);
+    if (id != null) {
+      return id;
+    }
+    SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    if (file != null && graph != null && !graph.isEmpty()) {
+      Integer line = graph.vertexListSorted().get(0).get(CoreAnnotations.LineNumberAnnotation.class);
+      if (line != null) {
+        return file + ":" + line;
+      }
+    }
+    return "sentence " + position;
+  }
+
+  /**
+   * The number of words of context a flag asks for, from the flag itself
+   * or else from {@code -C}, or -1 for the whole sentence if neither was given.
+   *
+   * @throws IllegalArgumentException if the number is not a whole number, zero or more
+   */
+  static int contextWords(Map<String, List<String>> argsMap, String flag) {
+    String value = SemgrexUtils.firstArg(argsMap, flag, SemgrexUtils.firstArg(argsMap, CONTEXT, null));
+    if (value == null) {
+      return -1;
+    }
+    try {
+      int words = Integer.parseInt(value.trim());
+      if (words >= 0) {
+        return words;
+      }
+    } catch (NumberFormatException e) {
+      // reported below
+    }
+    String which = argsMap.containsKey(flag) ? flag : CONTEXT;
+    throw new IllegalArgumentException(which + " takes a number of words, 0 or more, not " + value);
+  }
+
+  /**
    * Reads the patterns of a pattern file, one to a line.  Blank lines and
    * lines starting with {@code #}, which no pattern can, are skipped, so
    * the patterns can be spaced out and commented.
@@ -1092,9 +1162,14 @@ public abstract class SemgrexPattern implements Serializable  {
     log.info("  Files may also be named after the flags, with no flag of their own.");
     log.info(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
     log.info(EXTRAS + ": whether or not to use extras");
-    log.info(OUTPUT_FORMAT_OPTION + ": output format of matches. list, offset, or conllu. 'list' prints the graph as a list of dependencies, "
+    log.info(OUTPUT_FORMAT_OPTION + ": output format of matches. list, offset, conllu, or text. 'list' prints the graph as a list of dependencies, "
                          + "'offset' prints the filename and the line offset in the ConLL-U file, "
-                         + "and 'conllu' prints the sentence in CoNLL-U with each match as a comment.");
+                         + "'conllu' prints the sentence in CoNLL-U with each match as a comment, "
+                         + "and 'text' prints each match on a line: the sent_id, a tab, and the words, with the match marked as [[word]].");
+    log.info(CONTEXT + " N: with text, keep only N words before and after the match, as grep -C does.  "
+                         + "Implies text if no " + OUTPUT_FORMAT_OPTION + " is given");
+    log.info(BEFORE_CONTEXT + " N, " + AFTER_CONTEXT + " N: as " + CONTEXT + ", for the words before or after the match.  "
+                         + "Either takes precedence over " + CONTEXT + " on its side");
     log.info();
     log.info(PATTERN + " is required");
   }
@@ -1137,8 +1212,25 @@ public abstract class SemgrexPattern implements Serializable  {
     String modeString = SemgrexUtils.firstArg(argsMap, MODE, DEFAULT_MODE).toUpperCase(Locale.ROOT);
     SemanticGraphFactory.Mode mode = SemanticGraphFactory.Mode.valueOf(modeString);
 
-    String outputFormatString = SemgrexUtils.firstArg(argsMap, OUTPUT_FORMAT_OPTION, DEFAULT_OUTPUT_FORMAT).toUpperCase(Locale.ROOT);
+    // asking for context is asking for text, as only text has any
+    boolean contextGiven = argsMap.containsKey(CONTEXT) || argsMap.containsKey(BEFORE_CONTEXT) || argsMap.containsKey(AFTER_CONTEXT);
+    String defaultFormat = contextGiven ? OutputFormat.TEXT.toString() : DEFAULT_OUTPUT_FORMAT;
+    String outputFormatString = SemgrexUtils.firstArg(argsMap, OUTPUT_FORMAT_OPTION, defaultFormat).toUpperCase(Locale.ROOT);
     OutputFormat outputFormat = OutputFormat.valueOf(outputFormatString);
+    int before;
+    int after;
+    try {
+      if (contextGiven && outputFormat != OutputFormat.TEXT) {
+        throw new IllegalArgumentException(CONTEXT + ", " + BEFORE_CONTEXT + " and " + AFTER_CONTEXT + " only apply to " +
+                                           OUTPUT_FORMAT_OPTION + " text, not " + outputFormatString.toLowerCase(Locale.ROOT));
+      }
+      before = contextWords(argsMap, BEFORE_CONTEXT);
+      after = contextWords(argsMap, AFTER_CONTEXT);
+    } catch (IllegalArgumentException e) {
+      log.err(e.getMessage());
+      System.exit(2);
+      return;
+    }
 
     boolean useExtras = Boolean.parseBoolean(SemgrexUtils.firstArg(argsMap, EXTRAS, "true"));
 
@@ -1176,6 +1268,13 @@ public abstract class SemgrexPattern implements Serializable  {
     }
 
     List<Pair<CoreMap, List<SemgrexMatch>>> matches = matchAll(patterns, sentences);
+    // where each sentence is among those read, for a sentence with no other name
+    Map<CoreMap, Integer> positions = new IdentityHashMap<>();
+    if (outputFormat == OutputFormat.TEXT) {
+      for (int idx = 0; idx < sentences.size(); ++idx) {
+        positions.put(sentences.get(idx), idx + 1);
+      }
+    }
 
     // UTF-8 whatever the locale, as the treebanks are, rather than letting
     // a terminal in the C locale turn every accented letter into ?
@@ -1225,6 +1324,11 @@ public abstract class SemgrexPattern implements Serializable  {
         comments.addAll(highlightComments(sentenceMatches.second()));
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);
         stdout.print(output);
+      } else if (outputFormat == OutputFormat.TEXT) {
+        String label = sentenceLabel(sentence, sentenceFiles.get(sentence), positions.get(sentence));
+        for (SemgrexMatch matcher : sentenceMatches.second()) {
+          stdout.println(matchText(label, sentence, matcher, before, after));
+        }
       }
     }
     stdout.flush();
