@@ -66,17 +66,13 @@ public class SampleStat implements SemgrexStat {
   private static final String CONLLU = "-conllu";
 
   /** Sentence order for words: by index, then empty index or copy count, as in 8, 8.1, 8.2, 9 */
-  private static final Comparator<IndexedWord> SENTENCE_ORDER =
-    Comparator.comparingInt(IndexedWord::index)
-              .thenComparingInt(IndexedWord::getEmptyIndex)
-              .thenComparingInt(IndexedWord::copyCount);
 
   /** One sentence chosen for a combination, with the words its matches marked */
   private static class Sample {
     final CoreMap sentence;
     /** where the sentence is in the corpus, counting from 1, for the order of the samples */
     final long position;
-    final Set<IndexedWord> marked = new TreeSet<>(SENTENCE_ORDER);
+    final Set<IndexedWord> marked = new TreeSet<>(SemgrexUtils.SENTENCE_ORDER);
 
     Sample(CoreMap sentence, long position) {
       this.sentence = sentence;
@@ -268,30 +264,13 @@ public class SampleStat implements SemgrexStat {
 
   /** The sent_id of a sample's sentence, or its position in the corpus if it has none */
   private static String sentenceId(Sample sample) {
-    List<String> comments = sample.sentence.get(CoreAnnotations.CommentsAnnotation.class);
-    if (comments != null) {
-      for (String comment : comments) {
-        String trimmed = comment.trim();
-        if (trimmed.startsWith("#")) {
-          String[] pieces = trimmed.substring(1).split("=", 2);
-          if (pieces.length == 2 && pieces[0].trim().equals("sent_id")) {
-            return pieces[1].trim();
-          }
-        }
-      }
-    }
-    return "sentence " + sample.position;
+    String id = SemgrexUtils.sentenceId(sample.sentence);
+    return id != null ? id : "sentence " + sample.position;
   }
 
   /** The words of a sample's sentence, with the marked ones in [[ ]] */
   private static String markedText(Sample sample) {
-    SemanticGraph graph = sample.sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-    List<String> words = new ArrayList<>();
-    for (IndexedWord word : graph.vertexListSorted()) {
-      String text = word.word().replaceAll("[\t\r\n]", " ");
-      words.add(sample.marked.contains(word) ? "[[" + text + "]]" : text);
-    }
-    return String.join(" ", words);
+    return SemgrexUtils.markedText(sample.sentence, sample.marked, -1, -1);
   }
 
   /** A sample's sentence in CoNLL-U, with comments naming its combination and marking its words */

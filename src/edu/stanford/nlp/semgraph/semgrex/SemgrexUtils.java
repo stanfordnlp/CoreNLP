@@ -8,12 +8,14 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -42,6 +44,104 @@ public class SemgrexUtils {
 
   /** Creates a SemgrexUtils; all of its methods are static. */
   public SemgrexUtils() { }
+
+  /** Sentence order for words: by index, then empty index or copy count, as in 8, 8.1, 8.2, 9 */
+  public static final Comparator<IndexedWord> SENTENCE_ORDER =
+    Comparator.comparingInt(IndexedWord::index)
+              .thenComparingInt(IndexedWord::getEmptyIndex)
+              .thenComparingInt(IndexedWord::copyCount);
+
+  /** Marks a word in {@link #markedText} */
+  private static final String MARK_START = "[[";
+  /** Ends the mark of a word in {@link #markedText} */
+  private static final String MARK_END = "]]";
+  /** Stands for the words {@link #markedText} leaves out at either end */
+  private static final String ELLIPSIS = "...";
+
+  /**
+   * The {@code sent_id} of a sentence, from its {@code # sent_id = ...} comment.
+   *
+   * @param sentence the sentence
+   * @return the id, or null if the sentence has none
+   */
+  public static String sentenceId(CoreMap sentence) {
+    List<String> comments = sentence.get(CoreAnnotations.CommentsAnnotation.class);
+    if (comments == null) {
+      return null;
+    }
+    for (String comment : comments) {
+      String trimmed = comment.trim();
+      if (trimmed.startsWith("#")) {
+        String[] pieces = trimmed.substring(1).split("=", 2);
+        if (pieces.length == 2 && pieces[0].trim().equals("sent_id")) {
+          return pieces[1].trim();
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * The words of a sentence, separated by spaces, with the marked ones as
+   * {@code [[word]]}, such as {@code ate the [[cake]] .}
+   *<br>
+   * The words are those of the basic graph, in order, along with any
+   * marked word only the enhanced graph has, such as an empty word 8.1.
+   * With {@code before} or {@code after} zero or more, only that many
+   * words are kept before the first marked word or after the last, and
+   * {@code ...} stands for the rest, as in {@code ... the [[cake]] ...}.
+   * Everything between the first and last marked words is always kept.
+   *
+   * @param sentence the sentence, with its basic graph
+   * @param marked the words to mark
+   * @param before how many words to keep before the first marked word, or a negative number for all of them
+   * @param after how many words to keep after the last marked word, or a negative number for all of them
+   * @return the words, as one line
+   */
+  public static String markedText(CoreMap sentence, Collection<IndexedWord> marked, int before, int after) {
+    Set<IndexedWord> words = new TreeSet<>(SENTENCE_ORDER);
+    SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    if (graph != null) {
+      words.addAll(graph.vertexSet());
+    }
+    words.addAll(marked);
+    List<IndexedWord> ordered = new ArrayList<>(words);
+
+    int first = -1;
+    int last = -1;
+    for (int idx = 0; idx < ordered.size(); ++idx) {
+      if (marked.contains(ordered.get(idx))) {
+        if (first < 0) {
+          first = idx;
+        }
+        last = idx;
+      }
+    }
+    int start = 0;
+    int end = ordered.size();
+    if (first >= 0) {
+      if (before >= 0) {
+        start = Math.max(0, first - before);
+      }
+      if (after >= 0) {
+        end = Math.min(ordered.size(), last + after + 1);
+      }
+    }
+
+    List<String> pieces = new ArrayList<>();
+    if (start > 0) {
+      pieces.add(ELLIPSIS);
+    }
+    for (IndexedWord word : ordered.subList(start, end)) {
+      // a word with a tab or newline in it would break the line in two
+      String text = word.word().replaceAll("[\\t\\r\\n]", " ");
+      pieces.add(marked.contains(word) ? MARK_START + text + MARK_END : text);
+    }
+    if (end < ordered.size()) {
+      pieces.add(ELLIPSIS);
+    }
+    return String.join(" ", pieces);
+  }
 
   /**
    * Compares two keys element by element.  A null key sorts after a
