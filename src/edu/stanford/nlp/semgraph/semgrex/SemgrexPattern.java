@@ -877,7 +877,10 @@ public abstract class SemgrexPattern implements Serializable  {
     LIST,
     /** Print the line number of each matching sentence and the file it came from */
     OFFSET,
-    /** Print each matching sentence in CoNLL-U, with the matches as comments */
+    /**
+     * Print each matching sentence in CoNLL-U, with the matches as
+     * comments, and with only the rows around the matches if context is asked for
+     */
     CONLLU,
     /**
      * Print each match on a line of its own: the sentence's id, a tab, and
@@ -1039,17 +1042,63 @@ public abstract class SemgrexPattern implements Serializable  {
    * @param label what the sentence is called, such as its {@code sent_id}
    * @param sentence the sentence
    * @param match the match
-   * @param before how many words to keep before the first marked word, or a negative number for all of them
-   * @param after how many words to keep after the last marked word, or a negative number for all of them
+   * @param before how many words to keep before each marked word, or a negative number for all of them
+   * @param after how many words to keep after each marked word, or a negative number for all of them
    * @return the line, without a line separator
    */
   static String matchText(String label, CoreMap sentence, SemgrexMatch match, int before, int after) {
-    Set<IndexedWord> marked = new TreeSet<>(SENTENCE_ORDER);
-    marked.add(match.getMatch());
-    for (String name : match.getNodeNames()) {
-      marked.add(match.getNode(name));
-    }
+    Set<IndexedWord> marked = markedWords(Collections.singletonList(match));
     return label + "\t" + SemgrexUtils.markedText(sentence, marked, before, after);
+  }
+
+  /**
+   * A sentence written in CoNLL-U, cut down to the rows of the words in
+   * the ranges {@link SemgrexUtils#contextRanges} gives.  The comments are
+   * all kept.  A range line is kept with its words, which the ranges never
+   * split, and an empty word such as 8.1 is kept with the word it follows.
+   * The result is a snippet rather than valid CoNLL-U: the heads of the
+   * rows kept may point at rows which are not.
+   *
+   * @param conllu the sentence in CoNLL-U
+   * @param ranges the ranges of word indices to keep
+   * @return the rows kept, with the line separators they had
+   */
+  static String conlluContext(String conllu, List<int[]> ranges) {
+    StringBuilder sb = new StringBuilder();
+    // the separators are kept with their lines, so the blank line which
+    // ends the sentence stays
+    for (String line : conllu.split("(?<=\\n)")) {
+      String content = line.trim();
+      if (content.isEmpty() || content.startsWith("#")) {
+        sb.append(line);
+        continue;
+      }
+      String id = content.split("\t", 2)[0];
+      int index;
+      try {
+        // the first word of a range such as 4-5, or the word an empty word such as 8.1 follows
+        index = Integer.parseInt(id.split("[-.]", 2)[0]);
+      } catch (NumberFormatException e) {
+        sb.append(line);
+        continue;
+      }
+      if (SemgrexUtils.inRanges(ranges, index)) {
+        sb.append(line);
+      }
+    }
+    return sb.toString();
+  }
+
+  /** The word each match is at and its named nodes, in sentence order */
+  private static Set<IndexedWord> markedWords(List<SemgrexMatch> matches) {
+    Set<IndexedWord> marked = new TreeSet<>(SENTENCE_ORDER);
+    for (SemgrexMatch match : matches) {
+      marked.add(match.getMatch());
+      for (String name : match.getNodeNames()) {
+        marked.add(match.getNode(name));
+      }
+    }
+    return marked;
   }
 
   /**
@@ -1166,7 +1215,8 @@ public abstract class SemgrexPattern implements Serializable  {
                          + "'offset' prints the filename and the line offset in the ConLL-U file, "
                          + "'conllu' prints the sentence in CoNLL-U with each match as a comment, "
                          + "and 'text' prints each match on a line: the sent_id, a tab, and the words, with the match marked as [[word]].");
-    log.info(CONTEXT + " N: with text, keep only N words before and after the match, as grep -C does.  "
+    log.info(CONTEXT + " N: with text or conllu, keep only N words before and after each word of a match, "
+                         + "as grep -C does for lines.  A multi-word token is kept whole.  "
                          + "Implies text if no " + OUTPUT_FORMAT_OPTION + " is given");
     log.info(BEFORE_CONTEXT + " N, " + AFTER_CONTEXT + " N: as " + CONTEXT + ", for the words before or after the match.  "
                          + "Either takes precedence over " + CONTEXT + " on its side");
@@ -1220,9 +1270,9 @@ public abstract class SemgrexPattern implements Serializable  {
     int before;
     int after;
     try {
-      if (contextGiven && outputFormat != OutputFormat.TEXT) {
+      if (contextGiven && outputFormat != OutputFormat.TEXT && outputFormat != OutputFormat.CONLLU) {
         throw new IllegalArgumentException(CONTEXT + ", " + BEFORE_CONTEXT + " and " + AFTER_CONTEXT + " only apply to " +
-                                           OUTPUT_FORMAT_OPTION + " text, not " + outputFormatString.toLowerCase(Locale.ROOT));
+                                           OUTPUT_FORMAT_OPTION + " text or conllu, not " + outputFormatString.toLowerCase(Locale.ROOT));
       }
       before = contextWords(argsMap, BEFORE_CONTEXT);
       after = contextWords(argsMap, AFTER_CONTEXT);
@@ -1323,6 +1373,9 @@ public abstract class SemgrexPattern implements Serializable  {
         }
         comments.addAll(highlightComments(sentenceMatches.second()));
         String output = writer.printSemanticGraph(graph, enhanced, false, comments);
+        if (contextGiven) {
+          output = conlluContext(output, SemgrexUtils.contextRanges(markedWords(sentenceMatches.second()), graph, before, after));
+        }
         stdout.print(output);
       } else if (outputFormat == OutputFormat.TEXT) {
         String label = sentenceLabel(sentence, sentenceFiles.get(sentence), positions.get(sentence));
