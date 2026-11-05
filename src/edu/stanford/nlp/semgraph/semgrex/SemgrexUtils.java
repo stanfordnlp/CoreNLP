@@ -29,6 +29,7 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
@@ -55,7 +56,7 @@ public class SemgrexUtils {
   private static final String MARK_START = "[[";
   /** Ends the mark of a word in {@link #markedText} */
   private static final String MARK_END = "]]";
-  /** Stands for the words {@link #markedText} leaves out at either end */
+  /** Stands for each stretch of words {@link #markedText} leaves out */
   private static final String ELLIPSIS = "...";
 
   /**
@@ -87,15 +88,15 @@ public class SemgrexUtils {
    *<br>
    * The words are those of the basic graph, in order, along with any
    * marked word only the enhanced graph has, such as an empty word 8.1.
-   * With {@code before} or {@code after} zero or more, only that many
-   * words are kept before the first marked word or after the last, and
-   * {@code ...} stands for the rest, as in {@code ... the [[cake]] ...}.
-   * Everything between the first and last marked words is always kept.
+   * With {@code before} or {@code after} zero or more, only the words
+   * {@link #contextRanges} keeps around the marked words are written,
+   * and {@code ...} stands for each stretch left out, as in
+   * {@code ... quickly [[ate]] the ... big [[cake]] in ...}
    *
    * @param sentence the sentence, with its basic graph
    * @param marked the words to mark
-   * @param before how many words to keep before the first marked word, or a negative number for all of them
-   * @param after how many words to keep after the last marked word, or a negative number for all of them
+   * @param before how many words to keep before each marked word, or a negative number for all of them
+   * @param after how many words to keep after each marked word, or a negative number for all of them
    * @return the words, as one line
    */
   public static String markedText(CoreMap sentence, Collection<IndexedWord> marked, int before, int after) {
@@ -105,42 +106,123 @@ public class SemgrexUtils {
       words.addAll(graph.vertexSet());
     }
     words.addAll(marked);
-    List<IndexedWord> ordered = new ArrayList<>(words);
-
-    int first = -1;
-    int last = -1;
-    for (int idx = 0; idx < ordered.size(); ++idx) {
-      if (marked.contains(ordered.get(idx))) {
-        if (first < 0) {
-          first = idx;
-        }
-        last = idx;
-      }
-    }
-    int start = 0;
-    int end = ordered.size();
-    if (first >= 0) {
-      if (before >= 0) {
-        start = Math.max(0, first - before);
-      }
-      if (after >= 0) {
-        end = Math.min(ordered.size(), last + after + 1);
-      }
-    }
+    List<int[]> ranges = contextRanges(marked, graph, before, after);
 
     List<String> pieces = new ArrayList<>();
-    if (start > 0) {
-      pieces.add(ELLIPSIS);
-    }
-    for (IndexedWord word : ordered.subList(start, end)) {
+    boolean skipped = false;
+    for (IndexedWord word : words) {
+      if (!inRanges(ranges, word.index())) {
+        skipped = true;
+        continue;
+      }
+      if (skipped) {
+        pieces.add(ELLIPSIS);
+        skipped = false;
+      }
       // a word with a tab or newline in it would break the line in two
       String text = word.word().replaceAll("[\\t\\r\\n]", " ");
       pieces.add(marked.contains(word) ? MARK_START + text + MARK_END : text);
     }
-    if (end < ordered.size()) {
+    if (skipped) {
       pieces.add(ELLIPSIS);
     }
     return String.join(" ", pieces);
+  }
+
+  /**
+   * The words to keep around some marked words, as the ranges of word
+   * indices, such as 8-18 and 33-43 around 13 and 38 with five words of
+   * context.
+   *<br>
+   * Each marked word has a window of {@code before} words before it and
+   * {@code after} after it, the whole sentence on a side with a negative
+   * number.  A window which would cut a multi-word token in half takes
+   * in the whole of it, so its words stay together with its range line.
+   * Windows which overlap or touch are merged.  An empty word such as
+   * 8.1 counts as being at 8, which it follows.
+   *
+   * @param marked the marked words
+   * @param graph the basic graph, which has the multi-word tokens, or null
+   * @param before how many words to keep before each marked word, or a negative number for all of them
+   * @param after how many words to keep after each marked word, or a negative number for all of them
+   * @return the ranges, each as its first and last index, in order and apart from one another
+   */
+  public static List<int[]> contextRanges(Collection<IndexedWord> marked, SemanticGraph graph, int before, int after) {
+    List<int[]> windows = new ArrayList<>();
+    if (marked.isEmpty() || (before < 0 && after < 0)) {
+      windows.add(new int[] { 0, Integer.MAX_VALUE });
+      return windows;
+    }
+    List<int[]> mwts = mwtSpans(graph);
+    for (IndexedWord word : marked) {
+      int lo = before < 0 ? 0 : Math.max(0, word.index() - before);
+      int hi = after < 0 ? Integer.MAX_VALUE : word.index() + after;
+      for (int[] mwt : mwts) {
+        if (lo > mwt[0] && lo <= mwt[1]) {
+          lo = mwt[0];
+        }
+        if (hi >= mwt[0] && hi < mwt[1]) {
+          hi = mwt[1];
+        }
+      }
+      windows.add(new int[] { lo, hi });
+    }
+    windows.sort(Comparator.comparingInt(window -> window[0]));
+
+    List<int[]> merged = new ArrayList<>();
+    for (int[] window : windows) {
+      int[] last = merged.isEmpty() ? null : merged.get(merged.size() - 1);
+      if (last != null && window[0] - 1 <= last[1]) {
+        last[1] = Math.max(last[1], window[1]);
+      } else {
+        merged.add(window);
+      }
+    }
+    return merged;
+  }
+
+  /**
+   * Whether a word index is in one of the ranges {@link #contextRanges} gives.
+   *
+   * @param ranges the ranges
+   * @param index the index
+   * @return whether the index is in a range
+   */
+  public static boolean inRanges(List<int[]> ranges, int index) {
+    for (int[] range : ranges) {
+      if (index >= range[0] && index <= range[1]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * The multi-word tokens of a graph, each as the indices of its first and
+   * last words, found as the CoNLL-U writer finds them to write their
+   * range lines.
+   */
+  private static List<int[]> mwtSpans(SemanticGraph graph) {
+    List<int[]> spans = new ArrayList<>();
+    if (graph == null) {
+      return spans;
+    }
+    int[] current = null;
+    for (IndexedWord word : graph.vertexListSorted()) {
+      if (word.getEmptyIndex() != 0 || word.copyCount() != 0) {
+        continue;
+      }
+      Boolean first = word.get(CoreAnnotations.IsFirstWordOfMWTAnnotation.class);
+      if (first != null && first) {
+        current = new int[] { word.index(), word.index() };
+        spans.add(current);
+      } else if (current != null && CoNLLUDocumentWriter.isMWTbutNotStart(word)) {
+        current[1] = word.index();
+      } else {
+        current = null;
+      }
+    }
+    return spans;
   }
 
   /**

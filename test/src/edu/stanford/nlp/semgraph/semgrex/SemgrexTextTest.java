@@ -6,16 +6,23 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.CoNLLUReader;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.ud.CoNLLUDocumentWriter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 
@@ -54,6 +61,19 @@ public class SemgrexTextTest {
     "5.1\tlikes\tlike\tVERB\t_\t_\t_\t_\t2:conj:and\t_",
     "6\ttea\ttea\tNOUN\t_\t_\t5\torphan\t5.1:obj\t_",
     "",
+    "# sent_id = mwt-1",
+    "# text = Fue al parque de la ciudad ayer .",
+    "1\tFue\tir\tVERB\t_\t_\t0\troot\t0:root\t_",
+    "2-3\tal\t_\t_\t_\t_\t_\t_\t_\t_",
+    "2\ta\ta\tADP\t_\t_\t4\tcase\t4:case\t_",
+    "3\tel\tel\tDET\t_\t_\t4\tdet\t4:det\t_",
+    "4\tparque\tparque\tNOUN\t_\t_\t1\tobl\t1:obl\t_",
+    "5\tde\tde\tADP\t_\t_\t7\tcase\t7:case\t_",
+    "6\tla\tel\tDET\t_\t_\t7\tdet\t7:det\t_",
+    "7\tciudad\tciudad\tNOUN\t_\t_\t4\tnmod\t4:nmod\t_",
+    "8\tayer\tayer\tADV\t_\t_\t1\tadvmod\t1:advmod\t_",
+    "9\t.\t.\tPUNCT\t_\t_\t1\tpunct\t1:punct\t_",
+    "",
     "");
 
   private static List<CoreMap> readSentences() throws IOException {
@@ -69,7 +89,7 @@ public class SemgrexTextTest {
     List<Pair<CoreMap, List<SemgrexMatch>>> matches =
       SemgrexPattern.compile(pattern).matchSentences(Collections.singletonList(read), false);
     assertEquals(1, matches.size());
-    List<String> lines = new java.util.ArrayList<>();
+    List<String> lines = new ArrayList<>();
     for (SemgrexMatch match : matches.get(0).second()) {
       lines.add(SemgrexPattern.matchText("id", read, match, before, after));
     }
@@ -91,9 +111,15 @@ public class SemgrexTextTest {
                  text(0, "{word:cake}", 2, 2));
     assertEquals(Collections.singletonList("id\t... [[cake]] in ..."),
                  text(0, "{word:cake}", 0, 1));
-    // the words between the marked words are always kept
-    assertEquals(Collections.singletonList("id\t... quickly [[ate]] the very big [[cake]] in ..."),
+    // each marked word has its own window, with ... between them
+    assertEquals(Collections.singletonList("id\t... quickly [[ate]] the ... big [[cake]] in ..."),
                  text(0, "{} >obj {}=o", 1, 1));
+    // windows which overlap are merged
+    assertEquals(Collections.singletonList("id\t... man quickly [[ate]] the very big [[cake]] in the ..."),
+                 text(0, "{} >obj {}=o", 2, 2));
+    // as are windows which only touch, 4-6 and 7-9 here
+    assertEquals(Collections.singletonList("id\t... quickly [[ate]] the very [[big]] cake ..."),
+                 text(0, "{word:ate} >obj ({} >amod {}=a)", 1, 1));
     // no ... where the context reaches the end of the sentence
     assertEquals(Collections.singletonList("id\tThe old [[man]] quickly ..."),
                  text(0, "{word:man}", 5, 1));
@@ -115,6 +141,64 @@ public class SemgrexTextTest {
                  text(1, "{}=v >obj@enhanced {word:tea}=o", -1, -1));
     assertEquals(Collections.singletonList("id\tSue likes coffee and Bill [[tea]]"),
                  text(1, "{word:tea}", -1, -1));
+  }
+
+  /** Each marked word has its own window: 8-18 and 33-43 around 13 and 38 */
+  @Test
+  public void contextRanges() {
+    List<IndexedWord> marked = Arrays.asList(word(13), word(38));
+    assertEquals("[8-18, 33-43]", ranges(SemgrexUtils.contextRanges(marked, null, 5, 5)));
+    assertEquals("[13-15, 38-40]", ranges(SemgrexUtils.contextRanges(marked, null, 0, 2)));
+    // merged when they overlap, cut off at the start of the sentence
+    assertEquals("[0-50]", ranges(SemgrexUtils.contextRanges(marked, null, 20, 12)));
+    // the whole sentence, without context
+    assertEquals("[0-" + Integer.MAX_VALUE + "]", ranges(SemgrexUtils.contextRanges(marked, null, -1, -1)));
+    // everything before, so both windows start at the start and merge
+    assertEquals("[0-43]", ranges(SemgrexUtils.contextRanges(marked, null, -1, 5)));
+  }
+
+  private static IndexedWord word(int index) {
+    IndexedWord word = new IndexedWord(new CoreLabel());
+    word.setIndex(index);
+    return word;
+  }
+
+  private static String ranges(List<int[]> ranges) {
+    return ranges.stream().map(range -> range[0] + "-" + range[1]).collect(Collectors.toList()).toString();
+  }
+
+  /** A window which would cut a multi-word token in half takes in the whole of it */
+  @Test
+  public void multiWordTokens() throws IOException {
+    // one word before parque is el, the second word of al, so a is kept too
+    assertEquals(Collections.singletonList("id\t... a el [[parque]] ..."), text(2, "{word:parque}", 1, 0));
+    // one word after Fue is a, the first word of al, so el is kept too
+    assertEquals(Collections.singletonList("id\t[[Fue]] a el ..."), text(2, "{word:Fue}", 0, 1));
+    // a window which takes in all of it is unchanged
+    assertEquals(Collections.singletonList("id\t... [[a]] el parque ..."), text(2, "{word:a}", 0, 2));
+  }
+
+  /**
+   * In CoNLL-U, the comments are kept, with the rows of the words in the
+   * windows, a range line with its words
+   */
+  @Test
+  public void conlluContext() throws IOException {
+    CoreMap sentence = readSentences().get(2);
+    SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    String conllu = new CoNLLUDocumentWriter().printSemanticGraph(graph, null, false,
+                                                                 sentence.get(CoreAnnotations.CommentsAnnotation.class));
+    List<IndexedWord> marked = Collections.singletonList(graph.getNodeByIndex(4));
+    String cut = SemgrexPattern.conlluContext(conllu, SemgrexUtils.contextRanges(marked, graph, 1, 1));
+    List<String> ids = new ArrayList<>();
+    for (String line : cut.split("\\R")) {
+      ids.add(line.startsWith("#") || line.isEmpty() ? line : line.split("\t")[0]);
+    }
+    assertEquals(Arrays.asList("# sent_id = mwt-1", "# text = Fue al parque de la ciudad ayer .", "2-3", "2", "3", "4", "5"), ids);
+    assertTrue(cut, cut.endsWith(System.lineSeparator() + System.lineSeparator()));
+
+    // with every word in a window, nothing is cut
+    assertEquals(conllu, SemgrexPattern.conlluContext(conllu, SemgrexUtils.contextRanges(marked, graph, 5, 5)));
   }
 
   @Test
