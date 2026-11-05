@@ -908,6 +908,14 @@ public abstract class SemgrexPattern implements Serializable  {
     Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PATTERN, MODE, EXTRAS, OUTPUT_FORMAT_OPTION,
                                                             CONTEXT, AFTER_CONTEXT, BEFORE_CONTEXT)));
 
+  /** Every flag {@link #main} knows; any other is warned about, as it would otherwise do nothing */
+  private static final Set<String> KNOWN_FLAGS =
+    Collections.unmodifiableSet(new HashSet<>(Arrays.asList(PATTERN, TREE_FILE, MODE, EXTRAS, CONLLU_FILE, OUTPUT_FORMAT_OPTION,
+                                                            CONTEXT, AFTER_CONTEXT, BEFORE_CONTEXT)));
+
+  /** A context flag with its number attached, as grep allows, such as -A5 */
+  private static final java.util.regex.Pattern ATTACHED_CONTEXT = java.util.regex.Pattern.compile("(-[ABC])([0-9]+)");
+
   /** Sentence order for words: by index, then empty index or copy count, as in 8, 8.1, 8.2, 9 */
   private static final Comparator<IndexedWord> SENTENCE_ORDER = SemgrexUtils.SENTENCE_ORDER;
 
@@ -1122,6 +1130,27 @@ public abstract class SemgrexPattern implements Serializable  {
   }
 
   /**
+   * Splits a context flag with its number attached, such as {@code -A5},
+   * into the flag and the number, as grep allows either.
+   *
+   * @param args the command line
+   * @return the command line, with each such flag split in two
+   */
+  static String[] splitContextArgs(String[] args) {
+    List<String> split = new ArrayList<>();
+    for (String arg : args) {
+      java.util.regex.Matcher m = ATTACHED_CONTEXT.matcher(arg);
+      if (m.matches()) {
+        split.add(m.group(1));
+        split.add(m.group(2));
+      } else {
+        split.add(arg);
+      }
+    }
+    return split.toArray(new String[0]);
+  }
+
+  /**
    * The number of words of context a flag asks for, from the flag itself
    * or else from {@code -C}, or -1 for the whole sentence if neither was given.
    *
@@ -1219,7 +1248,7 @@ public abstract class SemgrexPattern implements Serializable  {
                          + "as grep -C does for lines.  A multi-word token is kept whole.  "
                          + "Implies text if no " + OUTPUT_FORMAT_OPTION + " is given");
     log.info(BEFORE_CONTEXT + " N, " + AFTER_CONTEXT + " N: as " + CONTEXT + ", for the words before or after the match.  "
-                         + "Either takes precedence over " + CONTEXT + " on its side");
+                         + "Either takes precedence over " + CONTEXT + " on its side.  The number may be attached, as in -A5");
     log.info();
     log.info(PATTERN + " is required");
   }
@@ -1240,7 +1269,12 @@ public abstract class SemgrexPattern implements Serializable  {
    * @throws IOException if a file cannot be read, or a file pattern matches nothing
    */
   public static void main(String[] args) throws IOException {
-    Map<String, List<String>> argsMap = SemgrexUtils.parseArgs(args, SINGLE_VALUED);
+    Map<String, List<String>> argsMap = SemgrexUtils.parseArgs(splitContextArgs(args), SINGLE_VALUED);
+    for (String flag : argsMap.keySet()) {
+      if (flag != null && !KNOWN_FLAGS.contains(flag)) {
+        log.warn("Unknown flag " + flag + " is ignored.  Known flags: " + new TreeSet<>(KNOWN_FLAGS));
+      }
+    }
 
     if (SemgrexUtils.firstArg(argsMap, PATTERN, null) == null) {
       help();

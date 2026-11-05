@@ -208,6 +208,15 @@ public class SemgrexTextTest {
     assertNull(SemgrexUtils.sentenceId(sentences.get(1)));
   }
 
+  /** -A5 is -A 5, as in grep, and nothing else is split */
+  @Test
+  public void splitContextArgs() {
+    assertArrayEquals(new String[] { "-A", "5", "-B", "12", "-C", "0", "-pattern", "{}" },
+                      SemgrexPattern.splitContextArgs(new String[] { "-A5", "-B12", "-C0", "-pattern", "{}" }));
+    assertArrayEquals(new String[] { "-A", "5", "-Ax", "-D5", "x-A5", "-A-5" },
+                      SemgrexPattern.splitContextArgs(new String[] { "-A", "5", "-Ax", "-D5", "x-A5", "-A-5" }));
+  }
+
   @Test
   public void contextWords() {
     Map<String, List<String>> args = new HashMap<>();
