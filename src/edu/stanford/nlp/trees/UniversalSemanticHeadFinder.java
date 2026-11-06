@@ -286,6 +286,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     // !$++ ADJP matches against "Why is the dog pink?"
     TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ NP !$++ ADJP))"),
 
+    // the fronted adjective predicate in "How old is your cousin?"
+    TregexPattern.compile("SBARQ < (WHADJP=head $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ NP !$++ ADJP|VP))"),
+
     // Actually somewhat limited in scope, this detects "Tuesday it is",
     // "Such a great idea this was", etc
     TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishPatterns.copularWordRegex + "))))"),

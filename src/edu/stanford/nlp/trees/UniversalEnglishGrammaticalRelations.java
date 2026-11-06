@@ -192,6 +192,8 @@ public class UniversalEnglishGrammaticalRelations {
         "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
         // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
         "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
+        // matches (old, is) in "How old is your cousin?" after the SQ has been flattened out of the tree
+        "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + " $+ NP) < WHADJP",
         // "Such a great idea this was"
         "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/=aux < " + copularWordRegex + "))))");
 
@@ -359,6 +361,8 @@ public class UniversalEnglishGrammaticalRelations {
             "S < (NP < EX) <+(VP) (VP < NP=target)",
             // matches (what, that) in "what is that" after the SQ has been flattened out of the tree
             "SBARQ < (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (WHNP < WP) < NP=target",
+            // matches (old, cousin) in "How old is your cousin?" after the SQ has been flattened out of the tree
+            "SBARQ < (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ NP=target) < WHADJP",
             // matches (what, wrong) in "what is wrong with ..." after the SQ has been flattened out of the tree
             // note that in that case "wrong" is taken as the head thanks to UniversalSemanticHeadFinder hackery
             // The !$++ matches against (what, worth) in What is UAL stock worth?

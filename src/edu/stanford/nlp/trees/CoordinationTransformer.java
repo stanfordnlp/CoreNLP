@@ -452,11 +452,17 @@ public class CoordinationTransformer implements TreeTransformer  {
                           // match against "good at"
                           " !< (ADJP < (PP <: IN|TO))))");
 
+  // Matches to be questions with a fronted adjective predicate, such
+  // as "How old is your cousin?", where the SQ is just the copula and
+  // the subject.  "How old is she turning?" has a VP and is not matched.
+  private static final TregexPattern flattenWHADJPSQTregex =
+    TregexPattern.compile("SBARQ < (WHADJP $+ (SQ=sq <, (/^VB/ < " + EnglishPatterns.copularWordRegex + ") <- NP !<3 __))");
+
   private static final TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
 
   /**
    * Removes the SQ structure under a WHNP question, such as "Who am I
-   * to judge?".  We do this so that it is easier to pick out the head
+   * to judge?", or a WHADJP question, such as "How old is your cousin?".  We do this so that it is easier to pick out the head
    * and then easier to connect that head to all of the other words in
    * the question in this situation.  In the specific case of making
    * the copula head, we don't do this so that the existing headfinder
@@ -471,7 +477,8 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (t == null) {
       return null;
     }
-    return Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
+    t = Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
+    return Tsurgeon.processPattern(flattenWHADJPSQTregex, flattenSQTsurgeon, t);
   }
 
   private static final TregexPattern removeXOverXTregex =
