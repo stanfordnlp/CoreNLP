@@ -334,6 +334,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nmod:poss(cousin-5, your-4)\n" +
            "nsubj(old-2, cousin-5)\n"},
          {TestType.BASIC,
+          "(ROOT (SBARQ (WHADJP (WRB How) (JJ old)) (SQ (VBZ is) (NP (PRP she)) (VP (VBG turning))) (. ?)))",
+          "advmod(old-2, How-1)\n" +
+           "xcomp(turning-5, old-2)\n" +
+           "aux(turning-5, is-3)\n" +
+           "nsubj(turning-5, she-4)\n" +
+           "root(ROOT-0, turning-5)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +
