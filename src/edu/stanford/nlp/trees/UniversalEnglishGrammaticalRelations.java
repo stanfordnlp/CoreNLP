@@ -314,10 +314,22 @@ public class UniversalEnglishGrammaticalRelations {
    * Example: <br>
    * "Clinton defeated Dole" &rarr; {@code nsubj}(defeated, Clinton)
    */
+  /**
+   * The tags of the verb which starts the VP of a small clause, the
+   * clause in "leaves patients facing a wait" or "had the car washed".
+   * PTB brackets these as an S with its own subject right after the verb:
+   * {@code (VP (VBZ leaves) (S (NP patients) (VP (VBG facing) ...)))}.
+   * As in UD, the subject is the obj of the verb and the clause is an
+   * xcomp.
+   */
+  private static final String SMALL_CLAUSE_VP = "VBG|VBN";
+
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nsubj", "nominal subject",
         SUBJECT, "S|SQ|SBARQ|SINV|SBAR|PRN", tregexCompiler,
-            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO))",
+            // the subject of a to clause or a small clause under a verb is
+            // the obj of that verb instead; see SMALL_CLAUSE_VP
+            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO) [ !$- /^VB/ | !< (=verb <, " + SMALL_CLAUSE_VP + ") ])",
             "S < ( NP=target <# (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
             "SQ|PRN < (NP=target !< EX $++ VP)",
             "SQ < (NP=target !< EX $- (/^(?:VB|AUX)/ < " + copularWordRegex + ") !$++ VP)",
@@ -443,6 +455,9 @@ public class UniversalEnglishGrammaticalRelations {
             // Examples such as "Rolls-Royce expects sales to remain steady"
             "VP < (S < (NP|WHNP=target $++ (VP < TO)))",
 
+            // small clauses such as "leaves patients facing a wait"
+            "VP < (/^VB/ $+ (S < (NP|WHNP=target $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
+
             // This matches rare cases of misparses, such as "What
             // disease causes cancer?" where the "causes" does not get a
             // surrounding VP.  Hopefully it does so without overlapping
@@ -549,7 +564,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (/^V/ < " + ccompObjVerbRegex + ") < (SBAR=target < (S < VP) $-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
             "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)))",
             "VP < @SBARQ=target",  // Direct question: She asked "Who is in trouble"
-            "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
+            "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < (VP !<, " + SMALL_CLAUSE_VP + "))",
             // !$-- @SBAR|S handles cases where the answer to the question
             //   "What do they ccompVerb?"
             //   is already answered by a different node
@@ -623,7 +638,10 @@ public class UniversalEnglishGrammaticalRelations {
             //Former acomp expression
             "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
             // For new treebank xcomp changes, match V + NP + xcomp patterns
-            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))"
+            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))",
+            // small clauses such as "leaves patients facing a wait", where
+            // the subject of the small clause is the obj of the verb
+            "VP < (/^VB/ $+ (S=target < (NP $+ (VP <, " + SMALL_CLAUSE_VP + "))))"
         );
 
 

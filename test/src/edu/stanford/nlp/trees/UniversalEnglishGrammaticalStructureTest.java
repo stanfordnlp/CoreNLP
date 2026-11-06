@@ -310,6 +310,15 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, eat-3)\n" +
            "obj(eat-3, cake-4)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (DT A) (NN shortage)) (VP (VBZ leaves) (S (NP (NNS patients)) (VP (VBG facing) (NP (DT a) (NN wait))))) (. .)))",
+          "det(shortage-2, A-1)\n" +
+           "nsubj(leaves-3, shortage-2)\n" +
+           "root(ROOT-0, leaves-3)\n" +
+           "obj(leaves-3, patients-4)\n" +
+           "xcomp(leaves-3, facing-5)\n" +
+           "det(wait-7, a-6)\n" +
+           "obj(facing-5, wait-7)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +
@@ -621,8 +630,8 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "mark(have-7, to-6)\n" +
            "xcomp(deserve-5, have-7)\n" +
            "nmod:poss(head-9, her-8)\n" +
-           "nsubj(chopped-10, head-9)\n" +
-           "ccomp(have-7, chopped-10)\n" +
+           "obj(have-7, head-9)\n" +
+           "xcomp(have-7, chopped-10)\n" +
            "compound:prt(chopped-10, off-11)\n"},
          {TestType.BASIC,
           "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
@@ -996,12 +1005,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "aux(have-6, ca-4)\n" +
            "advmod(have-6, n't-5)\n" +
            "root(ROOT-0, have-6)\n" +
-           "nsubj(hearing-12, taxpayers-7)\n" +
+           "obj(have-6, taxpayers-7)\n" +
            "acl(taxpayers-7, coming-8)\n" +
            "case(audit-11, into-9)\n" +
            "det(audit-11, an-10)\n" +
            "obl(coming-8, audit-11)\n" +
-           "ccomp(have-6, hearing-12)\n" +
+           "xcomp(have-6, hearing-12)\n" +
            "obj(hearing-12, oohs-14)\n" +
            "cc(ahs-18, and-16)\n" +
            "conj(oohs-14, ahs-18)\n"},
