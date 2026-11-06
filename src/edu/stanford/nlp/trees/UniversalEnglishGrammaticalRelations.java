@@ -316,13 +316,14 @@ public class UniversalEnglishGrammaticalRelations {
    */
   /**
    * The tags of the verb which starts the VP of a small clause, the
-   * clause in "leaves patients facing a wait" or "had the car washed".
+   * clause in "made him run", "leaves patients facing a wait" or "had
+   * the car washed".
    * PTB brackets these as an S with its own subject right after the verb:
    * {@code (VP (VBZ leaves) (S (NP patients) (VP (VBG facing) ...)))}.
    * As in UD, the subject is the obj of the verb and the clause is an
    * xcomp.
    */
-  private static final String SMALL_CLAUSE_VP = "VBG|VBN";
+  private static final String SMALL_CLAUSE_VP = "VB|VBG|VBN";
 
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nsubj", "nominal subject",
@@ -551,9 +552,10 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "ccomp", "clausal complement",
         COMPLEMENT, "VP|SINV|S|ADJP|ADVP", tregexCompiler,
-            // Weird case of verbs with direct S complement that is not an infinitive or participle
-            // ("I saw [him take the cake].", "making [him go crazy]")
-            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP)",
+            // Weird case of verbs with direct S complement that is not an infinitive or participle.
+            // Small clauses with a bare verb right after the verb,
+            // "I saw [him take the cake]", are xcomp instead; see SMALL_CLAUSE_VP
+            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP [ !$- /^VB/ | !< (NP $+ (VP <, VB)) ])",
             // the canonical case of a SBAR[that] with an overt "that" or "whether"
             "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",
             // Conjoined SBAR otherwise in the canonical case
