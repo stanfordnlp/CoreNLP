@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -107,6 +108,11 @@ public class CoordinationTransformer implements TreeTransformer  {
       return t;
     }
 
+    t = insertMissingNP(t);
+    if (VERBOSE) {
+      debugLine("After insertMissingNP:            ", t);
+    }
+
     if (performMWETransformation) {
       t = MWETransform(t);
       if (VERBOSE) {
@@ -167,6 +173,121 @@ public class CoordinationTransformer implements TreeTransformer  {
     t = mergeYodaVerbs(t);
     if (VERBOSE) {
       debugLine("After mergeYodaVerbs:             ", t);
+    }
+    return t;
+  }
+
+  /** The basic category of a label, without function tags such as -TMP */
+  private static String category(Tree t) {
+    String label = t.value();
+    if (label == null || label.startsWith("-")) {
+      return label;
+    }
+    int dash = label.indexOf('-');
+    return dash < 0 ? label : label.substring(0, dash);
+  }
+
+  private static boolean isTag(Tree t, String regex) {
+    return t.isPreTerminal() && t.value() != null && t.value().matches(regex);
+  }
+
+  private static final String NOUN_TAGS = "NNP?S?";
+
+  /**
+   * Whether the nouns in {@code kids[start..end)} are an argument which
+   * should be an NP: after a verb tag in a VP, right after a preposition
+   * in a PP, or before the VP of a clause.  A noun in a VP with no verb
+   * tag before it is more likely a mistagged verb, as in
+   * {@code (VP (NN yield) (NP ...))}, and so are nouns after MD or TO,
+   * so those are not arguments.
+   */
+  private static boolean isBareArgument(String parent, Tree[] kids, int start, int end) {
+    switch (parent) {
+    case "VP": {
+      boolean verb = false;
+      for (int i = 0; i < start; ++i) {
+        if (isTag(kids[i], "MD|TO")) {
+          return false;
+        }
+        if (isTag(kids[i], "VB[DGNPZ]?")) {
+          verb = true;
+        }
+      }
+      return verb;
+    }
+    case "PP":
+      return start > 0 && isTag(kids[start - 1], "IN");
+    case "S":
+    case "SQ":
+    case "SINV":
+      for (int i = end; i < kids.length; ++i) {
+        if ("VP".equals(category(kids[i]))) {
+          return true;
+        }
+      }
+      return false;
+    default:
+      return false;
+    }
+  }
+
+  /**
+   * Puts an NP over noun tags which are used as an argument without one,
+   * as in {@code (VP (VBZ contains) (NNS beets))}.  The relations all look
+   * for an NP in those places, so otherwise the noun is attached as dep.
+   * A run of nouns, as in {@code (VP (VBZ contains) (NN tin) (NNS cans))},
+   * becomes a single NP, as do nouns joined by a CC, as in
+   * {@code (VP (VBD bought) (NN salt) (CC and) (NN pepper))}.  See {@link #isBareArgument} for which places
+   * count as arguments.
+   */
+  public static Tree insertMissingNP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    for (Tree node : t.subTreeList()) {
+      if (node.isLeaf() || node.isPreTerminal()) {
+        continue;
+      }
+      String parent = category(node);
+      if (parent == null) {
+        continue;
+      }
+      Tree[] kids = node.children();
+      List<Tree> newKids = null;
+      int i = 0;
+      while (i < kids.length) {
+        if (!isTag(kids[i], NOUN_TAGS)) {
+          if (newKids != null) {
+            newKids.add(kids[i]);
+          }
+          ++i;
+          continue;
+        }
+        // a run of nouns, including nouns joined by a CC: salt and pepper
+        int end = i + 1;
+        while (end < kids.length) {
+          if (isTag(kids[end], NOUN_TAGS)) {
+            ++end;
+          } else if (end + 1 < kids.length && isTag(kids[end], "CC") && isTag(kids[end + 1], NOUN_TAGS)) {
+            end += 2;
+          } else {
+            break;
+          }
+        }
+        List<Tree> run = Arrays.asList(kids).subList(i, end);
+        if (isBareArgument(parent, kids, i, end)) {
+          if (newKids == null) {
+            newKids = new ArrayList<>(Arrays.asList(kids).subList(0, i));
+          }
+          newKids.add(node.treeFactory().newTreeNode("NP", new ArrayList<>(run)));
+        } else if (newKids != null) {
+          newKids.addAll(run);
+        }
+        i = end;
+      }
+      if (newKids != null) {
+        node.setChildren(newKids);
+      }
     }
     return t;
   }
