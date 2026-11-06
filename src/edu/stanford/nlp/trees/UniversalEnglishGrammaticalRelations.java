@@ -327,12 +327,19 @@ public class UniversalEnglishGrammaticalRelations {
    */
   private static final String SMALL_CLAUSE_VP = "VB|VBG|VBN";
 
+  /**
+   * The verb a small clause can follow.  A form of be is not one, since
+   * in "It's George Bush wanting to meet a foreign leader" the clause is
+   * the predicate, not an object and a complement.
+   */
+  private static final String SMALL_CLAUSE_VERB = "(/^VB/ !< " + copularWordRegex + ")";
+
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nsubj", "nominal subject",
         SUBJECT, "S|SQ|SBARQ|SINV|SBAR|PRN", tregexCompiler,
             // the subject of a to clause or a small clause under a verb is
             // the obj of that verb instead; see SMALL_CLAUSE_VP
-            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO) [ !$- /^VB/ | !< (=verb <, " + SMALL_CLAUSE_VP + ") ])",
+            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO) [ !$- " + SMALL_CLAUSE_VERB + " | !< (=verb <, " + SMALL_CLAUSE_VP + ") ])",
             "S < ( NP=target <# (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
             "SQ|PRN < (NP=target !< EX $++ VP)",
             "SQ < (NP=target !< EX $- (/^(?:VB|AUX)/ < " + copularWordRegex + ") !$++ VP)",
@@ -461,7 +468,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (S < (NP|WHNP=target $++ (VP < TO)))",
 
             // small clauses such as "leaves patients facing a wait"
-            "VP < (/^VB/ $+ (S < (NP|WHNP=target $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S < (NP|WHNP=target $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
 
             // This matches rare cases of misparses, such as "What
             // disease causes cancer?" where the "causes" does not get a
@@ -559,7 +566,7 @@ public class UniversalEnglishGrammaticalRelations {
             // Weird case of verbs with direct S complement that is not an infinitive or participle.
             // Small clauses with a bare verb right after the verb,
             // "I saw [him take the cake]", are xcomp instead; see SMALL_CLAUSE_VP
-            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP [ !$- /^VB/ | !< (NP $+ (VP <, VB)) ])",
+            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP [ !$- " + SMALL_CLAUSE_VERB + " | !< (NP $+ (VP <, VB)) ])",
             // the canonical case of a SBAR[that] with an overt "that" or "whether"
             "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",
             // Conjoined SBAR otherwise in the canonical case
@@ -647,7 +654,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))",
             // small clauses such as "leaves patients facing a wait", where
             // the subject of the small clause is the obj of the verb
-            "VP < (/^VB/ $+ (S=target < (NP $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S=target < (NP $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
             // a fronted adjective which is the complement of the verb, as in
             // "How old is she turning?" or "how ominous I found it".  Words
             // of amount or extent, as in "How much did it cost?", are not,
