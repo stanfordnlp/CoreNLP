@@ -320,11 +320,11 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "obj(facing-5, wait-7)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP It)) (VP (MD will) (VP (VB be) (S (NP (NNP Janet)) (VP (VBG signing))))) (. .)))",
-          "nsubj(be-3, It-1)\n" +
-           "aux(be-3, will-2)\n" +
-           "root(ROOT-0, be-3)\n" +
-           "nsubj(signing-5, Janet-4)\n" +
-           "dep(be-3, signing-5)\n"},
+          "nsubj(Janet-4, It-1)\n" +
+           "aux(Janet-4, will-2)\n" +
+           "cop(Janet-4, be-3)\n" +
+           "root(ROOT-0, Janet-4)\n" +
+           "acl(Janet-4, signing-5)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (NN Soup)) (VP (MD can) (VP (VB make) (S (NP (PRP you)) (VP (VB feel) (ADJP (JJR better)))))) (. .)))",
           "nsubj(make-3, Soup-1)\n" +

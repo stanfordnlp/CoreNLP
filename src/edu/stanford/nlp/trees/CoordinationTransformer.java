@@ -117,6 +117,11 @@ public class CoordinationTransformer implements TreeTransformer  {
       debugLine("After insertMissingNP:            ", t);
     }
 
+    t = copulaClauseToNP(t);
+    if (VERBOSE) {
+      debugLine("After copulaClauseToNP:           ", t);
+    }
+
     if (performMWETransformation) {
       t = MWETransform(t);
       if (VERBOSE) {
@@ -179,6 +184,26 @@ public class CoordinationTransformer implements TreeTransformer  {
       debugLine("After mergeYodaVerbs:             ", t);
     }
     return t;
+  }
+
+  private static final TregexPattern copulaClauseTregex =
+    TregexPattern.compile("VP < (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ (S=clause <1 NP <2 (VP <, VBG|VBN) !<3 __))");
+
+  private static final TsurgeonPattern copulaClauseTsurgeon =
+    Tsurgeon.parseOperation("relabel clause NP");
+
+  /**
+   * In "It's George Bush wanting to meet a foreign leader", PTB brackets
+   * the predicate as an S with its own subject, (S (NP George Bush) (VP
+   * (VBG wanting) ...)).  As in UD, treat the subject as the predicate
+   * nominal and the -ing or -ed VP as a reduced relative modifying it by
+   * relabeling the S as an NP: (NP (NP George Bush) (VP (VBG wanting) ...)).
+   */
+  public static Tree copulaClauseToNP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(copulaClauseTregex, copulaClauseTsurgeon, t);
   }
 
   /** The basic category of a label, without function tags such as -TMP */
