@@ -616,7 +616,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation XCLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "xcomp", "xclausal complement",
-        COMPLEMENT, "VP|ADJP|SINV", tregexCompiler,
+        COMPLEMENT, "VP|ADJP|SINV|SBARQ|SBAR", tregexCompiler,
             //"VP < (S=target [ !$-- NP $-- (/^V/ < " + xcompNoObjVerbRegex + ") | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
             "VP < (S=target [ !$-- NP | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
             "ADJP < (S=target <, (VP <, TO))",
@@ -647,7 +647,12 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))",
             // small clauses such as "leaves patients facing a wait", where
             // the subject of the small clause is the obj of the verb
-            "VP < (/^VB/ $+ (S=target < (NP $+ (VP <, " + SMALL_CLAUSE_VP + "))))"
+            "VP < (/^VB/ $+ (S=target < (NP $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            // a fronted adjective which is the complement of the verb, as in
+            // "How old is she turning?" or "how ominous I found it".  Words
+            // of amount or extent, as in "How much did it cost?", are not,
+            // and neither is the predicate of a copula: "how big it is"
+            "SBARQ|SBAR < (WHADJP=target <# (JJ|JJR !< /^(?i:much|many|little|few|long|far)$/) $+ (SQ|S < (VP !<: (/^VB/ < " + copularWordRegex + "))))"
         );
 
 
