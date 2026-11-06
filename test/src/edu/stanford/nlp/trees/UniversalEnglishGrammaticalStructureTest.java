@@ -267,6 +267,37 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nsubj(continue-7, yields-6)\n" +
            "conj(reinvestment-3, continue-7)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (DT This) (NN tin) (NN can)) (VP (VBZ contains) (NNS beets)) (. .)))",
+          "det(can-3, This-1)\n" +
+           "compound(can-3, tin-2)\n" +
+           "nsubj(contains-4, can-3)\n" +
+           "root(ROOT-0, contains-4)\n" +
+           "obj(contains-4, beets-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD put) (NN salt) (PP (IN in) (NN soup))) (. .)))",
+          "nsubj(put-2, He-1)\n" +
+           "root(ROOT-0, put-2)\n" +
+           "obj(put-2, salt-3)\n" +
+           "case(soup-5, in-4)\n" +
+           "obl(put-2, soup-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NN Salt) (VP (VBZ helps)) (. .)))",
+          "nsubj(helps-2, Salt-1)\n" +
+           "root(ROOT-0, helps-2)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD bought) (NN salt) (CC and) (NN pepper)) (. .)))",
+          "nsubj(bought-2, He-1)\n" +
+           "root(ROOT-0, bought-2)\n" +
+           "obj(bought-2, salt-3)\n" +
+           "cc(pepper-5, and-4)\n" +
+           "conj(salt-3, pepper-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP They)) (VP (NN yield) (NP (JJR more) (NN output))) (. .)))",
+          "nsubj(yield-2, They-1)\n" +
+           "root(ROOT-0, yield-2)\n" +
+           "amod(output-4, more-3)\n" +
+           "obj(yield-2, output-4)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +
