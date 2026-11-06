@@ -1454,6 +1454,22 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "det(water-7, the-6)\n" +
                "obj(carry-5, water-7)\n"},
              {TestType.NON_COLLAPSED,
+              "(ROOT (S (VP (VB Do) (RB n't) (VP (VB make) (S (NP (NNP Peters)) (VP (VB wait))))) (. .)))",
+              "aux(make-3, Do-1)\n" +
+               "advmod(make-3, n't-2)\n" +
+               "root(ROOT-0, make-3)\n" +
+               "obj(make-3, Peters-4)\n" +
+               "nsubj:xsubj(wait-5, Peters-4)\n" +
+               "xcomp(make-3, wait-5)\n"},
+             {TestType.NON_COLLAPSED,
+              "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (NNS properties))))) (. .)))",
+              "nsubj(heard-2, They-1)\n" +
+               "root(ROOT-0, heard-2)\n" +
+               "case(asbestos-4, about-3)\n" +
+               "obl(heard-2, asbestos-4)\n" +
+               "xcomp(heard-2, having-5)\n" +
+               "obj(having-5, properties-6)\n"},
+             {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP Who) ) (SQ (VBZ is) (VP (VBG going) (S (VP (TO to) (VP (VB carry) (NP (DT the) (NN water) )))))) (. ?)))",
               "nsubj(going-3, Who-1)\n" +
                "nsubj:xsubj(carry-5, Who-1)\n" +
