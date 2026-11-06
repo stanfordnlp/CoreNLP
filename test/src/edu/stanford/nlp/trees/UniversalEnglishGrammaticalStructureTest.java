@@ -1462,6 +1462,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "nsubj:xsubj(wait-5, Peters-4)\n" +
                "xcomp(make-3, wait-5)\n"},
              {TestType.NON_COLLAPSED,
+              "(ROOT (S (NP (PRP They)) (VP (VBD painted) (NP (DT the) (NN door)) (ADJP (JJ red))) (. .)))",
+              "nsubj(painted-2, They-1)\n" +
+               "root(ROOT-0, painted-2)\n" +
+               "det(door-4, the-3)\n" +
+               "obj(painted-2, door-4)\n" +
+               "nsubj:xsubj(red-5, door-4)\n" +
+               "xcomp(painted-2, red-5)\n"},
+             {TestType.NON_COLLAPSED,
               "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (NNS properties))))) (. .)))",
               "nsubj(heard-2, They-1)\n" +
                "root(ROOT-0, heard-2)\n" +
