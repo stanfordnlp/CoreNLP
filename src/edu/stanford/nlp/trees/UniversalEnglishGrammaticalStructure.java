@@ -1372,11 +1372,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * xcomp and there is no other aux dependency.  This accounts for
    * sentences such as "he decided not to" with no following verb.
    * <br>
-   * A verb xcomp with no aux or marker, as in "make their fans cheer",
-   * gets the obj of the governing verb as its extra nsubj.  Without an
-   * obj it gets none, since the subject of the governing verb is often
-   * the wrong one there: "They heard about asbestos having questionable
-   * properties".
+   * An xcomp with no aux or marker, as in "make their fans cheer" or
+   * "painted the door red", gets the obj of the governing verb as its
+   * extra nsubj.  Without an obj a verb xcomp gets none, since the
+   * subject of the governing verb is often the wrong one there: "They
+   * heard about asbestos having questionable properties".
    */
   private static void addExtraNSubj(SemanticGraph sg) {
 
@@ -1417,7 +1417,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
         if (hasAux) {
           continue;
         }
-      } else if (!hasAux && (objects.isEmpty() || modifier.tag() == null || !modifier.tag().startsWith("VB"))) {
+      } else if (!hasAux && objects.isEmpty()) {
         continue;
       }
 
