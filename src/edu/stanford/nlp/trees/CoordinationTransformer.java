@@ -108,6 +108,10 @@ public class CoordinationTransformer implements TreeTransformer  {
       return t;
     }
 
+    t = insertMissingVP(t);
+    if (VERBOSE) {
+      debugLine("After insertMissingVP:            ", t);
+    }
     t = insertMissingNP(t);
     if (VERBOSE) {
       debugLine("After insertMissingNP:            ", t);
@@ -287,6 +291,52 @@ public class CoordinationTransformer implements TreeTransformer  {
       }
       if (newKids != null) {
         node.setChildren(newKids);
+      }
+    }
+    return t;
+  }
+
+  /**
+   * Puts a VP over a base form verb which follows a modal or to in the
+   * same VP, along with everything after it, as in
+   * {@code (VP (MD shall) (RB not) (VB pass))}.  PTB always has the
+   * inner VP, and without it the modal becomes the head.  A VP with a
+   * CC is left alone, since it may be a flat coordination of verbs with
+   * a shared object, as in {@code (VP (VB buy) (CC and) (VB sell) (NP ...))}.
+   */
+  public static Tree insertMissingVP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    for (Tree node : t.subTreeList()) {
+      if (node.isLeaf() || node.isPreTerminal() || !"VP".equals(category(node))) {
+        continue;
+      }
+      Tree[] kids = node.children();
+      boolean coordination = false;
+      for (Tree kid : kids) {
+        if (isTag(kid, "CC") || "CONJP".equals(category(kid))) {
+          coordination = true;
+          break;
+        }
+      }
+      if (coordination) {
+        continue;
+      }
+      for (int i = 1; i < kids.length; ++i) {
+        if (!isTag(kids[i], "VB")) {
+          continue;
+        }
+        int previous = i - 1;
+        while (previous > 0 && isTag(kids[previous], "RB")) {
+          --previous;
+        }
+        if (isTag(kids[previous], "MD|TO")) {
+          List<Tree> newKids = new ArrayList<>(Arrays.asList(kids).subList(0, i));
+          newKids.add(node.treeFactory().newTreeNode("VP", new ArrayList<>(Arrays.asList(kids).subList(i, kids.length))));
+          node.setChildren(newKids);
+        }
+        break;
       }
     }
     return t;

@@ -298,6 +298,18 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "amod(output-4, more-3)\n" +
            "obj(yield-2, output-4)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (PRP You)) (VP (MD shall) (RB not) (VB pass)) (. .)))",
+          "nsubj(pass-4, You-1)\n" +
+           "aux(pass-4, shall-2)\n" +
+           "advmod(pass-4, not-3)\n" +
+           "root(ROOT-0, pass-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (MD will) (VB eat) (NN cake)) (. .)))",
+          "nsubj(eat-3, He-1)\n" +
+           "aux(eat-3, will-2)\n" +
+           "root(ROOT-0, eat-3)\n" +
+           "obj(eat-3, cake-4)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +
