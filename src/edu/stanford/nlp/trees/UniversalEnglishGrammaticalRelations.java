@@ -319,7 +319,8 @@ public class UniversalEnglishGrammaticalRelations {
   /**
    * The tags of the verb which starts the VP of a small clause, the
    * clause in "made him run", "leaves patients facing a wait" or "had
-   * the car washed".
+   * the car washed".  Other words may come between the subject and the
+   * VP, as in "want the pound formally tied to the mark".
    * PTB brackets these as an S with its own subject right after the verb:
    * {@code (VP (VBZ leaves) (S (NP patients) (VP (VBG facing) ...)))}.
    * As in UD, the subject is the obj of the verb and the clause is an
@@ -468,7 +469,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (S < (NP|WHNP=target $++ (VP < TO)))",
 
             // small clauses such as "leaves patients facing a wait"
-            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S < (NP|WHNP=target $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S < (NP|WHNP=target $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
 
             // This matches rare cases of misparses, such as "What
             // disease causes cancer?" where the "causes" does not get a
@@ -566,7 +567,7 @@ public class UniversalEnglishGrammaticalRelations {
             // Weird case of verbs with direct S complement that is not an infinitive or participle.
             // Small clauses with a bare verb right after the verb,
             // "I saw [him take the cake]", are xcomp instead; see SMALL_CLAUSE_VP
-            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP [ !$- " + SMALL_CLAUSE_VERB + " | !< (NP $+ (VP <, VB)) ])",
+            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP [ !$- " + SMALL_CLAUSE_VERB + " | !< (NP $++ (VP <, VB)) ])",
             // the canonical case of a SBAR[that] with an overt "that" or "whether"
             "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",
             // Conjoined SBAR otherwise in the canonical case
@@ -654,7 +655,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))",
             // small clauses such as "leaves patients facing a wait", where
             // the subject of the small clause is the obj of the verb
-            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S=target < (NP $+ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S=target < (NP $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
             // a fronted adjective which is the complement of the verb, as in
             // "How old is she turning?" or "how ominous I found it".  Words
             // of amount or extent, as in "How much did it cost?", are not,
