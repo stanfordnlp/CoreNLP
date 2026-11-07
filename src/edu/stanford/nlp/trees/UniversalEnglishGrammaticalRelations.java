@@ -335,12 +335,20 @@ public class UniversalEnglishGrammaticalRelations {
    */
   private static final String SMALL_CLAUSE_VERB = "(/^VB/ !< " + copularWordRegex + ")";
 
+  /**
+   * A possessive is not the subject of a small clause but of a gerund
+   * which is the object of the verb: "opposed Canada's joining" or
+   * "necessitated our filing Chapter 11".  These relations keep such an
+   * NP out of the small clause rules.
+   */
+  private static final String NOT_POSSESSIVE = "!<- POS !<: /^PRP\\$$/";
+
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nsubj", "nominal subject",
         SUBJECT, "S|SQ|SBARQ|SINV|SBAR|PRN", tregexCompiler,
             // the subject of a to clause or a small clause under a verb is
             // the obj of that verb instead; see SMALL_CLAUSE_VP
-            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO) [ !$- " + SMALL_CLAUSE_VERB + " | !< (=verb <, " + SMALL_CLAUSE_VP + ") ])",
+            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO) [ !$- " + SMALL_CLAUSE_VERB + " | !< (=verb <, " + SMALL_CLAUSE_VP + ") | < (=target [ <- POS | <: /^PRP\\$$/ ]) ])",
             "S < ( NP=target <# (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
             "SQ|PRN < (NP=target !< EX $++ VP)",
             "SQ < (NP=target !< EX $- (/^(?:VB|AUX)/ < " + copularWordRegex + ") !$++ VP)",
@@ -469,7 +477,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (S < (NP|WHNP=target $++ (VP < TO)))",
 
             // small clauses such as "leaves patients facing a wait"
-            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S < (NP|WHNP=target $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S < (NP|WHNP=target " + NOT_POSSESSIVE + " $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
 
             // This matches rare cases of misparses, such as "What
             // disease causes cancer?" where the "causes" does not get a
@@ -655,7 +663,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))",
             // small clauses such as "leaves patients facing a wait", where
             // the subject of the small clause is the obj of the verb
-            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S=target < (NP $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S=target < (NP " + NOT_POSSESSIVE + " $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
             // a fronted adjective which is the complement of the verb, as in
             // "How old is she turning?" or "how ominous I found it".  Words
             // of amount or extent, as in "How much did it cost?", are not,

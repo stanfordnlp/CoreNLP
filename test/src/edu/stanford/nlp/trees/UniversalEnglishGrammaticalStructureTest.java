@@ -326,6 +326,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "advmod(crumbling-5, finally-4)\n" +
            "xcomp(see-2, crumbling-5)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBD necessitated) (S (NP (PRP$ our)) (VP (VBG filing) (NP (NN Chapter) (CD 11))))) (. .)))",
+          "nsubj(necessitated-2, It-1)\n" +
+           "root(ROOT-0, necessitated-2)\n" +
+           "nsubj(filing-4, our-3)\n" +
+           "dep(necessitated-2, filing-4)\n" +
+           "obj(filing-4, Chapter-5)\n" +
+           "nummod(Chapter-5, 11-6)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP It)) (VP (MD will) (VP (VB be) (S (NP (NNP Janet)) (VP (VBG signing))))) (. .)))",
           "nsubj(Janet-4, It-1)\n" +
            "aux(Janet-4, will-2)\n" +
