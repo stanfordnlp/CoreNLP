@@ -326,6 +326,33 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "advmod(crumbling-5, finally-4)\n" +
            "xcomp(see-2, crumbling-5)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBD necessitated) (S (NP (PRP$ our)) (VP (VBG filing) (NP (NN Chapter) (CD 11))))) (. .)))",
+          "nsubj(necessitated-2, It-1)\n" +
+           "root(ROOT-0, necessitated-2)\n" +
+           "nsubj(filing-4, our-3)\n" +
+           "ccomp(necessitated-2, filing-4)\n" +
+           "obj(filing-4, Chapter-5)\n" +
+           "nummod(Chapter-5, 11-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (DT Some) (NNS commentators)) (VP (VBP have) (VP (VBN opposed) (S (NP (NNP Canada) (POS 's)) (VP (VBG joining) (NP (DT the) (NN group)))))) (. .)))",
+           "det(commentators-2, Some-1)\n" +
+           "nsubj(opposed-4, commentators-2)\n" +
+           "aux(opposed-4, have-3)\n" +
+           "root(ROOT-0, opposed-4)\n" +
+           "nsubj(joining-7, Canada-5)\n" +
+           "case(Canada-5, 's-6)\n" +
+           "ccomp(opposed-4, joining-7)\n" +
+           "det(group-9, the-8)\n" +
+           "obj(joining-7, group-9)\n"},
+         // 's here is a mistagged "us", not a possessive
+         {TestType.BASIC,
+          "(ROOT (S (VP (VB Let) (S (NP (POS 's)) (VP (VB close) (NP (DT the) (NN door))))) (. .)))",
+           "root(ROOT-0, Let-1)\n" +
+           "obj(Let-1, 's-2)\n" +
+           "xcomp(Let-1, close-3)\n" +
+           "det(door-5, the-4)\n" +
+           "obj(close-3, door-5)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP It)) (VP (MD will) (VP (VB be) (S (NP (NNP Janet)) (VP (VBG signing))))) (. .)))",
           "nsubj(Janet-4, It-1)\n" +
            "aux(Janet-4, will-2)\n" +
