@@ -367,13 +367,30 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
           "nsubj(wonder-2, I-1)\n" +
            "root(ROOT-0, wonder-2)\n" +
            "advmod(strong-4, how-3)\n" +
-           "dep(plant-10, strong-4)\n" +
-           "nsubj(plant-10, it-5)\n" +
-           "aux(plant-10, will-6)\n" +
-           "cop(plant-10, be-7)\n" +
+           "ccomp(wonder-2, strong-4)\n" +
+           "nsubj(strong-4, it-5)\n" +
+           "aux(strong-4, will-6)\n" +
+           "cop(strong-4, be-7)\n" +
            "case(plant-10, at-8)\n" +
            "det(plant-10, the-9)\n" +
-           "ccomp(wonder-2, plant-10)\n"},
+           "obl(strong-4, plant-10)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP wonder) (SBAR (WHADJP (WRB how) (JJ big)) (S (NP (PRP it)) (VP (VBZ is))))) (. .)))",
+          "nsubj(wonder-2, I-1)\n" +
+           "root(ROOT-0, wonder-2)\n" +
+           "advmod(big-4, how-3)\n" +
+           "ccomp(wonder-2, big-4)\n" +
+           "nsubj(big-4, it-5)\n" +
+           "cop(big-4, is-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADJP (WRB How) (JJ deep)) (SQ (VBZ is) (NP (PRP it)) (VP (VBG going) (S (VP (TO to) (VP (VB be)))))) (. ?)))",
+          "advmod(deep-2, How-1)\n" +
+           "xcomp(going-5, deep-2)\n" +
+           "aux(going-5, is-3)\n" +
+           "nsubj(going-5, it-4)\n" +
+           "root(ROOT-0, going-5)\n" +
+           "mark(deep-2, to-6)\n" +
+           "cop(deep-2, be-7)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
