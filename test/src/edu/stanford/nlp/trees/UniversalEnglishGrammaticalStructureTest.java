@@ -319,6 +319,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "det(wait-7, a-6)\n" +
            "obj(facing-5, wait-7)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (PRP They)) (VP (VBP see) (S (NP (NN resistance)) (ADVP (RB finally)) (VP (VBG crumbling)))) (. .)))",
+          "nsubj(see-2, They-1)\n" +
+           "root(ROOT-0, see-2)\n" +
+           "obj(see-2, resistance-3)\n" +
+           "advmod(crumbling-5, finally-4)\n" +
+           "xcomp(see-2, crumbling-5)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP It)) (VP (MD will) (VP (VB be) (S (NP (NNP Janet)) (VP (VBG signing))))) (. .)))",
           "nsubj(Janet-4, It-1)\n" +
            "aux(Janet-4, will-2)\n" +
