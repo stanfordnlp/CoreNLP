@@ -63,11 +63,21 @@ public class UniversalDependenciesConverterTest {
 
   /** Run the converter over the fixture, with any extra properties as name, value pairs */
   static String convert(String... properties) throws Exception {
-    File file = IOUtils.writeStringToTempFile(FIXTURE, "convertertest", "UTF-8");
+    return convertFile("conlluFile", FIXTURE, properties);
+  }
+
+  /** Run the converter over the given PTB trees, with any extra properties as name, value pairs */
+  static String convertTrees(String trees, String... properties) throws Exception {
+    return convertFile("treeFile", trees, properties);
+  }
+
+  /** Write the text to a file and run the converter on it as the given kind of input */
+  private static String convertFile(String inputProperty, String text, String... properties) throws Exception {
+    File file = IOUtils.writeStringToTempFile(text, "convertertest", "UTF-8");
     file.deleteOnExit();
     try {
       Properties props = new Properties();
-      props.setProperty("conlluFile", file.getPath());
+      props.setProperty(inputProperty, file.getPath());
       for (int i = 0; i < properties.length; i += 2) {
         props.setProperty(properties[i], properties[i + 1]);
       }
@@ -163,6 +173,16 @@ public class UniversalDependenciesConverterTest {
         "2\t's\tbe\tAUX\tVBZ\tNumber=Sing\t3\tcop\t3:cop\t_",
         "3\tfine\tfine\tADJ\tJJ\t_\t0\troot\t0:root\tSpaceAfter=No"),
         convert("outputRepresentation", "enhanced"));
+  }
+
+  /**
+   * A copula is AUX even where the UPOS mapper cannot tell from the tree:
+   * in "I wonder how big it is" the predicate of the copula is fronted
+   */
+  @Test
+  public void testCopulaIsAux() throws Exception {
+    String output = convertTrees("(ROOT (S (NP (PRP I)) (VP (VBP wonder) (SBAR (WHADJP (WRB how) (JJ big)) (S (NP (PRP it)) (VP (VBZ is))))) (. .)))\n");
+    assertTrue(output, output.contains("6\tis\tbe\tAUX\tVBZ\t_\t4\tcop\t_\t_"));
   }
 
   @Test
