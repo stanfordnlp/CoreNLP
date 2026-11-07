@@ -122,6 +122,11 @@ public class CoordinationTransformer implements TreeTransformer  {
       debugLine("After copulaClauseToNP:           ", t);
     }
 
+    t = moveWHADJPToCopula(t);
+    if (VERBOSE) {
+      debugLine("After moveWHADJPToCopula:         ", t);
+    }
+
     if (performMWETransformation) {
       t = MWETransform(t);
       if (VERBOSE) {
@@ -204,6 +209,37 @@ public class CoordinationTransformer implements TreeTransformer  {
       return null;
     }
     return Tsurgeon.processPattern(copulaClauseTregex, copulaClauseTsurgeon, t);
+  }
+
+  // A fronted WHADJP whose clause has a copula with no predicate, as in
+  // "how sweet it is" or "how deep is it going to be".  The copula is
+  // found by following VPs and clauses down from the clause, so a
+  // copula inside a relative clause or other modifier does not count.
+  // An S or SBAR after the copula is an extraposed clause or a
+  // complement of the adjective, as in "how hard it is to change a
+  // habit", not a predicate, so it does not stop the move.
+  private static final TregexPattern moveWHADJPTregex =
+    TregexPattern.compile("SBAR|SBARQ < (WHADJP=wh $+ (S|SQ <+(VP|S|SQ) (VP=vp < (/^VB/=cop < " + EnglishPatterns.copularWordRegex + ") !< NP|ADJP|VP|UCP|WHADJP)))");
+
+  private static final TsurgeonPattern moveWHADJPTsurgeon =
+    Tsurgeon.parseOperation("[move wh $- cop] [relabel wh ADJP]");
+
+  /**
+   * Puts a fronted adjective phrase back in the predicate position of a
+   * copula which has no predicate, as in "how sweet it is", "how deep is
+   * it going to be", "how strong that turnaround will be at the plant"
+   * or "how difficult it is for a person to live there".
+   * With the trace removed, the copula is otherwise left with nothing to
+   * be a copula of.  After the move, the adjective is the head of the
+   * copular clause, with the copula as cop and how as advmod, as in UD.
+   * Main clause questions with no VP, such as "How old is your cousin?",
+   * are handled by {@link #SQflatten}.
+   */
+  public static Tree moveWHADJPToCopula(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(moveWHADJPTregex, moveWHADJPTsurgeon, t);
   }
 
   /** The basic category of a label, without function tags such as -TMP */
