@@ -363,6 +363,18 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nsubj(turning-5, she-4)\n" +
            "root(ROOT-0, turning-5)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP wonder) (SBAR (WHADJP (WRB how) (JJ strong)) (S (NP (PRP it)) (VP (MD will) (VP (VB be) (PP (IN at) (NP (DT the) (NN plant)))))))) (. .)))",
+          "nsubj(wonder-2, I-1)\n" +
+           "root(ROOT-0, wonder-2)\n" +
+           "advmod(strong-4, how-3)\n" +
+           "dep(plant-10, strong-4)\n" +
+           "nsubj(plant-10, it-5)\n" +
+           "aux(plant-10, will-6)\n" +
+           "cop(plant-10, be-7)\n" +
+           "case(plant-10, at-8)\n" +
+           "det(plant-10, the-9)\n" +
+           "ccomp(wonder-2, plant-10)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +

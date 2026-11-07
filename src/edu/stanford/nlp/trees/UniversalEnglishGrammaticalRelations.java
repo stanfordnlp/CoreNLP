@@ -667,8 +667,10 @@ public class UniversalEnglishGrammaticalRelations {
             // a fronted adjective which is the complement of the verb, as in
             // "How old is she turning?" or "how ominous I found it".  Words
             // of amount or extent, as in "How much did it cost?", are not,
-            // and neither is the predicate of a copula: "how big it is"
-            "SBARQ|SBAR < (WHADJP=target <# (JJ|JJR !< /^(?i:much|many|little|few|long|far)$/) $+ (SQ|S < (VP !<: (/^VB/ < " + copularWordRegex + "))))"
+            // and neither is the predicate of a copula, which is the lowest
+            // VP of the clause: "how big it is", "how strong that turnaround
+            // will be at the computer maker"
+            "SBARQ|SBAR < (WHADJP=target <# (JJ|JJR !< /^(?i:much|many|little|few|long|far)$/) $+ (SQ|S < VP !< (VP [ (!< VP < (/^VB/ < " + copularWordRegex + ")) | <+(VP) (VP !< VP < (/^VB/ < " + copularWordRegex + ")) ])))"
         );
 
 
