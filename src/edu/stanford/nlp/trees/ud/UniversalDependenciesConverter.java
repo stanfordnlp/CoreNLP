@@ -202,6 +202,22 @@ public class UniversalDependenciesConverter {
     }
   }
 
+  /**
+   * Whether the token is attached as a cop or an aux.  These are AUX in
+   * UD, which the UPOS mapper cannot always see from the tree alone: in
+   * "how sweet it is", the copula is attached to the fronted adjective,
+   * which the tree has outside the copula's VP.
+   */
+  private static boolean isAuxiliary(SemanticGraph sg, IndexedWord token) {
+    for (SemanticGraphEdge edge : sg.incomingEdgeIterable(token)) {
+      String relation = edge.getRelation().toString();
+      if (relation.equals("cop") || relation.equals("aux") || relation.startsWith("aux:")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** variables for accessing NERClassifierCombiner via reflection **/
   private static Object NER_TAGGER; // = null;
   private static Method NER_CLASSIFY_METHOD; // = null;
@@ -353,6 +369,9 @@ public class UniversalDependenciesConverter {
         for (IndexedWord token: sg.vertexListSorted()) {
           int idx = token.index() - 1;
           String uposTag = uposLabels.get(idx).value();
+          if (uposTag.equals("VERB") && isAuxiliary(sg, token)) {
+            uposTag = "AUX";
+          }
           token.set(CoreAnnotations.CoarseTagAnnotation.class, uposTag);
         }
 
