@@ -175,6 +175,10 @@ public class UniversalEnglishGrammaticalRelations {
          "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
          "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))");
 
+  /** An adverb which the head finder can make the predicate of a copula */
+  private static final String COPULAR_ADVERB =
+    "(/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ)/ < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + "))";
+
   /**
    * The "copula" grammatical relation.  A copula is the relation between
    * the complement of a copular verb and the copular verb.
@@ -188,8 +192,8 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation COPULA =
     new GrammaticalRelation(Language.UniversalEnglish, "cop", "copula",
         AUX_MODIFIER, "VP|SQ|SINV|SBARQ", tregexCompiler,
-        "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$|PP|UCP)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) ] )",
-        "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
+        "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$|PP|UCP)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) | $++ " + COPULAR_ADVERB + " !$++ /^VP/ ] )",
+        "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) | $++ (NP $++ " + COPULAR_ADVERB + ") !$++ /^VP/ ] )",
         // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
         "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
         // matches (old, is) in "How old is your cousin?" after the SQ has been flattened out of the tree
@@ -875,6 +879,9 @@ public class UniversalEnglishGrammaticalRelations {
             // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
             // they wrote asking the SEC to ...
             "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
+            // a purpose clause after an adverb which is the predicate of a
+            // copula, as in "I'm here to help"
+            "VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") !< /^(?:VP|ADJP|NP|UCP|PP|WHADJP|WHNP)(?:-(?!TMP|ADV).*)?$/ < (" + COPULAR_ADVERB + " $++ (S=target < (VP <, TO) !< NP))",
             //"VP < (S=target < (VP < TO) !$-- (/^V/ < " + xcompNoObjVerbRegex + ") )",
 
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
@@ -1259,6 +1266,9 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "obl:npmod", "noun phrase adverbial modifier",
         MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP|QP)(?:-TMP|-ADV)?", tregexCompiler,
             "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
+            // a measure phrase after a predicate adverb, as in "the Dow was
+            // down 80.53 points" or "was up 3/4"
+            "@ADVP <# (/^(?:RB|IN|RP)/ < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + " $+ (@NP|QP|CD=target !< NNP|NNPS))",
             // one word nouns like "cost efficient", "ice-free"
             "@ADJP < (NN=target $++ /^JJ/) !< CC|CONJP",
             "@ADVP <# (/^(RB|ADVP)/ $++ @NP=target)", //up 20%, once a week, ...
