@@ -401,6 +401,30 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "ccomp(wonder-2, big-4)\n" +
            "nsubj(big-4, it-5)\n" +
            "cop(big-4, is-6)\n"},
+         // coordinated wh-clauses, where the first conjunct is the head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP wonder) (SBAR (SBAR (WHNP (WP who)) (S (VP (VBD came)))) (CC and) (SBAR (WHNP (WP what)) (S (NP (PRP they)) (VP (VBD brought)))))) (. .)))",
+          "nsubj(wonder-2, I-1)\n" +
+           "root(ROOT-0, wonder-2)\n" +
+           "nsubj(came-4, who-3)\n" +
+           "ccomp(wonder-2, came-4)\n" +
+           "cc(brought-8, and-5)\n" +
+           "obj(brought-8, what-6)\n" +
+           "nsubj(brought-8, they-7)\n" +
+           "conj(came-4, brought-8)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBD remembered) (SBAR (SBAR (WHADJP (WRB how) (JJ hard)) (S (NP (PRP it)) (VP (VBD was)))) (CC and) (SBAR (WHNP (WDT what) (NNS pitfalls)) (S (VP (VBD awaited) (NP (PRP us))))))) (. .)))",
+          "nsubj(remembered-2, I-1)\n" +
+           "root(ROOT-0, remembered-2)\n" +
+           "advmod(hard-4, how-3)\n" +
+           "ccomp(remembered-2, hard-4)\n" +
+           "nsubj(hard-4, it-5)\n" +
+           "cop(hard-4, was-6)\n" +
+           "cc(awaited-10, and-7)\n" +
+           "det(pitfalls-9, what-8)\n" +
+           "nsubj(awaited-10, pitfalls-9)\n" +
+           "conj(hard-4, awaited-10)\n" +
+           "obj(awaited-10, us-11)\n"},
          // the clause after the copula does not keep the adjective from moving
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBD realized) (SBAR (WHADJP (WRB how) (JJ difficult)) (S (NP (PRP it)) (VP (VBZ is) (SBAR (IN for) (S (NP (DT a) (NN person)) (VP (TO to) (VP (VB live)))))))))) (. .)))",
