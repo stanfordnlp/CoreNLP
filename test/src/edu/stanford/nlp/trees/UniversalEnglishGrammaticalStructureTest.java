@@ -722,6 +722,61 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, investigating-4)\n" +
            "det(causes-6, the-5)\n" +
            "obj(investigating-4, causes-6)\n"},
+         // a fronted wh-adverb is the predicate of an empty copula
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBZ is) (NP (DT the) (NN station))) (. ?)))",
+          "root(ROOT-0, Where-1)\n" +
+           "cop(Where-1, is-2)\n" +
+           "det(station-4, the-3)\n" +
+           "nsubj(Where-1, station-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP know) (SBAR (WHADVP (WRB where)) (S (NP (PRP he)) (VP (VBZ is))))) (. .)))",
+          "nsubj(know-2, I-1)\n" +
+           "root(ROOT-0, know-2)\n" +
+           "ccomp(know-2, where-3)\n" +
+           "nsubj(where-3, he-4)\n" +
+           "cop(where-3, is-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBD knew) (SBAR (WHADVP (RB just) (WRB where)) (S (NP (PRP it)) (VP (VBD was))))) (. .)))",
+          "nsubj(knew-2, We-1)\n" +
+           "root(ROOT-0, knew-2)\n" +
+           "advmod(where-4, just-3)\n" +
+           "ccomp(knew-2, where-4)\n" +
+           "nsubj(where-4, it-5)\n" +
+           "cop(where-4, was-6)\n"},
+         // how with an adjective in a WHADVP has the adjective as the head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBP know) (SBAR (WHADVP (WRB how) (JJ useful)) (S (NP (PRP it)) (VP (VBZ is))))) (. .)))",
+          "nsubj(know-2, We-1)\n" +
+           "root(ROOT-0, know-2)\n" +
+           "advmod(useful-4, how-3)\n" +
+           "ccomp(know-2, useful-4)\n" +
+           "nsubj(useful-4, it-5)\n" +
+           "cop(useful-4, is-6)\n"},
+         // an adjunct where clause keeps the copula as its head
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Rates)) (VP (MD will) (VP (VB stay) (SBAR (WHADVP (WRB where)) (S (NP (PRP they)) (VP (VBP are)))))) (. .)))",
+          "nsubj(stay-3, Rates-1)\n" +
+           "aux(stay-3, will-2)\n" +
+           "root(ROOT-0, stay-3)\n" +
+           "advmod(are-6, where-4)\n" +
+           "nsubj(are-6, they-5)\n" +
+           "advcl(stay-3, are-6)\n"},
+         // a wh-adverb with a verb or another predicate stays an adjunct
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBP are) (NP (PRP you)) (VP (VBG going))) (. ?)))",
+          "advmod(going-4, Where-1)\n" +
+           "aux(going-4, are-2)\n" +
+           "nsubj(going-4, you-3)\n" +
+           "root(ROOT-0, going-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP know) (SBAR (WHADVP (WRB when)) (S (NP (PRP it)) (VP (VBD was) (ADJP (JJ late)))))) (. .)))",
+          "nsubj(know-2, I-1)\n" +
+           "root(ROOT-0, know-2)\n" +
+           "advmod(late-6, when-3)\n" +
+           "nsubj(late-6, it-4)\n" +
+           "cop(late-6, was-5)\n" +
+           "ccomp(know-2, late-6)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
           "case(city-3, In-1)\n" +

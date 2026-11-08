@@ -304,7 +304,8 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
 
   /**
    * Adverbs of place and direction which can be the predicate of a
-   * copula, as in "he is here" or "the game is over".  Other adverbs
+   * copula, as in "he is here" or "the game is over", and wh-adverbs
+   * moved back after a copula, as in "I know where he is".  Other adverbs
    * after a copula, as in "the goal is simply to win", are modifiers.
    * "ago" is left out, since "it was a year ago" is most often an
    * ellipsis, as in "higher than it was a year ago".
@@ -312,7 +313,8 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
   static final String COPULAR_ADVERB_REGEX = "/^(?i:here|there|everywhere|anywhere|somewhere|nowhere|elsewhere|" +
     "above|below|ahead|behind|around|away|back|close|near|nearby|down|up|uphill|downhill|upstairs|downstairs|" +
     "in|inside|indoors|out|outside|outdoors|off|on|over|through|together|home|abroad|overseas|aboard|along|apart|aside|" +
-    "east|west|north|south|forward|far|farther|further|underway)$/";
+    "east|west|north|south|forward|far|farther|further|underway|" +
+    "where|how|when|why|wherever|whenever)$/";
 
   /**
    * A predicate adverb followed by a measure phrase or a degree adverb,
@@ -338,7 +340,7 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
 
   /** An ADVP or PRT which is the predicate of a copula with no other predicate */
   static final TregexPattern copularAdverbTregex =
-    TregexPattern.compile("/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ)/ < " + COPULAR_ADVERB_REGEX + ")");
+    TregexPattern.compile("/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ|WRB)/ < " + COPULAR_ADVERB_REGEX + ")");
 
   /**
    * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
@@ -384,6 +386,14 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       TregexMatcher matcher = headOfADVPTregex.matcher(t);
       if (matcher.matchesAt(t)) {
         return matcher.getNode("head");
+      }
+      // a wh-adverb moved back after a copula is the head of its ADVP
+      // when it comes last, as in "know just where it was".  In "how
+      // terrific they are" or "how useful it is", the head is the
+      // adjective, as for any other ADVP
+      Tree lastKid = t.lastChild();
+      if (lastKid.value().equals("WRB")) {
+        return lastKid;
       }
     }
 
