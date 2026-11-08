@@ -592,6 +592,9 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < (SBAR=target < (SBAR < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/)) < CC|CONJP)",
             // This finds most ccomp SBAR[that] with omission of that, but only ones without dobj
             "VP < (SBAR=target < (S < VP) !$-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
+            // the same for coordinated clauses, as in "I wonder who came and
+            // what they brought", where the first conjunct is the head
+            "VP < (SBAR=target < CC|CONJP <# (SBAR < (S < VP) !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB)) !$-- NP)",
             // Find ccomp SBAR[that] after dobj for clear marker verbs
             "VP < (/^V/ < " + ccompObjVerbRegex + ") < (SBAR=target < (S < VP) $-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
             "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)))",
