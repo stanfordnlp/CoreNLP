@@ -432,13 +432,101 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, realized-2)\n" +
            "advmod(difficult-4, how-3)\n" +
            "ccomp(realized-2, difficult-4)\n" +
-           "nsubj(difficult-4, it-5)\n" +
+           "expl(difficult-4, it-5)\n" +
            "cop(difficult-4, is-6)\n" +
            "mark(live-11, for-7)\n" +
            "det(person-9, a-8)\n" +
            "nsubj(live-11, person-9)\n" +
            "mark(live-11, to-10)\n" +
-           "advcl(difficult-4, live-11)\n"},
+           "csubj(difficult-4, live-11)\n"},
+         // a clause extraposed from the subject, with "it" as expl
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ hard)) (S (VP (TO to) (VP (VB change) (NP (DT a) (NN habit)))))) (. .)))",
+          "expl(hard-3, It-1)\n" +
+           "cop(hard-3, is-2)\n" +
+           "root(ROOT-0, hard-3)\n" +
+           "mark(change-5, to-4)\n" +
+           "csubj(hard-3, change-5)\n" +
+           "det(habit-7, a-6)\n" +
+           "obj(change-5, habit-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (MD would) (VP (VB have) (VP (VBN been) (NP (DT a) (NN shame)) (SBAR (IN that) (S (NP (PRP he)) (VP (VBD left))))))) (. .)))",
+          "expl(shame-6, It-1)\n" +
+           "aux(shame-6, would-2)\n" +
+           "aux(shame-6, have-3)\n" +
+           "cop(shame-6, been-4)\n" +
+           "det(shame-6, a-5)\n" +
+           "root(ROOT-0, shame-6)\n" +
+           "mark(left-9, that-7)\n" +
+           "nsubj(left-9, he-8)\n" +
+           "csubj(shame-6, left-9)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ unclear)) (SBAR (WHNP (WP what)) (S (NP (PRP he)) (VP (VBZ wants))))) (. .)))",
+          "expl(unclear-3, It-1)\n" +
+           "cop(unclear-3, is-2)\n" +
+           "root(ROOT-0, unclear-3)\n" +
+           "obj(wants-6, what-4)\n" +
+           "nsubj(wants-6, he-5)\n" +
+           "csubj(unclear-3, wants-6)\n"},
+         // a why clause after any adjective, but a when clause only after
+         // an adjective about knowing
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (RB n't) (ADJP (JJ clear)) (SBAR (WHADVP (WRB why)) (S (NP (DT that)) (VP (MD should) (VP (VB be) (ADVP (RB so))))))) (. .)))",
+          "expl(clear-4, It-1)\n" +
+           "cop(clear-4, is-2)\n" +
+           "advmod(clear-4, n't-3)\n" +
+           "root(ROOT-0, clear-4)\n" +
+           "advmod(be-8, why-5)\n" +
+           "nsubj(be-8, that-6)\n" +
+           "aux(be-8, should-7)\n" +
+           "csubj(clear-4, be-8)\n" +
+           "advmod(be-8, so-9)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ 's) (ADJP (JJ nice)) (SBAR (WHADVP (WRB when)) (S (NP (NNS people)) (VP (VBP say) (ADVP (RB so)))))) (. .)))",
+          "nsubj(nice-3, It-1)\n" +
+           "cop(nice-3, 's-2)\n" +
+           "root(ROOT-0, nice-3)\n" +
+           "advmod(say-6, when-4)\n" +
+           "nsubj(say-6, people-5)\n" +
+           "advcl(nice-3, say-6)\n" +
+           "advmod(say-6, so-7)\n"},
+         // an infinitive set off by a comma right after the predicate is not extraposed
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ 's) (ADJP (JJ annoying)) (, ,) (S (VP (TO to) (VP (VB say) (NP (DT the) (JJS least)))))) (. .)))",
+          "nsubj(annoying-3, It-1)\n" +
+           "cop(annoying-3, 's-2)\n" +
+           "root(ROOT-0, annoying-3)\n" +
+           "mark(say-6, to-5)\n" +
+           "xcomp(annoying-3, say-6)\n" +
+           "det(least-8, the-7)\n" +
+           "obj(say-6, least-8)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ difficult)) (, ,) (ADVP (RB however)) (, ,) (S (VP (TO to) (VP (VB justify) (NP (PRP it)))))) (. .)))",
+          "expl(difficult-3, It-1)\n" +
+           "cop(difficult-3, is-2)\n" +
+           "root(ROOT-0, difficult-3)\n" +
+           "advmod(difficult-3, however-5)\n" +
+           "mark(justify-8, to-7)\n" +
+           "csubj(difficult-3, justify-8)\n" +
+           "obj(justify-8, it-9)\n"},
+         // an infinitive inside the adjective phrase is its complement, and
+         // a clause with if is an adverbial clause, so it stays nsubj
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ ready) (S (VP (TO to) (VP (VB spawn)))))) (. .)))",
+          "nsubj(ready-3, It-1)\n" +
+           "cop(ready-3, is-2)\n" +
+           "root(ROOT-0, ready-3)\n" +
+           "mark(spawn-5, to-4)\n" +
+           "xcomp(ready-3, spawn-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (MD would) (VP (VB be) (ADJP (JJ nice)) (SBAR (IN if) (S (NP (PRP he)) (VP (VBD came)))))) (. .)))",
+          "nsubj(nice-4, It-1)\n" +
+           "aux(nice-4, would-2)\n" +
+           "cop(nice-4, be-3)\n" +
+           "root(ROOT-0, nice-4)\n" +
+           "mark(came-7, if-5)\n" +
+           "nsubj(came-7, he-6)\n" +
+           "advcl(nice-4, came-7)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHADJP (WRB How) (JJ deep)) (SQ (VBZ is) (NP (PRP it)) (VP (VBG going) (S (VP (TO to) (VP (VB be)))))) (. ?)))",
           "advmod(deep-2, How-1)\n" +
