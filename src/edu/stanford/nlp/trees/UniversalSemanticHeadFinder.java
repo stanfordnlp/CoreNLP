@@ -303,6 +303,37 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
   static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
 
   /**
+   * Adverbs of place and direction which can be the predicate of a
+   * copula, as in "he is here" or "the game is over".  Other adverbs
+   * after a copula, as in "the goal is simply to win", are modifiers.
+   * "ago" is left out, since "it was a year ago" is most often an
+   * ellipsis, as in "higher than it was a year ago".
+   */
+  static final String COPULAR_ADVERB_REGEX = "/^(?i:here|there|everywhere|anywhere|somewhere|nowhere|elsewhere|" +
+    "above|below|ahead|behind|around|away|back|close|near|nearby|down|up|uphill|downhill|upstairs|downstairs|" +
+    "in|inside|indoors|out|outside|outdoors|off|on|over|through|together|home|abroad|overseas|aboard|along|apart|aside|" +
+    "east|west|north|south|forward|far|farther|further|underway)$/";
+
+  /**
+   * A predicate adverb followed by a measure phrase or a degree adverb,
+   * as in "the Dow was down 80.53 points", "was off three pence" or
+   * "earnings were down slightly", is the head of its ADVP, with the
+   * measure phrase as obl:npmod and the degree adverb as advmod.  "far"
+   * before another adverb is itself a degree adverb, as in "far short"
+   * or "far more", and other adverbs after the first one are left to the
+   * usual head rule, as in "came back early" or "read it out loud".
+   */
+  private static final String DEGREE_ADVERB_REGEX = "/^(?i:slightly|sharply|substantially|significantly|considerably|markedly|" +
+    "modestly|marginally|fractionally|dramatically|steeply|strongly|moderately|somewhat|appreciably|noticeably|further)$/";
+
+  static final TregexPattern headOfADVPTregex =
+    TregexPattern.compile("ADVP <, (/^(?:RB|IN|RP)/=head < " + COPULAR_ADVERB_REGEX + " [ $+ (/^(?:NP|QP)/ [ << CD | << /^(?i:little|bit|lot)$/ ]) | $+ CD | !< /^(?i:far|farther|further)$/ $+ (/^RBR?$/ < " + DEGREE_ADVERB_REGEX + ") ])");
+
+  /** An ADVP or PRT which is the predicate of a copula with no other predicate */
+  static final TregexPattern copularAdverbTregex =
+    TregexPattern.compile("/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ)/ < " + COPULAR_ADVERB_REGEX + ")");
+
+  /**
    * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
    * For example, in the sentence "It is hands down the best dessert ...",
    * we want to avoid using "hands down" as the head.
@@ -342,6 +373,13 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     // other key words as the head.  For example, "and not" means
     // something completely different than "and".  Furthermore,
     // downstream code was written assuming "not" would be the head...
+    if (motherCat.equals("ADVP")) {
+      TregexMatcher matcher = headOfADVPTregex.matcher(t);
+      if (matcher.matchesAt(t)) {
+        return matcher.getNode("head");
+      }
+    }
+
     if (motherCat.equals("CONJP")) {
       for (TregexPattern pattern : headOfConjpTregex) {
         TregexMatcher matcher = pattern.matcher(t);
@@ -411,7 +449,6 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       // looks for copular verbs
       if (hasVerbalAuxiliary(kids, copulars, false) && ! isExistential(t, parent) && ! isWHQ(t, parent)) {
         String[][] how;
-        //TODO: also allow ADVP to be heads
         if (motherCat.equals("SQ")) {
           how = new String[][]{{"right", "VP", "ADJP", "NP", "UCP", "PP", "WHADJP", "WHNP"}};
         } else {
@@ -438,6 +475,17 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
             }
           if ( ! foundAnotherNp) {
             pti = null;
+          }
+        }
+
+        // An adverb of place or direction is the predicate when there is
+        // no other predicate, as in "he is here" or "is he here?"
+        if (pti == null) {
+          for (Tree kid : tmpFilteredChildren) {
+            if (copularAdverbTregex.matcher(kid).matches()) {
+              pti = kid;
+              break;
+            }
           }
         }
 

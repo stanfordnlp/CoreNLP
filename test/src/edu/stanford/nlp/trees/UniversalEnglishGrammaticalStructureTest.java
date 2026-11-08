@@ -640,9 +640,66 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
          {TestType.BASIC,
           "(ROOT (S (NP (DT The) (NN man)) (VP (VBZ is) (ADVP (RB here))) (. .)))",
           "det(man-2, The-1)\n" +
-           "nsubj(is-3, man-2)\n" +
+           "nsubj(here-4, man-2)\n" +
+           "cop(here-4, is-3)\n" +
+           "root(ROOT-0, here-4)\n"},
+         // a purpose clause after an adverb predicate is advcl
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP 'm) (ADVP (RB here)) (S (VP (TO to) (VP (VB help))))) (. .)))",
+          "nsubj(here-3, I-1)\n" +
+           "cop(here-3, 'm-2)\n" +
+           "root(ROOT-0, here-3)\n" +
+           "mark(help-5, to-4)\n" +
+           "advcl(here-3, help-5)\n"},
+         // other adverbs after a copula are modifiers
+         {TestType.BASIC,
+          "(ROOT (S (NP (DT The) (NN goal)) (VP (VBZ is) (ADVP (RB simply)) (S (VP (TO to) (VP (VB win))))) (. .)))",
+          "det(goal-2, The-1)\n" +
+           "nsubj(is-3, goal-2)\n" +
            "root(ROOT-0, is-3)\n" +
-           "advmod(is-3, here-4)\n"},
+           "advmod(is-3, simply-4)\n" +
+           "mark(win-6, to-5)\n" +
+           "xcomp(is-3, win-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBZ is) (ADVP (RB still)) (ADVP (RB there))) (. .)))",
+          "nsubj(there-4, He-1)\n" +
+           "cop(there-4, is-2)\n" +
+           "advmod(there-4, still-3)\n" +
+           "root(ROOT-0, there-4)\n"},
+         // the adverb is the head of its ADVP, with the measure as obl:npmod
+         {TestType.BASIC,
+          "(ROOT (S (NP (DT The) (NNP Dow)) (VP (VBD was) (ADVP (IN down) (NP (CD 80.53) (NNS points)))) (. .)))",
+          "det(Dow-2, The-1)\n" +
+           "nsubj(down-4, Dow-2)\n" +
+           "cop(down-4, was-3)\n" +
+           "root(ROOT-0, down-4)\n" +
+           "nummod(points-6, 80.53-5)\n" +
+           "obl:npmod(down-4, points-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Earnings)) (VP (VBD were) (ADVP (RB down) (RB slightly))) (. .)))",
+          "nsubj(down-3, Earnings-1)\n" +
+           "cop(down-3, were-2)\n" +
+           "root(ROOT-0, down-3)\n" +
+           "advmod(down-3, slightly-4)\n"},
+         // far before another adverb is a degree adverb, not the head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBD fell) (ADVP (RB far) (RB short) (PP (IN of) (NP (DT the) (NN goal))))) (. .)))",
+          "nsubj(fell-2, It-1)\n" +
+           "root(ROOT-0, fell-2)\n" +
+           "advmod(short-4, far-3)\n" +
+           "advmod(fell-2, short-4)\n" +
+           "case(goal-7, of-5)\n" +
+           "det(goal-7, the-6)\n" +
+           "obl(short-4, goal-7)\n"},
+         // a copula with a VP after it is an auxiliary, even after an adverb of place
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADVP (RBR further)) (VP (VBG investigating) (NP (DT the) (NNS causes)))) (. .)))",
+          "nsubj(investigating-4, It-1)\n" +
+           "aux(investigating-4, is-2)\n" +
+           "advmod(investigating-4, further-3)\n" +
+           "root(ROOT-0, investigating-4)\n" +
+           "det(causes-6, the-5)\n" +
+           "obj(investigating-4, causes-6)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
           "case(city-3, In-1)\n" +
@@ -670,19 +727,19 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
           "(ROOT (S (NP (PDT All) (DT the) (NNS boys)) (VP (VBP are) (ADVP (RB here))) (. .)))",
           "det:predet(boys-3, All-1)\n" +
            "det(boys-3, the-2)\n" +
-           "nsubj(are-4, boys-3)\n" +
-           "root(ROOT-0, are-4)\n" +
-           "advmod(are-4, here-5)\n"},
+           "nsubj(here-5, boys-3)\n" +
+           "cop(here-5, are-4)\n" +
+           "root(ROOT-0, here-5)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
           "cc:preconj(boys-3, Both-1)\n" +
            "det(boys-3, the-2)\n" +
-           "nsubj(are-7, boys-3)\n" +
+           "nsubj(here-8, boys-3)\n" +
            "cc(girls-6, and-4)\n" +
            "det(girls-6, the-5)\n" +
            "conj(boys-3, girls-6)\n" +
-           "root(ROOT-0, are-7)\n" +
-           "advmod(are-7, here-8)\n"},
+           "cop(here-8, are-7)\n" +
+           "root(ROOT-0, here-8)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP They)) (VP (VBD shut) (PRT (RP down)) (NP (DT the) (NN station))) (. .)))",
           "nsubj(shut-2, They-1)\n" +
@@ -880,10 +937,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nmod(future-4, music-7)\n"},
          {TestType.BASIC,
           "( (SQ (VBZ Is) (NP-SBJ (DT the) (NN trouble)) (ADVP-PRD (RP over)) (. ?)))",
-          "root(ROOT-0, Is-1)\n" +
+          "cop(over-4, Is-1)\n" +
            "det(trouble-3, the-2)\n" +
-           "nsubj(Is-1, trouble-3)\n" +
-           "advmod(Is-1, over-4)\n"},
+           "nsubj(over-4, trouble-3)\n" +
+           "root(ROOT-0, over-4)\n"},
          {TestType.BASIC,
           "( (SBARQ (SBAR (IN Although) (S (NP (NNP Sue)) (VP (VBP is) (ADJP (JJ smart))))) (, ,) (WHNP (WP who)) (SQ (MD will) (VP (VB win))) (. ?)))",
           "mark(smart-4, Although-1)\n" +
@@ -2405,12 +2462,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
               "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
               "cc:preconj(boys-3, Both-1)\n" +
                "det(boys-3, the-2)\n" +
-               "nsubj(are-7, boys-3)\n" +
+               "nsubj(here-8, boys-3)\n" +
                "cc(girls-6, and-4)\n" +
                "det(girls-6, the-5)\n" +
                "conj:and(boys-3, girls-6)\n" +
-               "root(ROOT-0, are-7)\n" +
-               "advmod(are-7, here-8)\n"},
+               "cop(here-8, are-7)\n" +
+               "root(ROOT-0, here-8)\n"},
              {TestType.COLLAPSED,
               "( (S (NP (NNP Fred)) (VP (VBD flew) (PP (IN across) (CC or) (IN across) (NP (NNP Serbia)))) (. .)))",
               "nsubj(flew-2, Fred-1)\n" +
@@ -2509,13 +2566,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
               "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
               "cc:preconj(boys-3, Both-1)\n" +
                "det(boys-3, the-2)\n" +
-               "nsubj(are-7, boys-3)\n" +
+               "nsubj(here-8, boys-3)\n" +
                "cc(girls-6, and-4)\n" +
                "det(girls-6, the-5)\n" +
                "conj:and(boys-3, girls-6)\n" +
-               "nsubj(are-7, girls-6)\n" +
-               "root(ROOT-0, are-7)\n" +
-               "advmod(are-7, here-8)\n"},
+               "nsubj(here-8, girls-6)\n" +
+               "cop(here-8, are-7)\n" +
+               "root(ROOT-0, here-8)\n"},
              {TestType.CC_PROCESSED,
               "(ROOT (S (NP-SBJ-38 (DT Neither) (NP (PRP they) ) (CC nor) (NP (NNP Mr.) (NNP McAlpine) )) (VP (MD could) (VP (VB be) (VP (VBN reached) (NP (-NONE- *-38) ) (PP-PRP (IN for) (NP (NN comment) ))))) (. .) ))",
               "cc:preconj(they-2, Neither-1)\n" +
