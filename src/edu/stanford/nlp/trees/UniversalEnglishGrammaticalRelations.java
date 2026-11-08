@@ -177,7 +177,7 @@ public class UniversalEnglishGrammaticalRelations {
 
   /** An adverb which the head finder can make the predicate of a copula */
   private static final String COPULAR_ADVERB =
-    "(/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ)/ < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + "))";
+    "(/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ|WRB)/ < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + "))";
 
   /**
    * The "copula" grammatical relation.  A copula is the relation between

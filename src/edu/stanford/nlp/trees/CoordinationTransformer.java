@@ -127,6 +127,11 @@ public class CoordinationTransformer implements TreeTransformer  {
       debugLine("After moveWHADJPToCopula:         ", t);
     }
 
+    t = moveWHADVPToCopula(t);
+    if (VERBOSE) {
+      debugLine("After moveWHADVPToCopula:         ", t);
+    }
+
     if (performMWETransformation) {
       t = MWETransform(t);
       if (VERBOSE) {
@@ -240,6 +245,56 @@ public class CoordinationTransformer implements TreeTransformer  {
       return null;
     }
     return Tsurgeon.processPattern(moveWHADJPTregex, moveWHADJPTsurgeon, t);
+  }
+
+  // A fronted WHADVP whose clause has a copula with no predicate, as in
+  // "I know where he is", "How was your trip?" or "When will the
+  // meeting be?"  Unlike a WHADJP, a WHADVP is usually an adjunct, so
+  // the copula must have nothing else after it, not even an adverb or a
+  // PP, as in "why is he here" or "where is he from".
+  private static final String WHADVP_EMPTY_COPULA =
+    "(WHADVP=wh $+ (S|SQ <+(VP|S|SQ) (VP=vp < (/^VB/=cop < " + EnglishPatterns.copularWordRegex + ") !< NP|ADJP|ADVP|PRT|PP|VP|UCP|S|SBAR|WHADJP)))";
+
+  // The relation rules tell a where or when complement, as in "I know
+  // where he is", from an adjunct, as in "stay where we are" or "put
+  // your money where your mouth is", by the WHADVP at the start of the
+  // SBAR.  The move takes that away, so it is limited to the places
+  // where the relation of the clause does not depend on it: the
+  // complement of a verb which takes a wh-clause, the object of a
+  // preposition, a clause with how, and a main clause question.
+  private static final TregexPattern moveWHADVPTregex =
+    TregexPattern.compile("SBAR [ > (VP < (/^V/ < " + EnglishPatterns.ccompVerbRegex + ") < (/^V/ < " + EnglishPatterns.ccompObjVerbRegex + ")) | " +
+                          "!$-- NP > (VP < (/^V/ < " + EnglishPatterns.ccompVerbRegex + ")) | > PP | " +
+                          "!$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)) ] < " + WHADVP_EMPTY_COPULA);
+
+  private static final TregexPattern moveWHADVPQuestionTregex =
+    TregexPattern.compile("SBARQ < " + WHADVP_EMPTY_COPULA);
+
+  private static final TsurgeonPattern moveWHADVPTsurgeon =
+    Tsurgeon.parseOperation("[move wh $- cop] [relabel wh ADVP]");
+
+  // The same in a main clause question with no VP, where the SQ is just
+  // the copula and the subject, as in "Where is the station?"  The
+  // adverb goes after the subject, as in "Is the station here?"
+  private static final TregexPattern moveWHADVPSQTregex =
+    TregexPattern.compile("SBARQ < (WHADVP=wh $+ (SQ=sq <, (/^VB/ < " + EnglishPatterns.copularWordRegex + ") <- NP !<3 __))");
+
+  private static final TsurgeonPattern moveWHADVPSQTsurgeon =
+    Tsurgeon.parseOperation("[move wh >-1 sq] [relabel wh ADVP]");
+
+  /**
+   * Puts a fronted wh-adverb back in the predicate position of a copula
+   * which has no predicate, as in "I know where he is" or "Where is the
+   * station?"  After the move, the adverb is the head of the copular
+   * clause, with the copula as cop, as in UD.
+   */
+  public static Tree moveWHADVPToCopula(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    t = Tsurgeon.processPattern(moveWHADVPTregex, moveWHADVPTsurgeon, t);
+    t = Tsurgeon.processPattern(moveWHADVPQuestionTregex, moveWHADVPTsurgeon, t);
+    return Tsurgeon.processPattern(moveWHADVPSQTregex, moveWHADVPSQTsurgeon, t);
   }
 
   /** The basic category of a label, without function tags such as -TMP */
