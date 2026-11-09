@@ -691,6 +691,28 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "case(goal-7, of-5)\n" +
            "det(goal-7, the-6)\n" +
            "obl(short-4, goal-7)\n"},
+         // the inverted "here's", with the adverb outside the VP or moved into it
+         {TestType.BASIC,
+          "(ROOT (SINV (ADVP (RB Here)) (VP (VBZ is)) (NP (DT the) (NN link)) (. :)))",
+          "root(ROOT-0, Here-1)\n" +
+           "cop(Here-1, is-2)\n" +
+           "det(link-4, the-3)\n" +
+           "nsubj(Here-1, link-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (SINV (SBAR (IN If) (S (NP (PRP you)) (VP (VBP start)))) (, ,) (ADVP (RB here)) (VP (VBZ 's)) (NP (DT the) (NN sum)) (. .)))",
+          "mark(start-3, If-1)\n" +
+           "nsubj(start-3, you-2)\n" +
+           "advcl(here-5, start-3)\n" +
+           "root(ROOT-0, here-5)\n" +
+           "cop(here-5, 's-6)\n" +
+           "det(sum-8, the-7)\n" +
+           "nsubj(here-5, sum-8)\n"},
+         {TestType.BASIC,
+          "(ROOT (SINV (ADVP (RB There)) (VP (VBZ goes)) (NP (DT the) (NN bus)) (. .)))",
+          "advmod(goes-2, There-1)\n" +
+           "root(ROOT-0, goes-2)\n" +
+           "det(bus-4, the-3)\n" +
+           "nsubj(goes-2, bus-4)\n"},
          // a copula with a VP after it is an auxiliary, even after an adverb of place
          {TestType.BASIC,
           "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADVP (RBR further)) (VP (VBG investigating) (NP (DT the) (NNS causes)))) (. .)))",
@@ -1850,16 +1872,16 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "obl(is-2, field-6)\n"},
              {TestType.BASIC,
               "(ROOT (SINV (ADVP (RB Here)) (VP (VBP are)) (NP (DT some) (NNS bags))))",
-              "advmod(are-2, Here-1)\n" +
-               "root(ROOT-0, are-2)\n" +
+              "root(ROOT-0, Here-1)\n" +
+               "cop(Here-1, are-2)\n" +
                "det(bags-4, some-3)\n" +
-               "nsubj(are-2, bags-4)\n"},
+               "nsubj(Here-1, bags-4)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SINV (ADVP (RB Here)) (VP (VBP are)) (NP (DT some) (NNS bags))))",
-              "advmod(are-2, Here-1)\n" +
-               "root(ROOT-0, are-2)\n" +
+              "root(ROOT-0, Here-1)\n" +
+               "cop(Here-1, are-2)\n" +
                "det(bags-4, some-3)\n" +
-               "nsubj(are-2, bags-4)\n"},
+               "nsubj(Here-1, bags-4)\n"},
              {TestType.BASIC,
               "(ROOT (S (NP (PRP He)) (VP (VBZ is) (PP (IN in) (NP (DT the) (NN garden))))))",
               "nsubj(garden-5, He-1)\n" +
