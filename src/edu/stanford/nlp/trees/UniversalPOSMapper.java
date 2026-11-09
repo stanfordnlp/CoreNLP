@@ -155,6 +155,14 @@ public class UniversalPOSMapper  {
       // WDT -> DET
       { "WDT=target <... {/.*/}", "DET" },
     };
+    // An IN or RP which is the head of an ADVP is an adverb, as in "the
+    // Dow was down 80.53 points" or "shares were up".  These are the
+    // same ADVPs whose head the UniversalSemanticHeadFinder picks out
+    operations.add(new Pair<>(UniversalSemanticHeadFinder.headOfADVPTregex,
+                              Tsurgeon.parseOperation("relabel head ADV")));
+    operations.add(new Pair<>(compiler.compile("@ADVP <: (IN|RP=target < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + ")"),
+                              Tsurgeon.parseOperation("relabel target ADV")));
+
     for (String[] newOp : otherContextMappings) {
       operations.add(new Pair<>(compiler.compile(newOp[0]),
                                 Tsurgeon.parseOperation("relabel target " + newOp[1])));

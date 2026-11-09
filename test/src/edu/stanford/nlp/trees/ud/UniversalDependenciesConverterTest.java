@@ -186,6 +186,16 @@ public class UniversalDependenciesConverterTest {
   }
 
   @Test
+  public void testAdverbHeadOfADVPIsAdv() throws Exception {
+    // "down" is tagged IN here, as it often is in the PTB, but it heads
+    // its ADVP, so it is an adverb.  "up" in a PP is still an adposition
+    String output = convertTrees("(ROOT (S (NP (DT The) (NNP Dow)) (VP (VBD was) (ADVP (IN down) (NP (CD 80.53) (NNS points)))) (. .)))\n" +
+                                 "(ROOT (S (NP (PRP He)) (VP (VBD walked) (PP (IN up) (NP (DT the) (NN hill)))) (. .)))\n");
+    assertTrue(output, output.contains("4\tdown\tdown\tADV\tIN\t_\t0\troot\t_\t_"));
+    assertTrue(output, output.contains("3\tup\tup\tADP\tIN\t_\t5\tcase\t_\t_"));
+  }
+
+  @Test
   public void testEnhancedPlusPlus() throws Exception {
     // nothing in this fixture is treated differently by enhanced++, so the
     // two come out the same.  a fixture which told them apart would be
