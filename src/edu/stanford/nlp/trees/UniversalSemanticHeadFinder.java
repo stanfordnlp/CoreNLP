@@ -329,6 +329,13 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
   static final TregexPattern headOfADVPTregex =
     TregexPattern.compile("ADVP <, (/^(?:RB|IN|RP)/=head < " + COPULAR_ADVERB_REGEX + " [ $+ (/^(?:NP|QP)/ [ << CD | << /^(?i:little|bit|lot)$/ ]) | $+ CD | !< /^(?i:far|farther|further)$/ $+ (/^RBR?$/ < " + DEGREE_ADVERB_REGEX + ") ])");
 
+  /**
+   * An inverted "here's the link" or "there was the problem": the
+   * adverb before a VP which is just the copula is the predicate
+   */
+  static final TregexPattern headOfInvertedCopulaTregex =
+    TregexPattern.compile("SINV < (/^(?:ADVP|PRT)/=head < (/^(?:RB|RP|IN|NN|JJ)/ < " + COPULAR_ADVERB_REGEX + ") $++ (VP < (/^(?:VB|AUX)/ < " + EnglishPatterns.copularWordRegex + ") !< /^(?:VP|ADJP|NP|UCP|PP|ADVP|PRT|S|SBAR)/))");
+
   /** An ADVP or PRT which is the predicate of a copula with no other predicate */
   static final TregexPattern copularAdverbTregex =
     TregexPattern.compile("/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ)/ < " + COPULAR_ADVERB_REGEX + ")");
@@ -397,6 +404,10 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
           if (matcher.matchesAt(t)) {
             return matcher.getNode("head");
           }
+        }
+        TregexMatcher matcher = headOfInvertedCopulaTregex.matcher(t);
+        if (matcher.matchesAt(t)) {
+          return matcher.getNode("head");
         }
       }
       // if none of the above patterns match, use the standard method

@@ -194,6 +194,10 @@ public class UniversalEnglishGrammaticalRelations {
         AUX_MODIFIER, "VP|SQ|SINV|SBARQ", tregexCompiler,
         "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$|PP|UCP)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) | $++ " + COPULAR_ADVERB + " !$++ /^VP/ ] )",
         "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) | $++ (NP $++ " + COPULAR_ADVERB + ") !$++ /^VP/ ] )",
+        // the inverted "here's the link", in either of the shapes it can
+        // have, with the adverb outside the VP or moved into it
+        "SINV < (" + COPULAR_ADVERB + " $++ (VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") !< /^(?:VP|ADJP|NP|UCP|PP|ADVP|PRT|S|SBAR)/))",
+        "SINV < (VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " $-- " + COPULAR_ADVERB + " !$++ __))",
         // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
         "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
         // matches (old, is) in "How old is your cousin?" after the SQ has been flattened out of the tree
