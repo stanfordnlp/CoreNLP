@@ -819,6 +819,20 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "case(attacks-6, behind-4)\n" +
            "det(attacks-6, the-5)\n" +
            "root(ROOT-0, attacks-6)\n"},
+         // why, how and when are adjuncts, so the question keeps its own predicate
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB Why)) (SQ (VBZ is) (NP (PRP he)) (ADVP (RB here))) (. ?)))",
+          "advmod(here-4, Why-1)\n" +
+           "cop(here-4, is-2)\n" +
+           "nsubj(here-4, he-3)\n" +
+           "root(ROOT-0, here-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB When)) (SQ (VBZ is) (NP (PRP he)) (PP (IN in) (NP (NN town)))) (. ?)))",
+          "advmod(town-5, When-1)\n" +
+           "cop(town-5, is-2)\n" +
+           "nsubj(town-5, he-3)\n" +
+           "case(town-5, in-4)\n" +
+           "root(ROOT-0, town-5)\n"},
          // an existential question keeps the copula as the head
          {TestType.BASIC,
           "(ROOT (SQ (VBZ Is) (NP (EX there)) (NP (DT a) (NN book)) (PP (IN on) (NP (DT the) (NN table))) (. ?)))",
