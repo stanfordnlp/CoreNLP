@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
@@ -634,6 +635,25 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
    * (It was changed to looser definition in Feb 2006.)
    *
    */
+  private static final Pattern ADJUNCT_WH_ADVERB = Pattern.compile("(?i)why|how|when");
+
+  /**
+   * A WHADVP whose wh-word is why, how or when is an adjunct of the
+   * question, not its predicate, so the copula in the question can still
+   * have a predicate of its own.
+   */
+  private static boolean isAdjunctWHADVP(Tree t) {
+    if (!t.value().startsWith("WHADVP")) {
+      return false;
+    }
+    for (Tree kid : t.children()) {
+      if (kid.isPreTerminal() && kid.value().equals("WRB") && ADJUNCT_WH_ADVERB.matcher(kid.firstChild().value()).matches()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private static boolean isWHQ(Tree t, Tree parent) {
     if (t == null) {
       return false;
@@ -643,8 +663,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       if (parent != null && parent.value().equals("SBARQ")) {
         Tree[] kids = parent.children();
         for (Tree kid : kids) {
-          // looks for a WH.*
-          if (kid.value().startsWith("WH")) {
+          // looks for a WH.*, other than a why, how or when, which is an
+          // adjunct, as in "Why is the woman always from Ohio?"
+          if (kid.value().startsWith("WH") && !isAdjunctWHADVP(kid)) {
             toReturn = true;
           }
         }
