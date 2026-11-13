@@ -113,7 +113,11 @@ public class GrammaticalStructureConversionUtils {
 
     Map<Integer, Integer> indexToPos = Generics.newHashMap();
     indexToPos.put(0,0); // to deal with the special node "ROOT"
-    List<Tree> gsLeaves = gs.root().getLeaves();
+    // the leaves of the transformed tree, in the order of the words: the
+    // transformations may remove leaves, and may move them, as when a
+    // fronted WHADJP is put back after its copula
+    List<Tree> gsLeaves = new ArrayList<>(gs.root().getLeaves());
+    gsLeaves.sort(Comparator.comparingInt(leaf -> ((TreeGraphNode) leaf).label().index()));
     for (int i = 0; i < gsLeaves.size(); i++) {
       TreeGraphNode leaf = (TreeGraphNode) gsLeaves.get(i);
       indexToPos.put(leaf.label().index(), i + 1);

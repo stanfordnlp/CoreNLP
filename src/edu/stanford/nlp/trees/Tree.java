@@ -2198,16 +2198,30 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
 
   /**
-   * Return the parent of the tree node.  This routine may return
-   * {@code null} meaning simply that the implementation doesn't
-   * know how to determine the parent node, rather than there is no
-   * such node.
+   * Return the parent of the tree node, for a tree which keeps its
+   * parents, such as a {@link TreeGraphNode}.  A tree which does not
+   * keep its parents throws {@code UnsupportedOperationException};
+   * use {@link #parentSafe()} for {@code null} instead, or
+   * {@link #parent(Tree)} to search from the root.
    *
-   * @return The parent {@code Tree} node or {@code null}
+   * @return The parent {@code Tree} node, or {@code null} for the root
+   * @throws UnsupportedOperationException if this tree does not keep its parents
    * @see Tree#parent(Tree)
    */
   public Tree parent() {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Return the parent of the tree node, or {@code null} if this tree
+   * does not keep its parents, or if this node is the root.
+   *
+   * @return The parent {@code Tree} node or {@code null}
+   * @see Tree#parent()
+   * @see Tree#parent(Tree)
+   */
+  public Tree parentSafe() {
+    return null;
   }
 
 

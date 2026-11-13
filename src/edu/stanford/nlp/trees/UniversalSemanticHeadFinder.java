@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
@@ -286,6 +287,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     // !$++ ADJP matches against "Why is the dog pink?"
     TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ NP !$++ ADJP))"),
 
+    // the fronted adjective predicate in "How old is your cousin?"
+    TregexPattern.compile("SBARQ < (WHADJP=head $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ NP !$++ ADJP|VP))"),
+
     // Actually somewhat limited in scope, this detects "Tuesday it is",
     // "Such a great idea this was", etc
     TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishPatterns.copularWordRegex + "))))"),
@@ -298,6 +302,46 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
   };
 
   static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
+
+  /**
+   * Adverbs of place and direction which can be the predicate of a
+   * copula, as in "he is here" or "the game is over", and wh-adverbs
+   * moved back after a copula, as in "I know where he is".  Other adverbs
+   * after a copula, as in "the goal is simply to win", are modifiers.
+   * "ago" is left out, since "it was a year ago" is most often an
+   * ellipsis, as in "higher than it was a year ago".
+   */
+  static final String COPULAR_ADVERB_REGEX = "/^(?i:here|there|everywhere|anywhere|somewhere|nowhere|elsewhere|" +
+    "above|below|ahead|behind|around|away|back|close|near|nearby|down|up|uphill|downhill|upstairs|downstairs|" +
+    "in|inside|indoors|out|outside|outdoors|off|on|over|through|together|home|abroad|overseas|aboard|along|apart|aside|" +
+    "east|west|north|south|forward|far|farther|further|underway|" +
+    "where|how|when|why|wherever|whenever)$/";
+
+  /**
+   * A predicate adverb followed by a measure phrase or a degree adverb,
+   * as in "the Dow was down 80.53 points", "was off three pence" or
+   * "earnings were down slightly", is the head of its ADVP, with the
+   * measure phrase as obl:npmod and the degree adverb as advmod.  "far"
+   * before another adverb is itself a degree adverb, as in "far short"
+   * or "far more", and other adverbs after the first one are left to the
+   * usual head rule, as in "came back early" or "read it out loud".
+   */
+  private static final String DEGREE_ADVERB_REGEX = "/^(?i:slightly|sharply|substantially|significantly|considerably|markedly|" +
+    "modestly|marginally|fractionally|dramatically|steeply|strongly|moderately|somewhat|appreciably|noticeably|further)$/";
+
+  static final TregexPattern headOfADVPTregex =
+    TregexPattern.compile("ADVP <, (/^(?:RB|IN|RP)/=head < " + COPULAR_ADVERB_REGEX + " [ $+ (/^(?:NP|QP)/ [ << CD | << /^(?i:little|bit|lot)$/ ]) | $+ CD | !< /^(?i:far|farther|further)$/ $+ (/^RBR?$/ < " + DEGREE_ADVERB_REGEX + ") ])");
+
+  /**
+   * An inverted "here's the link" or "there was the problem": the
+   * adverb before a VP which is just the copula is the predicate
+   */
+  static final TregexPattern headOfInvertedCopulaTregex =
+    TregexPattern.compile("SINV < (/^(?:ADVP|PRT)/=head < (/^(?:RB|RP|IN|NN|JJ)/ < " + COPULAR_ADVERB_REGEX + ") $++ (VP < (/^(?:VB|AUX)/ < " + EnglishPatterns.copularWordRegex + ") !< /^(?:VP|ADJP|NP|UCP|PP|ADVP|PRT|S|SBAR)/))");
+
+  /** An ADVP or PRT which is the predicate of a copula with no other predicate */
+  static final TregexPattern copularAdverbTregex =
+    TregexPattern.compile("/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ|WRB)/ < " + COPULAR_ADVERB_REGEX + ")");
 
   /**
    * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
@@ -339,6 +383,21 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     // other key words as the head.  For example, "and not" means
     // something completely different than "and".  Furthermore,
     // downstream code was written assuming "not" would be the head...
+    if (motherCat.equals("ADVP")) {
+      TregexMatcher matcher = headOfADVPTregex.matcher(t);
+      if (matcher.matchesAt(t)) {
+        return matcher.getNode("head");
+      }
+      // a wh-adverb moved back after a copula is the head of its ADVP
+      // when it comes last, as in "know just where it was".  In "how
+      // terrific they are" or "how useful it is", the head is the
+      // adjective, as for any other ADVP
+      Tree lastKid = t.lastChild();
+      if (lastKid.value().equals("WRB")) {
+        return lastKid;
+      }
+    }
+
     if (motherCat.equals("CONJP")) {
       for (TregexPattern pattern : headOfConjpTregex) {
         TregexMatcher matcher = pattern.matcher(t);
@@ -357,8 +416,26 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
             return matcher.getNode("head");
           }
         }
+        TregexMatcher matcher = headOfInvertedCopulaTregex.matcher(t);
+        if (matcher.matchesAt(t)) {
+          return matcher.getNode("head");
+        }
       }
       // if none of the above patterns match, use the standard method
+    }
+
+    // a verbless clause, such as the headline "Stocks on the rise" or
+    // the absolute "with Bush in office", has its predicate as the head.
+    // A small clause under a verb, as in "consider him in charge",
+    // keeps its subject as the head, since the subject is the object
+    // of that verb.  Under an SBAR other than "with" or "without", the
+    // clause usually has no subject, as in "though long a leader in the
+    // business", so the first NP is the predicate there
+    if (motherCat.equals("S") && !isSmallClauseOrSubjectless(parent)) {
+      Tree predicate = predicateOfVerblessClause(t);
+      if (predicate != null) {
+        return predicate;
+      }
     }
 
     // do VPs with auxiliary as special case
@@ -408,7 +485,6 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       // looks for copular verbs
       if (hasVerbalAuxiliary(kids, copulars, false) && ! isExistential(t, parent) && ! isWHQ(t, parent)) {
         String[][] how;
-        //TODO: also allow ADVP to be heads
         if (motherCat.equals("SQ")) {
           how = new String[][]{{"right", "VP", "ADJP", "NP", "UCP", "PP", "WHADJP", "WHNP"}};
         } else {
@@ -434,7 +510,33 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
               }
             }
           if ( ! foundAnotherNp) {
+            // The NP is the subject, so look for a PP predicate after it,
+            // as in "Is the diplomat in Baghdad now?"
+            Tree subject = pti;
             pti = null;
+            boolean afterSubject = false;
+            for (Tree kid : tmpFilteredChildren) {
+              if (kid == subject) {
+                afterSubject = true;
+              } else if (afterSubject && kid.label() != null) {
+                String category = tlp.basicCategory(kid.label().value());
+                if (category.equals("PP") || category.equals("UCP")) {
+                  pti = kid;
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // An adverb of place or direction is the predicate when there is
+        // no other predicate, as in "he is here" or "is he here?"
+        if (pti == null) {
+          for (Tree kid : tmpFilteredChildren) {
+            if (copularAdverbTregex.matcher(kid).matches()) {
+              pti = kid;
+              break;
+            }
           }
         }
 
@@ -484,6 +586,90 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       log.info("Determined head (case 3) for " + t.value() + " is: " + hd);
     }
     return hd;
+  }
+
+  private static final Set<String> VERBLESS_CLAUSE_BLOCKERS =
+    Generics.newHashSet(Arrays.asList("VP", "S", "SBAR", "SINV", "SQ", "SBARQ", "FRAG", "ADJP", "UCP", "TO"));
+
+  private static final Pattern WITH_ABSOLUTE = Pattern.compile("(?i)with|without");
+
+  /**
+   * True if an S under this parent is a small clause, under a VP, or is
+   * probably missing its subject, under an SBAR other than "with" or
+   * "without"
+   */
+  private boolean isSmallClauseOrSubjectless(Tree parent) {
+    if (parent == null) {
+      return false;
+    }
+    String category = tlp.basicCategory(parent.label().value());
+    if (category.equals("VP")) {
+      return true;
+    }
+    if (!category.equals("SBAR")) {
+      return false;
+    }
+    for (Tree kid : parent.children()) {
+      if (kid.value().equals("IN") && kid.numChildren() == 1 &&
+          WITH_ABSOLUTE.matcher(kid.firstChild().value()).matches()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Adverbs which modify a verbless clause rather than being its
+   * predicate, as in "with the monthly level never more than 21.4%".
+   * "notwithstanding" is the case marker of the NP before it
+   */
+  private static final Set<String> NON_PREDICATE_ADVERBS =
+    Generics.newHashSet(Arrays.asList("not", "never", "also", "still", "just", "only", "even",
+                                      "almost", "nearly", "already", "always", "ever", "often",
+                                      "now", "then", "too", "however", "perhaps", "probably",
+                                      "notwithstanding", "withstanding"));
+
+  private static boolean isNonPredicateAdverb(Tree advp) {
+    for (Tree leaf : advp.getLeaves()) {
+      if (!NON_PREDICATE_ADVERBS.contains(leaf.value().toLowerCase())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Returns the first PP, ADVP or NP after the subject of an S with no
+   * verb, or null if t is not such a clause.  An ADJP predicate is
+   * already the head of an S, so a clause with an ADJP is left alone.
+   * A temporal NP or an ADVP such as "never" is not a predicate, and an
+   * existential "there" is not a subject.
+   */
+  private Tree predicateOfVerblessClause(Tree t) {
+    for (Tree kid : t.children()) {
+      if (kid.isLeaf() || kid.label() == null ||
+          VERBLESS_CLAUSE_BLOCKERS.contains(tlp.basicCategory(kid.label().value()))) {
+        return null;
+      }
+    }
+    Tree subject = null;
+    for (Tree kid : t.children()) {
+      String value = kid.label().value();
+      String category = tlp.basicCategory(value);
+      if (subject == null) {
+        if (category.equals("NP") && !value.contains("-TMP")) {
+          if (kid.numChildren() == 1 && kid.firstChild().value().equals("EX")) {
+            return null;
+          }
+          subject = kid;
+        }
+      } else if ((category.equals("PP") || category.equals("NP") ||
+                  (category.equals("ADVP") && !isNonPredicateAdverb(kid))) &&
+                 !value.contains("-TMP")) {
+        return kid;
+      }
+    }
+    return null;
   }
 
   /* Checks whether the tree t is an existential constituent
@@ -547,6 +733,25 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
    * (It was changed to looser definition in Feb 2006.)
    *
    */
+  private static final Pattern ADJUNCT_WH_ADVERB = Pattern.compile("(?i)why|how|when");
+
+  /**
+   * A WHADVP whose wh-word is why, how or when is an adjunct of the
+   * question, not its predicate, so the copula in the question can still
+   * have a predicate of its own.
+   */
+  private static boolean isAdjunctWHADVP(Tree t) {
+    if (!t.value().startsWith("WHADVP")) {
+      return false;
+    }
+    for (Tree kid : t.children()) {
+      if (kid.isPreTerminal() && kid.value().equals("WRB") && ADJUNCT_WH_ADVERB.matcher(kid.firstChild().value()).matches()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private static boolean isWHQ(Tree t, Tree parent) {
     if (t == null) {
       return false;
@@ -556,8 +761,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       if (parent != null && parent.value().equals("SBARQ")) {
         Tree[] kids = parent.children();
         for (Tree kid : kids) {
-          // looks for a WH.*
-          if (kid.value().startsWith("WH")) {
+          // looks for a WH.*, other than a why, how or when, which is an
+          // adjunct, as in "Why is the woman always from Ohio?"
+          if (kid.value().startsWith("WH") && !isAdjunctWHADVP(kid)) {
             toReturn = true;
           }
         }

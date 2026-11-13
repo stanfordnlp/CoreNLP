@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -107,6 +108,30 @@ public class CoordinationTransformer implements TreeTransformer  {
       return t;
     }
 
+    t = insertMissingVP(t);
+    if (VERBOSE) {
+      debugLine("After insertMissingVP:            ", t);
+    }
+    t = insertMissingNP(t);
+    if (VERBOSE) {
+      debugLine("After insertMissingNP:            ", t);
+    }
+
+    t = copulaClauseToNP(t);
+    if (VERBOSE) {
+      debugLine("After copulaClauseToNP:           ", t);
+    }
+
+    t = moveWHADJPToCopula(t);
+    if (VERBOSE) {
+      debugLine("After moveWHADJPToCopula:         ", t);
+    }
+
+    t = moveWHADVPToCopula(t);
+    if (VERBOSE) {
+      debugLine("After moveWHADVPToCopula:         ", t);
+    }
+
     if (performMWETransformation) {
       t = MWETransform(t);
       if (VERBOSE) {
@@ -167,6 +192,268 @@ public class CoordinationTransformer implements TreeTransformer  {
     t = mergeYodaVerbs(t);
     if (VERBOSE) {
       debugLine("After mergeYodaVerbs:             ", t);
+    }
+    return t;
+  }
+
+  private static final TregexPattern copulaClauseTregex =
+    TregexPattern.compile("VP < (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ (S=clause <1 NP <2 (VP <, VBG|VBN) !<3 __))");
+
+  private static final TsurgeonPattern copulaClauseTsurgeon =
+    Tsurgeon.parseOperation("relabel clause NP");
+
+  /**
+   * In "It's George Bush wanting to meet a foreign leader", PTB brackets
+   * the predicate as an S with its own subject, (S (NP George Bush) (VP
+   * (VBG wanting) ...)).  As in UD, treat the subject as the predicate
+   * nominal and the -ing or -ed VP as a reduced relative modifying it by
+   * relabeling the S as an NP: (NP (NP George Bush) (VP (VBG wanting) ...)).
+   */
+  public static Tree copulaClauseToNP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(copulaClauseTregex, copulaClauseTsurgeon, t);
+  }
+
+  // A fronted WHADJP whose clause has a copula with no predicate, as in
+  // "how sweet it is" or "how deep is it going to be".  The copula is
+  // found by following VPs and clauses down from the clause, so a
+  // copula inside a relative clause or other modifier does not count.
+  // An S or SBAR after the copula is an extraposed clause or a
+  // complement of the adjective, as in "how hard it is to change a
+  // habit", not a predicate, so it does not stop the move.
+  private static final TregexPattern moveWHADJPTregex =
+    TregexPattern.compile("SBAR|SBARQ < (WHADJP=wh $+ (S|SQ <+(VP|S|SQ) (VP=vp < (/^VB/=cop < " + EnglishPatterns.copularWordRegex + ") !< NP|ADJP|VP|UCP|WHADJP)))");
+
+  private static final TsurgeonPattern moveWHADJPTsurgeon =
+    Tsurgeon.parseOperation("[move wh $- cop] [relabel wh ADJP]");
+
+  /**
+   * Puts a fronted adjective phrase back in the predicate position of a
+   * copula which has no predicate, as in "how sweet it is", "how deep is
+   * it going to be", "how strong that turnaround will be at the plant"
+   * or "how difficult it is for a person to live there".
+   * With the trace removed, the copula is otherwise left with nothing to
+   * be a copula of.  After the move, the adjective is the head of the
+   * copular clause, with the copula as cop and how as advmod, as in UD.
+   * Main clause questions with no VP, such as "How old is your cousin?",
+   * are handled by {@link #SQflatten}.
+   */
+  public static Tree moveWHADJPToCopula(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    return Tsurgeon.processPattern(moveWHADJPTregex, moveWHADJPTsurgeon, t);
+  }
+
+  // A fronted WHADVP whose clause has a copula with no predicate, as in
+  // "I know where he is", "How was your trip?" or "When will the
+  // meeting be?"  Unlike a WHADJP, a WHADVP is usually an adjunct, so
+  // the copula must have nothing else after it, not even an adverb or a
+  // PP, as in "why is he here" or "where is he from".
+  private static final String WHADVP_EMPTY_COPULA =
+    "(WHADVP=wh $+ (S|SQ <+(VP|S|SQ) (VP=vp < (/^VB/=cop < " + EnglishPatterns.copularWordRegex + ") !< NP|ADJP|ADVP|PRT|PP|VP|UCP|S|SBAR|WHADJP)))";
+
+  // The relation rules tell a where or when complement, as in "I know
+  // where he is", from an adjunct, as in "stay where we are" or "put
+  // your money where your mouth is", by the WHADVP at the start of the
+  // SBAR.  The move takes that away, so it is limited to the places
+  // where the relation of the clause does not depend on it: the
+  // complement of a verb which takes a wh-clause, the object of a
+  // preposition, a clause with how, and a main clause question.
+  private static final TregexPattern moveWHADVPTregex =
+    TregexPattern.compile("SBAR [ > (VP < (/^V/ < " + EnglishPatterns.ccompVerbRegex + ") < (/^V/ < " + EnglishPatterns.ccompObjVerbRegex + ")) | " +
+                          "!$-- NP > (VP < (/^V/ < " + EnglishPatterns.ccompVerbRegex + ")) | > PP | " +
+                          "!$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)) ] < " + WHADVP_EMPTY_COPULA);
+
+  private static final TregexPattern moveWHADVPQuestionTregex =
+    TregexPattern.compile("SBARQ < " + WHADVP_EMPTY_COPULA);
+
+  private static final TsurgeonPattern moveWHADVPTsurgeon =
+    Tsurgeon.parseOperation("[move wh $- cop] [relabel wh ADVP]");
+
+  // The same in a main clause question with no VP, where the SQ is just
+  // the copula and the subject, as in "Where is the station?"  The
+  // adverb goes after the subject, as in "Is the station here?"
+  private static final TregexPattern moveWHADVPSQTregex =
+    TregexPattern.compile("SBARQ < (WHADVP=wh $+ (SQ=sq <, (/^VB/ < " + EnglishPatterns.copularWordRegex + ") <- NP !<3 __))");
+
+  private static final TsurgeonPattern moveWHADVPSQTsurgeon =
+    Tsurgeon.parseOperation("[move wh >-1 sq] [relabel wh ADVP]");
+
+  /**
+   * Puts a fronted wh-adverb back in the predicate position of a copula
+   * which has no predicate, as in "I know where he is" or "Where is the
+   * station?"  After the move, the adverb is the head of the copular
+   * clause, with the copula as cop, as in UD.
+   */
+  public static Tree moveWHADVPToCopula(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    t = Tsurgeon.processPattern(moveWHADVPTregex, moveWHADVPTsurgeon, t);
+    t = Tsurgeon.processPattern(moveWHADVPQuestionTregex, moveWHADVPTsurgeon, t);
+    return Tsurgeon.processPattern(moveWHADVPSQTregex, moveWHADVPSQTsurgeon, t);
+  }
+
+  /** The basic category of a label, without function tags such as -TMP */
+  private static String category(Tree t) {
+    String label = t.value();
+    if (label == null || label.startsWith("-")) {
+      return label;
+    }
+    int dash = label.indexOf('-');
+    return dash < 0 ? label : label.substring(0, dash);
+  }
+
+  private static boolean isTag(Tree t, String regex) {
+    return t.isPreTerminal() && t.value() != null && t.value().matches(regex);
+  }
+
+  private static final String NOUN_TAGS = "NNP?S?";
+
+  /**
+   * Whether the nouns in {@code kids[start..end)} are an argument which
+   * should be an NP: after a verb tag in a VP, right after a preposition
+   * in a PP, or before the VP of a clause.  A noun in a VP with no verb
+   * tag before it is more likely a mistagged verb, as in
+   * {@code (VP (NN yield) (NP ...))}, and so are nouns after MD or TO,
+   * so those are not arguments.
+   */
+  private static boolean isBareArgument(String parent, Tree[] kids, int start, int end) {
+    switch (parent) {
+    case "VP": {
+      boolean verb = false;
+      for (int i = 0; i < start; ++i) {
+        if (isTag(kids[i], "MD|TO")) {
+          return false;
+        }
+        if (isTag(kids[i], "VB[DGNPZ]?")) {
+          verb = true;
+        }
+      }
+      return verb;
+    }
+    case "PP":
+      return start > 0 && isTag(kids[start - 1], "IN");
+    case "S":
+    case "SQ":
+    case "SINV":
+      for (int i = end; i < kids.length; ++i) {
+        if ("VP".equals(category(kids[i]))) {
+          return true;
+        }
+      }
+      return false;
+    default:
+      return false;
+    }
+  }
+
+  /**
+   * Puts an NP over noun tags which are used as an argument without one,
+   * as in {@code (VP (VBZ contains) (NNS beets))}.  The relations all look
+   * for an NP in those places, so otherwise the noun is attached as dep.
+   * A run of nouns, as in {@code (VP (VBZ contains) (NN tin) (NNS cans))},
+   * becomes a single NP, as do nouns joined by a CC, as in
+   * {@code (VP (VBD bought) (NN salt) (CC and) (NN pepper))}.  See {@link #isBareArgument} for which places
+   * count as arguments.
+   */
+  public static Tree insertMissingNP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    for (Tree node : t.subTreeList()) {
+      if (node.isLeaf() || node.isPreTerminal()) {
+        continue;
+      }
+      String parent = category(node);
+      if (parent == null) {
+        continue;
+      }
+      Tree[] kids = node.children();
+      List<Tree> newKids = null;
+      int i = 0;
+      while (i < kids.length) {
+        if (!isTag(kids[i], NOUN_TAGS)) {
+          if (newKids != null) {
+            newKids.add(kids[i]);
+          }
+          ++i;
+          continue;
+        }
+        // a run of nouns, including nouns joined by a CC: salt and pepper
+        int end = i + 1;
+        while (end < kids.length) {
+          if (isTag(kids[end], NOUN_TAGS)) {
+            ++end;
+          } else if (end + 1 < kids.length && isTag(kids[end], "CC") && isTag(kids[end + 1], NOUN_TAGS)) {
+            end += 2;
+          } else {
+            break;
+          }
+        }
+        List<Tree> run = Arrays.asList(kids).subList(i, end);
+        if (isBareArgument(parent, kids, i, end)) {
+          if (newKids == null) {
+            newKids = new ArrayList<>(Arrays.asList(kids).subList(0, i));
+          }
+          newKids.add(node.treeFactory().newTreeNode("NP", new ArrayList<>(run)));
+        } else if (newKids != null) {
+          newKids.addAll(run);
+        }
+        i = end;
+      }
+      if (newKids != null) {
+        node.setChildren(newKids);
+      }
+    }
+    return t;
+  }
+
+  /**
+   * Puts a VP over a base form verb which follows a modal or to in the
+   * same VP, along with everything after it, as in
+   * {@code (VP (MD shall) (RB not) (VB pass))}.  PTB always has the
+   * inner VP, and without it the modal becomes the head.  A VP with a
+   * CC is left alone, since it may be a flat coordination of verbs with
+   * a shared object, as in {@code (VP (VB buy) (CC and) (VB sell) (NP ...))}.
+   */
+  public static Tree insertMissingVP(Tree t) {
+    if (t == null) {
+      return null;
+    }
+    for (Tree node : t.subTreeList()) {
+      if (node.isLeaf() || node.isPreTerminal() || !"VP".equals(category(node))) {
+        continue;
+      }
+      Tree[] kids = node.children();
+      boolean coordination = false;
+      for (Tree kid : kids) {
+        if (isTag(kid, "CC") || "CONJP".equals(category(kid))) {
+          coordination = true;
+          break;
+        }
+      }
+      if (coordination) {
+        continue;
+      }
+      for (int i = 1; i < kids.length; ++i) {
+        if (!isTag(kids[i], "VB")) {
+          continue;
+        }
+        int previous = i - 1;
+        while (previous > 0 && isTag(kids[previous], "RB")) {
+          --previous;
+        }
+        if (isTag(kids[previous], "MD|TO")) {
+          List<Tree> newKids = new ArrayList<>(Arrays.asList(kids).subList(0, i));
+          newKids.add(node.treeFactory().newTreeNode("VP", new ArrayList<>(Arrays.asList(kids).subList(i, kids.length))));
+          node.setChildren(newKids);
+        }
+        break;
+      }
     }
     return t;
   }
@@ -281,11 +568,17 @@ public class CoordinationTransformer implements TreeTransformer  {
                           // match against "good at"
                           " !< (ADJP < (PP <: IN|TO))))");
 
+  // Matches to be questions with a fronted adjective predicate, such
+  // as "How old is your cousin?", where the SQ is just the copula and
+  // the subject.  "How old is she turning?" has a VP and is not matched.
+  private static final TregexPattern flattenWHADJPSQTregex =
+    TregexPattern.compile("SBARQ < (WHADJP $+ (SQ=sq <, (/^VB/ < " + EnglishPatterns.copularWordRegex + ") <- NP !<3 __))");
+
   private static final TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
 
   /**
    * Removes the SQ structure under a WHNP question, such as "Who am I
-   * to judge?".  We do this so that it is easier to pick out the head
+   * to judge?", or a WHADJP question, such as "How old is your cousin?".  We do this so that it is easier to pick out the head
    * and then easier to connect that head to all of the other words in
    * the question in this situation.  In the specific case of making
    * the copula head, we don't do this so that the existing headfinder
@@ -300,7 +593,8 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (t == null) {
       return null;
     }
-    return Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
+    t = Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
+    return Tsurgeon.processPattern(flattenWHADJPSQTregex, flattenSQTsurgeon, t);
   }
 
   private static final TregexPattern removeXOverXTregex =

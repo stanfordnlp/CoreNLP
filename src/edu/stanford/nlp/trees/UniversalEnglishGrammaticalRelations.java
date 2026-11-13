@@ -157,6 +157,13 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
+   * The participle of a passive.  "been" is the participle of "be"
+   * itself, so in "he's been happy" the "'s" is "has", not a passive
+   * auxiliary.
+   */
+  private static final String PASSIVE_PARTICIPLE = "(VBN|VBD !< /^(?i:been)$/)";
+
+  /**
     * The "passive auxiliary" grammatical relation. A passive auxiliary of a
     * clause is a
     * non-main verb of the clause which contains the passive information.
@@ -169,11 +176,15 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
      new GrammaticalRelation(Language.UniversalEnglish, "aux:pass", "passive auxiliary",
          AUX_MODIFIER, "VP|SQ|SINV", tregexCompiler,
-         "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
-         "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < VBD|VBN))",
+         "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < " + PASSIVE_PARTICIPLE + " | < (VP|ADJP < " + PASSIVE_PARTICIPLE + ") < CC ] )",
+         "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < " + PASSIVE_PARTICIPLE + "))",
          // add handling of tricky VP fronting cases...
-         "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
-         "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))");
+         "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < " + PASSIVE_PARTICIPLE + "))",
+         "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ")) $-- (VP < " + PASSIVE_PARTICIPLE + "))");
+
+  /** An adverb which the head finder can make the predicate of a copula */
+  private static final String COPULAR_ADVERB =
+    "(/^(?:ADVP|PRT)/ < (/^(?:RB|RP|IN|NN|JJ|WRB)/ < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + "))";
 
   /**
    * The "copula" grammatical relation.  A copula is the relation between
@@ -188,10 +199,16 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation COPULA =
     new GrammaticalRelation(Language.UniversalEnglish, "cop", "copula",
         AUX_MODIFIER, "VP|SQ|SINV|SBARQ", tregexCompiler,
-        "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$|PP|UCP)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) ] )",
-        "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
+        "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$|PP|UCP)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) | $++ " + COPULAR_ADVERB + " !$++ /^VP/ ] )",
+        "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) | $++ (NP $++ " + COPULAR_ADVERB + ") !$++ /^VP/ | $++ (NP !<: EX $++ PP|UCP) !$++ /^(?:VP|ADJP)/ ] )",
+        // the inverted "here's the link", in either of the shapes it can
+        // have, with the adverb outside the VP or moved into it
+        "SINV < (" + COPULAR_ADVERB + " $++ (VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") !< /^(?:VP|ADJP|NP|UCP|PP|ADVP|PRT|S|SBAR)/))",
+        "SINV < (VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " $-- " + COPULAR_ADVERB + " !$++ __))",
         // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
         "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
+        // matches (old, is) in "How old is your cousin?" after the SQ has been flattened out of the tree
+        "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + " $+ NP) < WHADJP",
         // "Such a great idea this was"
         "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/=aux < " + copularWordRegex + "))))");
 
@@ -314,10 +331,129 @@ public class UniversalEnglishGrammaticalRelations {
    * Example: <br>
    * "Clinton defeated Dole" &rarr; {@code nsubj}(defeated, Clinton)
    */
+  /**
+   * The tags of the verb which starts the VP of a small clause, the
+   * clause in "made him run", "leaves patients facing a wait" or "had
+   * the car washed".  Other words may come between the subject and the
+   * VP, as in "want the pound formally tied to the mark".
+   * PTB brackets these as an S with its own subject right after the verb:
+   * {@code (VP (VBZ leaves) (S (NP patients) (VP (VBG facing) ...)))}.
+   * As in UD, the subject is the obj of the verb and the clause is an
+   * xcomp.
+   */
+  private static final String SMALL_CLAUSE_VP = "VB|VBG|VBN";
+
+  /**
+   * The verb a small clause can follow.  A form of be is not one, since
+   * in "It's George Bush wanting to meet a foreign leader" the clause is
+   * the predicate, not an object and a complement.
+   */
+  private static final String SMALL_CLAUSE_VERB = "(/^VB/ !< " + copularWordRegex + ")";
+
+  /**
+   * A possessive NP: one ending in a POS with something before it, or
+   * just a PRP$.  An NP of nothing but a POS is a mistagged "us", as in
+   * "let 's close the door", and does not count.
+   * <br>
+   * A possessive before an -ing verb is not the subject of a small
+   * clause but of a gerund clause which is a ccomp of the verb, as in
+   * "opposed Canada's joining" or "necessitated our filing Chapter 11".
+   */
+  private static final String POSSESSIVE = "[ <- (POS $- __) | <: /^PRP\\$$/ ]";
+
+  /** The negation of {@link #POSSESSIVE}, for the small clause rules */
+  private static final String NOT_POSSESSIVE = "!<- (POS $- __) !<: /^PRP\\$$/";
+
+  /**
+   * A subject NP which is just "it", possibly in a chain of unary NPs,
+   * as in (NP (NP (PRP it))) once the *EXP* trace is removed.
+   */
+  private static final String IT_SUBJECT_CONDITION = "<<: (PRP < /^(?i:it)$/)";
+
+  private static final String IT_SUBJECT = "(NP " + IT_SUBJECT_CONDITION + ")";
+
+  /**
+   * The predicate of a copula whose subject is "it", which an
+   * extraposed clause follows, as in "It is hard to change a habit".
+   * The copula can be under modals and auxiliaries, as in "it would
+   * have been nice to see her".  A predicate with a degree word, such
+   * as "so cold that we stayed inside" or "too early to tell", has a
+   * clause of its own and is left out.
+   */
+  private static String extraposingPredicate(String categories) {
+    return "(" + categories + " !<< /^(?i:so|such|too|enough)$/ $-- (/^(?:VB|AUX)/ < " + copularWordRegex + ") > (VP >+(VP) (S < " + IT_SUBJECT + ")))";
+  }
+
+  /**
+   * A clause extraposed from the subject position, written as
+   * conditions on an S or SBAR which is a sister of the predicate.
+   * Infinitives and clauses with "that", "whether" or "for" follow
+   * either an adjective or a noun: "it is hard to change a habit", "it
+   * was a shame that he left".  Wh-clauses and clauses with no
+   * complementizer follow only an adjective, as in "it is amazing how
+   * lax New Delhi has been", since after a noun they are relative
+   * clauses, as in the cleft "it was John who left".  A where or when
+   * clause counts only after an adjective about knowing, as in "it
+   * wasn't clear when the pace will resume", not in "it's nice when
+   * people say so".  A clause with "if", as in "it would be nice if he
+   * came", is an adverbial clause, and so is an infinitive set off by a
+   * comma right after the predicate, as in "it's been annoying, to say
+   * the least".
+   * There are no traces in parser output, so the clause is found by its
+   * position after the predicate rather than by an *EXP* trace.
+   */
+  /**
+   * Adjectives about knowing, after which a where or when clause is an
+   * extraposed subject, as in "it wasn't clear when the normal pace will
+   * resume".  After other adjectives, as in "it's nice when people say
+   * so", the clause is an adverbial clause and "it" is the subject.
+   */
+  private static final String KNOWLEDGE_ADJECTIVE_REGEX =
+    "/^(?i:clear|unclear|certain|uncertain|obvious|evident|apparent|known|unknown|doubtful|plain)$/";
+
+  private static final String EXTRAPOSED_CLAUSE =
+    "[ [ < (VP <, TO) !< NP !$- (/^,$/ $- (ADJP|NP $- (/^(?:VB|AUX)/ < " + copularWordRegex + "))) | <, (IN < /^(?i:that|whether)$/) | <, (IN < /^(?i:for)$/) < (S < (VP <, TO)) ] $-- " + extraposingPredicate("ADJP|NP") +
+    " | [ <, WHNP|WHADJP | <, (WHADVP < (WRB < /^(?i:how|why)$/)) | <, S ] $-- " + extraposingPredicate("ADJP") +
+    " | <, (WHADVP < (WRB < /^(?i:where|when)$/)) $-- " + extraposingPredicate("ADJP < (JJ < " + KNOWLEDGE_ADJECTIVE_REGEX + ")") + " ]";
+
+  /**
+   * An S with no verb of its own, such as the headline "India unhappy
+   * with Lanka" or the absolute "with Bush in office".  Under a VP it is
+   * a small clause, and under an SBAR other than one with "with" or
+   * "without" it usually has no subject, as in "though long a leader in
+   * the business", so the rules using this also check the parent with
+   * VERBLESS_CLAUSE_PARENT.  The predicate is the head; see
+   * UniversalSemanticHeadFinder.
+   */
+  private static final String VERBLESS_CLAUSE_CONDITION =
+    "!< VP|S|SBAR|SINV|SQ|SBARQ|FRAG|UCP|TO";
+
+  private static final String SUBJECTLESS_SBAR =
+    "(SBAR !< (IN < /^(?i:with|without)$/))";
+
+  private static final String VERBLESS_CLAUSE_PARENT =
+    "!> VP !> " + SUBJECTLESS_SBAR;
+
+  /**
+   * The subject of a verbless clause is the first NP, with a predicate
+   * after it.  An existential "there" is not a subject.
+   */
+  private static final String VERBLESS_SUBJECT_CONDITION =
+    "!<: EX !$-- NP $++ ADJP|PP|ADVP|NP";
+
+  /**
+   * Keeps an extraposed clause out of the ccomp and advcl rules,
+   * which would otherwise win over csubj for the same clause
+   */
+  private static final String NOT_EXTRAPOSED_CLAUSE = "!" + EXTRAPOSED_CLAUSE;
+
   public static final GrammaticalRelation NOMINAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nsubj", "nominal subject",
         SUBJECT, "S|SQ|SBARQ|SINV|SBAR|PRN", tregexCompiler,
-            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO))",
+            // the subject of a to clause or a small clause under a verb is
+            // the obj of that verb instead; see SMALL_CLAUSE_VP.  A possessive
+            // stays the nsubj of its gerund; see POSSESSIVE
+            "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO) [ !$- " + SMALL_CLAUSE_VERB + " | !< (=verb <, " + SMALL_CLAUSE_VP + ") | < (=target " + POSSESSIVE + ") ])",
             "S < ( NP=target <# (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
             "SQ|PRN < (NP=target !< EX $++ VP)",
             "SQ < (NP=target !< EX $- (/^(?:VB|AUX)/ < " + copularWordRegex + ") !$++ VP)",
@@ -336,6 +472,13 @@ public class UniversalEnglishGrammaticalRelations {
             "SINV < (NP $++ (NP=target $++ (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
             //matches subj in xcomp like "He considered him a friend"
             "S < (NP=target $+ NP|ADJP) > VP",
+            // matches subj in a verbless clause, such as the headline
+            // "India unhappy with Lanka" or the absolute "with Bush in
+            // office"; the predicate is the head, see UniversalSemanticHeadFinder
+            "S " + VERBLESS_CLAUSE_PARENT + " " + VERBLESS_CLAUSE_CONDITION + " < (NP=target " + VERBLESS_SUBJECT_CONDITION + ")",
+            // under an SBAR such as "if" or "though", only an ADJP predicate
+            // is clear enough, as in "if no margin agreed"
+            "S > " + SUBJECTLESS_SBAR + " " + VERBLESS_CLAUSE_CONDITION + " < (NP=target !<: EX !$-- NP $++ ADJP)",
             // matches subj in relative clauses
             "SBAR < WHNP=target [ < (S < (VP !$-- NP) !< SBAR) | < (VP !$-- NP) !< S ]",  // second disjunct matches errors where there is no S under SBAR and otherwise does no harm
             // matches subj in relative clauses
@@ -346,6 +489,8 @@ public class UniversalEnglishGrammaticalRelations {
             "S < (NP < EX) <+(VP) (VP < NP=target)",
             // matches (what, that) in "what is that" after the SQ has been flattened out of the tree
             "SBARQ < (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (WHNP < WP) < NP=target",
+            // matches (old, cousin) in "How old is your cousin?" after the SQ has been flattened out of the tree
+            "SBARQ < (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ NP=target) < WHADJP",
             // matches (what, wrong) in "what is wrong with ..." after the SQ has been flattened out of the tree
             // note that in that case "wrong" is taken as the head thanks to UniversalSemanticHeadFinder hackery
             // The !$++ matches against (what, worth) in What is UAL stock worth?
@@ -370,7 +515,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation NOMINAL_PASSIVE_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nsubj:pass", "nominal passive subject",
         NOMINAL_SUBJECT, "S|SQ", tregexCompiler,
-            "S|SQ < (WHNP|NP=target !< EX) < (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + ")  < (VP < VBN|VBD))");
+            "S|SQ < (WHNP|NP=target !< EX) < (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + ")  < (VP < " + PASSIVE_PARTICIPLE + "))");
 
 
   /**
@@ -384,7 +529,9 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CLAUSAL_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "csubj", "clausal subject",
         SUBJECT, "S", tregexCompiler,
-            "S < (SBAR|S=target !$+ /^,$/ $++ (VP !$-- NP))");
+            "S < (SBAR|S=target !$+ /^,$/ $++ (VP !$-- NP))",
+            // a clause extraposed from the subject, with "it" as expl
+            "S < (" + IT_SUBJECT + " $++ (VP <+(VP) (/^(?:S|SBAR)$/=target " + EXTRAPOSED_CLAUSE + ")))");
 
 
 
@@ -398,8 +545,8 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CLAUSAL_PASSIVE_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "csubj:pass", "clausal passive subject",
         CLAUSAL_SUBJECT, "S", tregexCompiler,
-            "S < (SBAR|S=target !$+ /^,$/ $++ (VP < (VP < VBN|VBD) < (/^(?:VB|AUXG?)/ < " + passiveAuxWordRegex + ") !$-- NP))",
-            "S < (SBAR|S=target !$+ /^,$/ $++ (VP <+(VP) (VP < VBN|VBD > (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + "))) !$-- NP))");
+            "S < (SBAR|S=target !$+ /^,$/ $++ (VP < (VP < " + PASSIVE_PARTICIPLE + ") < (/^(?:VB|AUXG?)/ < " + passiveAuxWordRegex + ") !$-- NP))",
+            "S < (SBAR|S=target !$+ /^,$/ $++ (VP <+(VP) (VP < " + PASSIVE_PARTICIPLE + " > (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + "))) !$-- NP))");
 
 
 
@@ -442,6 +589,9 @@ public class UniversalEnglishGrammaticalRelations {
 
             // Examples such as "Rolls-Royce expects sales to remain steady"
             "VP < (S < (NP|WHNP=target $++ (VP < TO)))",
+
+            // small clauses such as "leaves patients facing a wait"
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S < (NP|WHNP=target " + NOT_POSSESSIVE + " $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
 
             // This matches rare cases of misparses, such as "What
             // disease causes cancer?" where the "causes" does not get a
@@ -536,20 +686,27 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "ccomp", "clausal complement",
         COMPLEMENT, "VP|SINV|S|ADJP|ADVP", tregexCompiler,
-            // Weird case of verbs with direct S complement that is not an infinitive or participle
-            // ("I saw [him take the cake].", "making [him go crazy]")
-            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP)",
+            // Weird case of verbs with direct S complement that is not an infinitive or participle.
+            // Small clauses with a bare verb right after the verb,
+            // "I saw [him take the cake]", are xcomp instead; see SMALL_CLAUSE_VP
+            "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP [ !$- " + SMALL_CLAUSE_VERB + " | !< (NP $++ (VP <, VB)) ])",
+            // a gerund clause with a possessive subject, as in
+            // "opposed Canada's joining" or "necessitated our filing Chapter 11"
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S=target < (NP " + POSSESSIVE + " $++ (VP <, VBG))))",
             // the canonical case of a SBAR[that] with an overt "that" or "whether"
-            "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",
+            "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/) " + NOT_EXTRAPOSED_CLAUSE + ")",
             // Conjoined SBAR otherwise in the canonical case
             "VP < (SBAR=target < (SBAR < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/)) < CC|CONJP)",
             // This finds most ccomp SBAR[that] with omission of that, but only ones without dobj
-            "VP < (SBAR=target < (S < VP) !$-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
+            "VP < (SBAR=target < (S < VP) !$-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB) " + NOT_EXTRAPOSED_CLAUSE + ")",
+            // the same for coordinated clauses, as in "I wonder who came and
+            // what they brought", where the first conjunct is the head
+            "VP < (SBAR=target < CC|CONJP <# (SBAR < (S < VP) !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB)) !$-- NP)",
             // Find ccomp SBAR[that] after dobj for clear marker verbs
             "VP < (/^V/ < " + ccompObjVerbRegex + ") < (SBAR=target < (S < VP) $-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
-            "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)))",
+            "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)) " + NOT_EXTRAPOSED_CLAUSE + ")",
             "VP < @SBARQ=target",  // Direct question: She asked "Who is in trouble"
-            "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",
+            "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < (VP !<, " + SMALL_CLAUSE_VP + "))",
             // !$-- @SBAR|S handles cases where the answer to the question
             //   "What do they ccompVerb?"
             //   is already answered by a different node
@@ -595,7 +752,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation XCLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "xcomp", "xclausal complement",
-        COMPLEMENT, "VP|ADJP|SINV", tregexCompiler,
+        COMPLEMENT, "VP|ADJP|SINV|SBARQ|SBAR", tregexCompiler,
             //"VP < (S=target [ !$-- NP $-- (/^V/ < " + xcompNoObjVerbRegex + ") | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
             "VP < (S=target [ !$-- NP | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
             "ADJP < (S=target <, (VP <, TO))",
@@ -623,7 +780,17 @@ public class UniversalEnglishGrammaticalRelations {
             //Former acomp expression
             "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
             // For new treebank xcomp changes, match V + NP + xcomp patterns
-            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))"
+            "VP < (/^V/ < " + xcompVerbRegex + ") < NP < (S=target < (VP < TO))",
+            // small clauses such as "leaves patients facing a wait", where
+            // the subject of the small clause is the obj of the verb
+            "VP < (" + SMALL_CLAUSE_VERB + " $+ (S=target < (NP " + NOT_POSSESSIVE + " $++ (VP <, " + SMALL_CLAUSE_VP + "))))",
+            // a fronted adjective which is the complement of the verb, as in
+            // "How old is she turning?" or "how ominous I found it".  Words
+            // of amount or extent, as in "How much did it cost?", are not,
+            // and neither is the predicate of a copula, which is the lowest
+            // VP of the clause: "how big it is", "how strong that turnaround
+            // will be at the computer maker"
+            "SBARQ|SBAR < (WHADJP=target <# (JJ|JJR !< /^(?i:much|many|little|few|long|far)$/) $+ (SQ|S < VP !< (VP [ (!< VP < (/^VB/ < " + copularWordRegex + ")) | <+(VP) (VP !< VP < (/^VB/ < " + copularWordRegex + ")) ])))"
         );
 
 
@@ -683,7 +850,9 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation EXPLETIVE =
     new GrammaticalRelation(Language.UniversalEnglish, "expl", "expletive",
         DEPENDENT, "S|SQ|SINV", tregexCompiler,
-            "S|SQ|SINV < (NP=target <+(NP) EX)");
+            "S|SQ|SINV < (NP=target <+(NP) EX)",
+            // "it" holding the place of a clause extraposed from the subject
+            "S < (NP=target " + IT_SUBJECT_CONDITION + " $++ (VP <+(VP) (/^(?:S|SBAR)$/ " + EXTRAPOSED_CLAUSE + ")))");
 
 
   /**
@@ -746,6 +915,8 @@ public class UniversalEnglishGrammaticalRelations {
                   "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
                   "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
                   "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S",
+                  // "Prices higher in Tokyo", where the clause has no verb
+                  "S " + VERBLESS_CLAUSE_PARENT + " " + VERBLESS_CLAUSE_CONDITION + " < (NP " + VERBLESS_SUBJECT_CONDITION + ") < (PP|PP-TMP=target !< SBAR|S)",
                   // For cases like "some uzi - toting guards" with new tokenization
                   "@ADJP > @NP < (@NP|NN|NNP|NNS|NNPS=target . (HYPH . VBN|VBG))"
           );
@@ -768,7 +939,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "advcl", "adverbial clause modifier",
         MODIFIER, "VP|S|SQ|SINV|SBARQ|NP|ADVP|ADJP", tregexCompiler,
-            "VP < (@SBAR=target <= (@SBAR [ < (IN|MWE !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ))",
+            "VP < (@SBAR=target <= (@SBAR [ < (IN|MWE !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ) " + NOT_EXTRAPOSED_CLAUSE + ")",
             "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
             // to get "rather than"
             //"S|SQ|SINV < (SBAR|SBAR-TMP=target <2 (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?$).*$/)",
@@ -781,8 +952,8 @@ public class UniversalEnglishGrammaticalRelations {
             // ":" indicates something that should be a parataxis
             // in cases where there are two SBARs conjoined, we're happy
             // to use the head SBAR as a candidate for this relation
-            "S|SQ < (@SBAR=target [ == @SBAR=sbar | <# @SBAR=sbar ] ): (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
-            "VP < (@SBAR=target !$-- /^:$/ [ == @SBAR=sbar | <# @SBAR=sbar ] ) [ !< (/^V/ < " + ccompVerbRegex + ") | < (=target $-- @SBAR|S) | ( !< (/^V/ < " + ccompObjVerbRegex + ") < (=target $-- NP)) ] : (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)))",
+            "S|SQ < (@SBAR=target " + NOT_EXTRAPOSED_CLAUSE + " [ == @SBAR=sbar | <# @SBAR=sbar ] ): (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)) !$-- /^:$/)",
+            "VP < (@SBAR=target !$-- /^:$/ " + NOT_EXTRAPOSED_CLAUSE + " [ == @SBAR=sbar | <# @SBAR=sbar ] ) [ !< (/^V/ < " + ccompVerbRegex + ") | < (=target $-- @SBAR|S) | ( !< (/^V/ < " + ccompObjVerbRegex + ") < (=target $-- NP)) ] : (=sbar < (WHADVP|WHNP < (WRB !< /^(?i:how)$/) !$-- /^(?!RB|ADVP).*$/) !< (S < (VP < TO)))",
             // "S|SQ < (PP=target <, RB < @S)", // caught as prep and pcomp.
             "@S < (@SBAR=target $++ @NP $++ @VP)",  // fronted adverbial clause
             "@S < (@S=target < (VP < TO) $+ (/^,$/ $++ @NP))", // part of former purpcl: This is fronted infinitives: "To find out why, we went to ..."
@@ -814,7 +985,10 @@ public class UniversalEnglishGrammaticalRelations {
             // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
             // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
             // they wrote asking the SEC to ...
-            "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
+            "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") " + NOT_EXTRAPOSED_CLAUSE + ")",
+            // a purpose clause after an adverb which is the predicate of a
+            // copula, as in "I'm here to help"
+            "VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") !< /^(?:VP|ADJP|NP|UCP|PP|WHADJP|WHNP)(?:-(?!TMP|ADV).*)?$/ < (" + COPULAR_ADVERB + " $++ (S=target < (VP <, TO) !< NP))",
             //"VP < (S=target < (VP < TO) !$-- (/^V/ < " + xcompNoObjVerbRegex + ") )",
 
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
@@ -1199,6 +1373,9 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "obl:npmod", "noun phrase adverbial modifier",
         MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP|QP)(?:-TMP|-ADV)?", tregexCompiler,
             "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
+            // a measure phrase after a predicate adverb, as in "the Dow was
+            // down 80.53 points" or "was up 3/4"
+            "@ADVP <# (/^(?:RB|IN|RP)/ < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + " $+ (@NP|QP|CD=target !< NNP|NNPS))",
             // one word nouns like "cost efficient", "ice-free"
             "@ADJP < (NN=target $++ /^JJ/) !< CC|CONJP",
             "@ADVP <# (/^(RB|ADVP)/ $++ @NP=target)", //up 20%, once a week, ...
@@ -1231,6 +1408,7 @@ public class UniversalEnglishGrammaticalRelations {
             // combining expressions into a single disjunction should improve speed a little
             "@PP < (IN|TO|VBG|FW $++ (@NP [ $+ NP-TMP=target | $+ (NP=target <# (/^NN/ < " + timeWordRegex + ")) ]))",
             "S < (NP-TMP=target $++ VP $ NP )",
+            "S " + VERBLESS_CLAUSE_PARENT + " " + VERBLESS_CLAUSE_CONDITION + " < (NP " + VERBLESS_SUBJECT_CONDITION + ") < NP-TMP=target",
             "S < (NP=target <# (/^NN/ < " + timeWordRegex + ") $++ (NP $++ VP))",
             // matches when relative clauses as temporal modifiers of verbs!
             "SBAR < (@WHADVP < (WRB < when)) < (S < (NP $+ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) ))) !$-- CC $-- NP > NP=target",

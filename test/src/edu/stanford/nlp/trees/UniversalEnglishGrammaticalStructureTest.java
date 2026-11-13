@@ -267,6 +267,276 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nsubj(continue-7, yields-6)\n" +
            "conj(reinvestment-3, continue-7)\n"},
          {TestType.BASIC,
+          "(ROOT (S (NP (DT This) (NN tin) (NN can)) (VP (VBZ contains) (NNS beets)) (. .)))",
+          "det(can-3, This-1)\n" +
+           "compound(can-3, tin-2)\n" +
+           "nsubj(contains-4, can-3)\n" +
+           "root(ROOT-0, contains-4)\n" +
+           "obj(contains-4, beets-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD put) (NN salt) (PP (IN in) (NN soup))) (. .)))",
+          "nsubj(put-2, He-1)\n" +
+           "root(ROOT-0, put-2)\n" +
+           "obj(put-2, salt-3)\n" +
+           "case(soup-5, in-4)\n" +
+           "obl(put-2, soup-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NN Salt) (VP (VBZ helps)) (. .)))",
+          "nsubj(helps-2, Salt-1)\n" +
+           "root(ROOT-0, helps-2)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD bought) (NN salt) (CC and) (NN pepper)) (. .)))",
+          "nsubj(bought-2, He-1)\n" +
+           "root(ROOT-0, bought-2)\n" +
+           "obj(bought-2, salt-3)\n" +
+           "cc(pepper-5, and-4)\n" +
+           "conj(salt-3, pepper-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP They)) (VP (NN yield) (NP (JJR more) (NN output))) (. .)))",
+          "nsubj(yield-2, They-1)\n" +
+           "root(ROOT-0, yield-2)\n" +
+           "amod(output-4, more-3)\n" +
+           "obj(yield-2, output-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP You)) (VP (MD shall) (RB not) (VB pass)) (. .)))",
+          "nsubj(pass-4, You-1)\n" +
+           "aux(pass-4, shall-2)\n" +
+           "advmod(pass-4, not-3)\n" +
+           "root(ROOT-0, pass-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (MD will) (VB eat) (NN cake)) (. .)))",
+          "nsubj(eat-3, He-1)\n" +
+           "aux(eat-3, will-2)\n" +
+           "root(ROOT-0, eat-3)\n" +
+           "obj(eat-3, cake-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (DT A) (NN shortage)) (VP (VBZ leaves) (S (NP (NNS patients)) (VP (VBG facing) (NP (DT a) (NN wait))))) (. .)))",
+          "det(shortage-2, A-1)\n" +
+           "nsubj(leaves-3, shortage-2)\n" +
+           "root(ROOT-0, leaves-3)\n" +
+           "obj(leaves-3, patients-4)\n" +
+           "xcomp(leaves-3, facing-5)\n" +
+           "det(wait-7, a-6)\n" +
+           "obj(facing-5, wait-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP They)) (VP (VBP see) (S (NP (NN resistance)) (ADVP (RB finally)) (VP (VBG crumbling)))) (. .)))",
+          "nsubj(see-2, They-1)\n" +
+           "root(ROOT-0, see-2)\n" +
+           "obj(see-2, resistance-3)\n" +
+           "advmod(crumbling-5, finally-4)\n" +
+           "xcomp(see-2, crumbling-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBD necessitated) (S (NP (PRP$ our)) (VP (VBG filing) (NP (NN Chapter) (CD 11))))) (. .)))",
+          "nsubj(necessitated-2, It-1)\n" +
+           "root(ROOT-0, necessitated-2)\n" +
+           "nsubj(filing-4, our-3)\n" +
+           "ccomp(necessitated-2, filing-4)\n" +
+           "obj(filing-4, Chapter-5)\n" +
+           "nummod(Chapter-5, 11-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (DT Some) (NNS commentators)) (VP (VBP have) (VP (VBN opposed) (S (NP (NNP Canada) (POS 's)) (VP (VBG joining) (NP (DT the) (NN group)))))) (. .)))",
+           "det(commentators-2, Some-1)\n" +
+           "nsubj(opposed-4, commentators-2)\n" +
+           "aux(opposed-4, have-3)\n" +
+           "root(ROOT-0, opposed-4)\n" +
+           "nsubj(joining-7, Canada-5)\n" +
+           "case(Canada-5, 's-6)\n" +
+           "ccomp(opposed-4, joining-7)\n" +
+           "det(group-9, the-8)\n" +
+           "obj(joining-7, group-9)\n"},
+         // 's here is a mistagged "us", not a possessive
+         {TestType.BASIC,
+          "(ROOT (S (VP (VB Let) (S (NP (POS 's)) (VP (VB close) (NP (DT the) (NN door))))) (. .)))",
+           "root(ROOT-0, Let-1)\n" +
+           "obj(Let-1, 's-2)\n" +
+           "xcomp(Let-1, close-3)\n" +
+           "det(door-5, the-4)\n" +
+           "obj(close-3, door-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (MD will) (VP (VB be) (S (NP (NNP Janet)) (VP (VBG signing))))) (. .)))",
+          "nsubj(Janet-4, It-1)\n" +
+           "aux(Janet-4, will-2)\n" +
+           "cop(Janet-4, be-3)\n" +
+           "root(ROOT-0, Janet-4)\n" +
+           "acl(Janet-4, signing-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NN Soup)) (VP (MD can) (VP (VB make) (S (NP (PRP you)) (VP (VB feel) (ADJP (JJR better)))))) (. .)))",
+          "nsubj(make-3, Soup-1)\n" +
+           "aux(make-3, can-2)\n" +
+           "root(ROOT-0, make-3)\n" +
+           "obj(make-3, you-4)\n" +
+           "xcomp(make-3, feel-5)\n" +
+           "xcomp(feel-5, better-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADJP (WRB How) (JJ old)) (SQ (VBZ is) (NP (PRP$ your) (NN cousin))) (. ?)))",
+          "advmod(old-2, How-1)\n" +
+           "root(ROOT-0, old-2)\n" +
+           "cop(old-2, is-3)\n" +
+           "nmod:poss(cousin-5, your-4)\n" +
+           "nsubj(old-2, cousin-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADJP (WRB How) (JJ old)) (SQ (VBZ is) (NP (PRP she)) (VP (VBG turning))) (. ?)))",
+          "advmod(old-2, How-1)\n" +
+           "xcomp(turning-5, old-2)\n" +
+           "aux(turning-5, is-3)\n" +
+           "nsubj(turning-5, she-4)\n" +
+           "root(ROOT-0, turning-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP wonder) (SBAR (WHADJP (WRB how) (JJ strong)) (S (NP (PRP it)) (VP (MD will) (VP (VB be) (PP (IN at) (NP (DT the) (NN plant)))))))) (. .)))",
+          "nsubj(wonder-2, I-1)\n" +
+           "root(ROOT-0, wonder-2)\n" +
+           "advmod(strong-4, how-3)\n" +
+           "ccomp(wonder-2, strong-4)\n" +
+           "nsubj(strong-4, it-5)\n" +
+           "aux(strong-4, will-6)\n" +
+           "cop(strong-4, be-7)\n" +
+           "case(plant-10, at-8)\n" +
+           "det(plant-10, the-9)\n" +
+           "obl(strong-4, plant-10)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP wonder) (SBAR (WHADJP (WRB how) (JJ big)) (S (NP (PRP it)) (VP (VBZ is))))) (. .)))",
+          "nsubj(wonder-2, I-1)\n" +
+           "root(ROOT-0, wonder-2)\n" +
+           "advmod(big-4, how-3)\n" +
+           "ccomp(wonder-2, big-4)\n" +
+           "nsubj(big-4, it-5)\n" +
+           "cop(big-4, is-6)\n"},
+         // coordinated wh-clauses, where the first conjunct is the head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP wonder) (SBAR (SBAR (WHNP (WP who)) (S (VP (VBD came)))) (CC and) (SBAR (WHNP (WP what)) (S (NP (PRP they)) (VP (VBD brought)))))) (. .)))",
+          "nsubj(wonder-2, I-1)\n" +
+           "root(ROOT-0, wonder-2)\n" +
+           "nsubj(came-4, who-3)\n" +
+           "ccomp(wonder-2, came-4)\n" +
+           "cc(brought-8, and-5)\n" +
+           "obj(brought-8, what-6)\n" +
+           "nsubj(brought-8, they-7)\n" +
+           "conj(came-4, brought-8)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBD remembered) (SBAR (SBAR (WHADJP (WRB how) (JJ hard)) (S (NP (PRP it)) (VP (VBD was)))) (CC and) (SBAR (WHNP (WDT what) (NNS pitfalls)) (S (VP (VBD awaited) (NP (PRP us))))))) (. .)))",
+          "nsubj(remembered-2, I-1)\n" +
+           "root(ROOT-0, remembered-2)\n" +
+           "advmod(hard-4, how-3)\n" +
+           "ccomp(remembered-2, hard-4)\n" +
+           "nsubj(hard-4, it-5)\n" +
+           "cop(hard-4, was-6)\n" +
+           "cc(awaited-10, and-7)\n" +
+           "det(pitfalls-9, what-8)\n" +
+           "nsubj(awaited-10, pitfalls-9)\n" +
+           "conj(hard-4, awaited-10)\n" +
+           "obj(awaited-10, us-11)\n"},
+         // the clause after the copula does not keep the adjective from moving
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBD realized) (SBAR (WHADJP (WRB how) (JJ difficult)) (S (NP (PRP it)) (VP (VBZ is) (SBAR (IN for) (S (NP (DT a) (NN person)) (VP (TO to) (VP (VB live)))))))))) (. .)))",
+          "nsubj(realized-2, I-1)\n" +
+           "root(ROOT-0, realized-2)\n" +
+           "advmod(difficult-4, how-3)\n" +
+           "ccomp(realized-2, difficult-4)\n" +
+           "expl(difficult-4, it-5)\n" +
+           "cop(difficult-4, is-6)\n" +
+           "mark(live-11, for-7)\n" +
+           "det(person-9, a-8)\n" +
+           "nsubj(live-11, person-9)\n" +
+           "mark(live-11, to-10)\n" +
+           "csubj(difficult-4, live-11)\n"},
+         // a clause extraposed from the subject, with "it" as expl
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ hard)) (S (VP (TO to) (VP (VB change) (NP (DT a) (NN habit)))))) (. .)))",
+          "expl(hard-3, It-1)\n" +
+           "cop(hard-3, is-2)\n" +
+           "root(ROOT-0, hard-3)\n" +
+           "mark(change-5, to-4)\n" +
+           "csubj(hard-3, change-5)\n" +
+           "det(habit-7, a-6)\n" +
+           "obj(change-5, habit-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (MD would) (VP (VB have) (VP (VBN been) (NP (DT a) (NN shame)) (SBAR (IN that) (S (NP (PRP he)) (VP (VBD left))))))) (. .)))",
+          "expl(shame-6, It-1)\n" +
+           "aux(shame-6, would-2)\n" +
+           "aux(shame-6, have-3)\n" +
+           "cop(shame-6, been-4)\n" +
+           "det(shame-6, a-5)\n" +
+           "root(ROOT-0, shame-6)\n" +
+           "mark(left-9, that-7)\n" +
+           "nsubj(left-9, he-8)\n" +
+           "csubj(shame-6, left-9)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ unclear)) (SBAR (WHNP (WP what)) (S (NP (PRP he)) (VP (VBZ wants))))) (. .)))",
+          "expl(unclear-3, It-1)\n" +
+           "cop(unclear-3, is-2)\n" +
+           "root(ROOT-0, unclear-3)\n" +
+           "obj(wants-6, what-4)\n" +
+           "nsubj(wants-6, he-5)\n" +
+           "csubj(unclear-3, wants-6)\n"},
+         // a why clause after any adjective, but a when clause only after
+         // an adjective about knowing
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (RB n't) (ADJP (JJ clear)) (SBAR (WHADVP (WRB why)) (S (NP (DT that)) (VP (MD should) (VP (VB be) (ADVP (RB so))))))) (. .)))",
+          "expl(clear-4, It-1)\n" +
+           "cop(clear-4, is-2)\n" +
+           "advmod(clear-4, n't-3)\n" +
+           "root(ROOT-0, clear-4)\n" +
+           "advmod(be-8, why-5)\n" +
+           "nsubj(be-8, that-6)\n" +
+           "aux(be-8, should-7)\n" +
+           "csubj(clear-4, be-8)\n" +
+           "advmod(be-8, so-9)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ 's) (ADJP (JJ nice)) (SBAR (WHADVP (WRB when)) (S (NP (NNS people)) (VP (VBP say) (ADVP (RB so)))))) (. .)))",
+          "nsubj(nice-3, It-1)\n" +
+           "cop(nice-3, 's-2)\n" +
+           "root(ROOT-0, nice-3)\n" +
+           "advmod(say-6, when-4)\n" +
+           "nsubj(say-6, people-5)\n" +
+           "advcl(nice-3, say-6)\n" +
+           "advmod(say-6, so-7)\n"},
+         // an infinitive set off by a comma right after the predicate is not extraposed
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ 's) (ADJP (JJ annoying)) (, ,) (S (VP (TO to) (VP (VB say) (NP (DT the) (JJS least)))))) (. .)))",
+          "nsubj(annoying-3, It-1)\n" +
+           "cop(annoying-3, 's-2)\n" +
+           "root(ROOT-0, annoying-3)\n" +
+           "mark(say-6, to-5)\n" +
+           "xcomp(annoying-3, say-6)\n" +
+           "det(least-8, the-7)\n" +
+           "obj(say-6, least-8)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ difficult)) (, ,) (ADVP (RB however)) (, ,) (S (VP (TO to) (VP (VB justify) (NP (PRP it)))))) (. .)))",
+          "expl(difficult-3, It-1)\n" +
+           "cop(difficult-3, is-2)\n" +
+           "root(ROOT-0, difficult-3)\n" +
+           "advmod(difficult-3, however-5)\n" +
+           "mark(justify-8, to-7)\n" +
+           "csubj(difficult-3, justify-8)\n" +
+           "obj(justify-8, it-9)\n"},
+         // an infinitive inside the adjective phrase is its complement, and
+         // a clause with if is an adverbial clause, so it stays nsubj
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADJP (JJ ready) (S (VP (TO to) (VP (VB spawn)))))) (. .)))",
+          "nsubj(ready-3, It-1)\n" +
+           "cop(ready-3, is-2)\n" +
+           "root(ROOT-0, ready-3)\n" +
+           "mark(spawn-5, to-4)\n" +
+           "xcomp(ready-3, spawn-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (MD would) (VP (VB be) (ADJP (JJ nice)) (SBAR (IN if) (S (NP (PRP he)) (VP (VBD came)))))) (. .)))",
+          "nsubj(nice-4, It-1)\n" +
+           "aux(nice-4, would-2)\n" +
+           "cop(nice-4, be-3)\n" +
+           "root(ROOT-0, nice-4)\n" +
+           "mark(came-7, if-5)\n" +
+           "nsubj(came-7, he-6)\n" +
+           "advcl(nice-4, came-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADJP (WRB How) (JJ deep)) (SQ (VBZ is) (NP (PRP it)) (VP (VBG going) (S (VP (TO to) (VP (VB be)))))) (. ?)))",
+          "advmod(deep-2, How-1)\n" +
+           "xcomp(going-5, deep-2)\n" +
+           "aux(going-5, is-3)\n" +
+           "nsubj(going-5, it-4)\n" +
+           "root(ROOT-0, going-5)\n" +
+           "mark(deep-2, to-6)\n" +
+           "cop(deep-2, be-7)\n"},
+         {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ ready) (S (VP (TO to) (VP (VB leave)))))) (. .)))",
           "nsubj(ready-3, I-1)\n" +
            "cop(ready-3, am-2)\n" +
@@ -458,9 +728,243 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
          {TestType.BASIC,
           "(ROOT (S (NP (DT The) (NN man)) (VP (VBZ is) (ADVP (RB here))) (. .)))",
           "det(man-2, The-1)\n" +
-           "nsubj(is-3, man-2)\n" +
+           "nsubj(here-4, man-2)\n" +
+           "cop(here-4, is-3)\n" +
+           "root(ROOT-0, here-4)\n"},
+         // a purpose clause after an adverb predicate is advcl
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP 'm) (ADVP (RB here)) (S (VP (TO to) (VP (VB help))))) (. .)))",
+          "nsubj(here-3, I-1)\n" +
+           "cop(here-3, 'm-2)\n" +
+           "root(ROOT-0, here-3)\n" +
+           "mark(help-5, to-4)\n" +
+           "advcl(here-3, help-5)\n"},
+         // other adverbs after a copula are modifiers
+         {TestType.BASIC,
+          "(ROOT (S (NP (DT The) (NN goal)) (VP (VBZ is) (ADVP (RB simply)) (S (VP (TO to) (VP (VB win))))) (. .)))",
+          "det(goal-2, The-1)\n" +
+           "nsubj(is-3, goal-2)\n" +
            "root(ROOT-0, is-3)\n" +
-           "advmod(is-3, here-4)\n"},
+           "advmod(is-3, simply-4)\n" +
+           "mark(win-6, to-5)\n" +
+           "xcomp(is-3, win-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBZ is) (ADVP (RB still)) (ADVP (RB there))) (. .)))",
+          "nsubj(there-4, He-1)\n" +
+           "cop(there-4, is-2)\n" +
+           "advmod(there-4, still-3)\n" +
+           "root(ROOT-0, there-4)\n"},
+         // the adverb is the head of its ADVP, with the measure as obl:npmod
+         {TestType.BASIC,
+          "(ROOT (S (NP (DT The) (NNP Dow)) (VP (VBD was) (ADVP (IN down) (NP (CD 80.53) (NNS points)))) (. .)))",
+          "det(Dow-2, The-1)\n" +
+           "nsubj(down-4, Dow-2)\n" +
+           "cop(down-4, was-3)\n" +
+           "root(ROOT-0, down-4)\n" +
+           "nummod(points-6, 80.53-5)\n" +
+           "obl:npmod(down-4, points-6)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Earnings)) (VP (VBD were) (ADVP (RB down) (RB slightly))) (. .)))",
+          "nsubj(down-3, Earnings-1)\n" +
+           "cop(down-3, were-2)\n" +
+           "root(ROOT-0, down-3)\n" +
+           "advmod(down-3, slightly-4)\n"},
+         // far before another adverb is a degree adverb, not the head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBD fell) (ADVP (RB far) (RB short) (PP (IN of) (NP (DT the) (NN goal))))) (. .)))",
+          "nsubj(fell-2, It-1)\n" +
+           "root(ROOT-0, fell-2)\n" +
+           "advmod(short-4, far-3)\n" +
+           "advmod(fell-2, short-4)\n" +
+           "case(goal-7, of-5)\n" +
+           "det(goal-7, the-6)\n" +
+           "obl(short-4, goal-7)\n"},
+         // the inverted "here's", with the adverb outside the VP or moved into it
+         {TestType.BASIC,
+          "(ROOT (SINV (ADVP (RB Here)) (VP (VBZ is)) (NP (DT the) (NN link)) (. :)))",
+          "root(ROOT-0, Here-1)\n" +
+           "cop(Here-1, is-2)\n" +
+           "det(link-4, the-3)\n" +
+           "nsubj(Here-1, link-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (SINV (SBAR (IN If) (S (NP (PRP you)) (VP (VBP start)))) (, ,) (ADVP (RB here)) (VP (VBZ 's)) (NP (DT the) (NN sum)) (. .)))",
+          "mark(start-3, If-1)\n" +
+           "nsubj(start-3, you-2)\n" +
+           "advcl(here-5, start-3)\n" +
+           "root(ROOT-0, here-5)\n" +
+           "cop(here-5, 's-6)\n" +
+           "det(sum-8, the-7)\n" +
+           "nsubj(here-5, sum-8)\n"},
+         {TestType.BASIC,
+          "(ROOT (SINV (ADVP (RB There)) (VP (VBZ goes)) (NP (DT the) (NN bus)) (. .)))",
+          "advmod(goes-2, There-1)\n" +
+           "root(ROOT-0, goes-2)\n" +
+           "det(bus-4, the-3)\n" +
+           "nsubj(goes-2, bus-4)\n"},
+         // a copula with a VP after it is an auxiliary, even after an adverb of place
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (ADVP (RBR further)) (VP (VBG investigating) (NP (DT the) (NNS causes)))) (. .)))",
+          "nsubj(investigating-4, It-1)\n" +
+           "aux(investigating-4, is-2)\n" +
+           "advmod(investigating-4, further-3)\n" +
+           "root(ROOT-0, investigating-4)\n" +
+           "det(causes-6, the-5)\n" +
+           "obj(investigating-4, causes-6)\n"},
+         // a PP after the subject is the predicate of a yes/no question
+         {TestType.BASIC,
+          "(ROOT (SQ (VBD Was) (NP (NNP bin) (NNP Laden)) (PP (IN behind) (NP (DT the) (NNS attacks))) (. ?)))",
+          "cop(attacks-6, Was-1)\n" +
+           "compound(Laden-3, bin-2)\n" +
+           "nsubj(attacks-6, Laden-3)\n" +
+           "case(attacks-6, behind-4)\n" +
+           "det(attacks-6, the-5)\n" +
+           "root(ROOT-0, attacks-6)\n"},
+         // why, how and when are adjuncts, so the question keeps its own predicate
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB Why)) (SQ (VBZ is) (NP (PRP he)) (ADVP (RB here))) (. ?)))",
+          "advmod(here-4, Why-1)\n" +
+           "cop(here-4, is-2)\n" +
+           "nsubj(here-4, he-3)\n" +
+           "root(ROOT-0, here-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB When)) (SQ (VBZ is) (NP (PRP he)) (PP (IN in) (NP (NN town)))) (. ?)))",
+          "advmod(town-5, When-1)\n" +
+           "cop(town-5, is-2)\n" +
+           "nsubj(town-5, he-3)\n" +
+           "case(town-5, in-4)\n" +
+           "root(ROOT-0, town-5)\n"},
+         // an existential question keeps the copula as the head
+         {TestType.BASIC,
+          "(ROOT (SQ (VBZ Is) (NP (EX there)) (NP (DT a) (NN book)) (PP (IN on) (NP (DT the) (NN table))) (. ?)))",
+          "root(ROOT-0, Is-1)\n" +
+           "expl(Is-1, there-2)\n" +
+           "det(book-4, a-3)\n" +
+           "nsubj(Is-1, book-4)\n" +
+           "case(table-7, on-5)\n" +
+           "det(table-7, the-6)\n" +
+           "obl(Is-1, table-7)\n"},
+         // the subject of a verbless headline is nsubj of its predicate
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNP India)) (ADJP (JJ unhappy) (PP (IN with) (NP (NNP Lanka))) (PP (IN over) (NP (NN fighting)))) (. .)))",
+          "nsubj(unhappy-2, India-1)\n" +
+           "root(ROOT-0, unhappy-2)\n" +
+           "case(Lanka-4, with-3)\n" +
+           "obl(unhappy-2, Lanka-4)\n" +
+           "case(fighting-6, over-5)\n" +
+           "obl(unhappy-2, fighting-6)\n"},
+         // a PP or ADVP after the subject is the predicate
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Stocks)) (PP (IN on) (NP (DT the) (NN rise))) (NP-TMP (NN today))))",
+          "nsubj(rise-4, Stocks-1)\n" +
+           "case(rise-4, on-2)\n" +
+           "det(rise-4, the-3)\n" +
+           "root(ROOT-0, rise-4)\n" +
+           "obl:tmod(rise-4, today-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Prices)) (ADVP (RBR higher)) (PP (IN in) (NP (NNP Tokyo)))))",
+          "nsubj(higher-2, Prices-1)\n" +
+           "root(ROOT-0, higher-2)\n" +
+           "case(Tokyo-4, in-3)\n" +
+           "obl(higher-2, Tokyo-4)\n"},
+         // the same goes for an absolute with "with"
+         {TestType.BASIC,
+          "(ROOT (S (PP (IN With) (S (NP (NNP Bush)) (PP (IN in) (NP (NN office))))) (, ,) (NP (NNS buyers)) (VP (VBD waited)) (. .)))",
+          "mark(office-4, With-1)\n" +
+           "nsubj(office-4, Bush-2)\n" +
+           "case(office-4, in-3)\n" +
+           "advcl(waited-7, office-4)\n" +
+           "nsubj(waited-7, buyers-6)\n" +
+           "root(ROOT-0, waited-7)\n"},
+         // PTB often puts the absolute under an SBAR instead
+         {TestType.BASIC,
+          "(ROOT (S (SBAR (IN With) (S (NP (NNS pros) (CC and) (NNS cons)) (PP (IN in) (NP (NN limbo))))) (, ,) (NP (PRP I)) (VP (VBP wait)) (. .)))",
+          "mark(limbo-6, With-1)\n" +
+           "nsubj(limbo-6, pros-2)\n" +
+           "cc(cons-4, and-3)\n" +
+           "conj(pros-2, cons-4)\n" +
+           "case(limbo-6, in-5)\n" +
+           "advcl(wait-9, limbo-6)\n" +
+           "nsubj(wait-9, I-8)\n" +
+           "root(ROOT-0, wait-9)\n"},
+         // "never" modifies the predicate rather than being it
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Sales)) (VP (VBD rose)) (, ,) (PP (IN with) (S (NP (DT the) (NN level)) (ADVP (RB never)) (NP (CD 21) (NN %)))) (. .)))",
+          "nsubj(rose-2, Sales-1)\n" +
+           "root(ROOT-0, rose-2)\n" +
+           "mark(%-9, with-4)\n" +
+           "det(level-6, the-5)\n" +
+           "nsubj(%-9, level-6)\n" +
+           "advmod(%-9, never-7)\n" +
+           "nummod(%-9, 21-8)\n" +
+           "advcl(rose-2, %-9)\n"},
+         // "been" is not a passive participle, so "'s" is "has" here
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBZ 's) (VP (VBN been) (ADJP (JJ happy)))) (. .)))",
+          "nsubj(happy-4, He-1)\n" +
+           "aux(happy-4, 's-2)\n" +
+           "cop(happy-4, been-3)\n" +
+           "root(ROOT-0, happy-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBZ 's) (VP (VBN been) (VP (VBN seen)))) (. .)))",
+          "nsubj:pass(seen-4, He-1)\n" +
+           "aux(seen-4, 's-2)\n" +
+           "aux:pass(seen-4, been-3)\n" +
+           "root(ROOT-0, seen-4)\n"},
+         // a fronted wh-adverb is the predicate of an empty copula
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBZ is) (NP (DT the) (NN station))) (. ?)))",
+          "root(ROOT-0, Where-1)\n" +
+           "cop(Where-1, is-2)\n" +
+           "det(station-4, the-3)\n" +
+           "nsubj(Where-1, station-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP know) (SBAR (WHADVP (WRB where)) (S (NP (PRP he)) (VP (VBZ is))))) (. .)))",
+          "nsubj(know-2, I-1)\n" +
+           "root(ROOT-0, know-2)\n" +
+           "ccomp(know-2, where-3)\n" +
+           "nsubj(where-3, he-4)\n" +
+           "cop(where-3, is-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBD knew) (SBAR (WHADVP (RB just) (WRB where)) (S (NP (PRP it)) (VP (VBD was))))) (. .)))",
+          "nsubj(knew-2, We-1)\n" +
+           "root(ROOT-0, knew-2)\n" +
+           "advmod(where-4, just-3)\n" +
+           "ccomp(knew-2, where-4)\n" +
+           "nsubj(where-4, it-5)\n" +
+           "cop(where-4, was-6)\n"},
+         // how with an adjective in a WHADVP has the adjective as the head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBP know) (SBAR (WHADVP (WRB how) (JJ useful)) (S (NP (PRP it)) (VP (VBZ is))))) (. .)))",
+          "nsubj(know-2, We-1)\n" +
+           "root(ROOT-0, know-2)\n" +
+           "advmod(useful-4, how-3)\n" +
+           "ccomp(know-2, useful-4)\n" +
+           "nsubj(useful-4, it-5)\n" +
+           "cop(useful-4, is-6)\n"},
+         // an adjunct where clause keeps the copula as its head
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Rates)) (VP (MD will) (VP (VB stay) (SBAR (WHADVP (WRB where)) (S (NP (PRP they)) (VP (VBP are)))))) (. .)))",
+          "nsubj(stay-3, Rates-1)\n" +
+           "aux(stay-3, will-2)\n" +
+           "root(ROOT-0, stay-3)\n" +
+           "advmod(are-6, where-4)\n" +
+           "nsubj(are-6, they-5)\n" +
+           "advcl(stay-3, are-6)\n"},
+         // a wh-adverb with a verb or another predicate stays an adjunct
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBP are) (NP (PRP you)) (VP (VBG going))) (. ?)))",
+          "advmod(going-4, Where-1)\n" +
+           "aux(going-4, are-2)\n" +
+           "nsubj(going-4, you-3)\n" +
+           "root(ROOT-0, going-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP I)) (VP (VBP know) (SBAR (WHADVP (WRB when)) (S (NP (PRP it)) (VP (VBD was) (ADJP (JJ late)))))) (. .)))",
+          "nsubj(know-2, I-1)\n" +
+           "root(ROOT-0, know-2)\n" +
+           "advmod(late-6, when-3)\n" +
+           "nsubj(late-6, it-4)\n" +
+           "cop(late-6, was-5)\n" +
+           "ccomp(know-2, late-6)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
           "case(city-3, In-1)\n" +
@@ -488,19 +992,19 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
           "(ROOT (S (NP (PDT All) (DT the) (NNS boys)) (VP (VBP are) (ADVP (RB here))) (. .)))",
           "det:predet(boys-3, All-1)\n" +
            "det(boys-3, the-2)\n" +
-           "nsubj(are-4, boys-3)\n" +
-           "root(ROOT-0, are-4)\n" +
-           "advmod(are-4, here-5)\n"},
+           "nsubj(here-5, boys-3)\n" +
+           "cop(here-5, are-4)\n" +
+           "root(ROOT-0, here-5)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
           "cc:preconj(boys-3, Both-1)\n" +
            "det(boys-3, the-2)\n" +
-           "nsubj(are-7, boys-3)\n" +
+           "nsubj(here-8, boys-3)\n" +
            "cc(girls-6, and-4)\n" +
            "det(girls-6, the-5)\n" +
            "conj(boys-3, girls-6)\n" +
-           "root(ROOT-0, are-7)\n" +
-           "advmod(are-7, here-8)\n"},
+           "cop(here-8, are-7)\n" +
+           "root(ROOT-0, here-8)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP They)) (VP (VBD shut) (PRT (RP down)) (NP (DT the) (NN station))) (. .)))",
           "nsubj(shut-2, They-1)\n" +
@@ -578,8 +1082,8 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "mark(have-7, to-6)\n" +
            "xcomp(deserve-5, have-7)\n" +
            "nmod:poss(head-9, her-8)\n" +
-           "nsubj(chopped-10, head-9)\n" +
-           "ccomp(have-7, chopped-10)\n" +
+           "obj(have-7, head-9)\n" +
+           "xcomp(have-7, chopped-10)\n" +
            "compound:prt(chopped-10, off-11)\n"},
          {TestType.BASIC,
           "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
@@ -698,10 +1202,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nmod(future-4, music-7)\n"},
          {TestType.BASIC,
           "( (SQ (VBZ Is) (NP-SBJ (DT the) (NN trouble)) (ADVP-PRD (RP over)) (. ?)))",
-          "root(ROOT-0, Is-1)\n" +
+          "cop(over-4, Is-1)\n" +
            "det(trouble-3, the-2)\n" +
-           "nsubj(Is-1, trouble-3)\n" +
-           "advmod(Is-1, over-4)\n"},
+           "nsubj(over-4, trouble-3)\n" +
+           "root(ROOT-0, over-4)\n"},
          {TestType.BASIC,
           "( (SBARQ (SBAR (IN Although) (S (NP (NNP Sue)) (VP (VBP is) (ADJP (JJ smart))))) (, ,) (WHNP (WP who)) (SQ (MD will) (VP (VB win))) (. ?)))",
           "mark(smart-4, Although-1)\n" +
@@ -953,12 +1457,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "aux(have-6, ca-4)\n" +
            "advmod(have-6, n't-5)\n" +
            "root(ROOT-0, have-6)\n" +
-           "nsubj(hearing-12, taxpayers-7)\n" +
+           "obj(have-6, taxpayers-7)\n" +
            "acl(taxpayers-7, coming-8)\n" +
            "case(audit-11, into-9)\n" +
            "det(audit-11, an-10)\n" +
            "obl(coming-8, audit-11)\n" +
-           "ccomp(have-6, hearing-12)\n" +
+           "xcomp(have-6, hearing-12)\n" +
            "obj(hearing-12, oohs-14)\n" +
            "cc(ahs-18, and-16)\n" +
            "conj(oohs-14, ahs-18)\n"},
@@ -1394,6 +1898,30 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "det(water-7, the-6)\n" +
                "obj(carry-5, water-7)\n"},
              {TestType.NON_COLLAPSED,
+              "(ROOT (S (VP (VB Do) (RB n't) (VP (VB make) (S (NP (NNP Peters)) (VP (VB wait))))) (. .)))",
+              "aux(make-3, Do-1)\n" +
+               "advmod(make-3, n't-2)\n" +
+               "root(ROOT-0, make-3)\n" +
+               "obj(make-3, Peters-4)\n" +
+               "nsubj:xsubj(wait-5, Peters-4)\n" +
+               "xcomp(make-3, wait-5)\n"},
+             {TestType.NON_COLLAPSED,
+              "(ROOT (S (NP (PRP They)) (VP (VBD painted) (NP (DT the) (NN door)) (ADJP (JJ red))) (. .)))",
+              "nsubj(painted-2, They-1)\n" +
+               "root(ROOT-0, painted-2)\n" +
+               "det(door-4, the-3)\n" +
+               "obj(painted-2, door-4)\n" +
+               "nsubj:xsubj(red-5, door-4)\n" +
+               "xcomp(painted-2, red-5)\n"},
+             {TestType.NON_COLLAPSED,
+              "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (NNS properties))))) (. .)))",
+              "nsubj(heard-2, They-1)\n" +
+               "root(ROOT-0, heard-2)\n" +
+               "case(asbestos-4, about-3)\n" +
+               "obl(heard-2, asbestos-4)\n" +
+               "xcomp(heard-2, having-5)\n" +
+               "obj(having-5, properties-6)\n"},
+             {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP Who) ) (SQ (VBZ is) (VP (VBG going) (S (VP (TO to) (VP (VB carry) (NP (DT the) (NN water) )))))) (. ?)))",
               "nsubj(going-3, Who-1)\n" +
                "nsubj:xsubj(carry-5, Who-1)\n" +
@@ -1587,16 +2115,16 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
                "obl(is-2, field-6)\n"},
              {TestType.BASIC,
               "(ROOT (SINV (ADVP (RB Here)) (VP (VBP are)) (NP (DT some) (NNS bags))))",
-              "advmod(are-2, Here-1)\n" +
-               "root(ROOT-0, are-2)\n" +
+              "root(ROOT-0, Here-1)\n" +
+               "cop(Here-1, are-2)\n" +
                "det(bags-4, some-3)\n" +
-               "nsubj(are-2, bags-4)\n"},
+               "nsubj(Here-1, bags-4)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (SINV (ADVP (RB Here)) (VP (VBP are)) (NP (DT some) (NNS bags))))",
-              "advmod(are-2, Here-1)\n" +
-               "root(ROOT-0, are-2)\n" +
+              "root(ROOT-0, Here-1)\n" +
+               "cop(Here-1, are-2)\n" +
                "det(bags-4, some-3)\n" +
-               "nsubj(are-2, bags-4)\n"},
+               "nsubj(Here-1, bags-4)\n"},
              {TestType.BASIC,
               "(ROOT (S (NP (PRP He)) (VP (VBZ is) (PP (IN in) (NP (DT the) (NN garden))))))",
               "nsubj(garden-5, He-1)\n" +
@@ -2199,12 +2727,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
               "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
               "cc:preconj(boys-3, Both-1)\n" +
                "det(boys-3, the-2)\n" +
-               "nsubj(are-7, boys-3)\n" +
+               "nsubj(here-8, boys-3)\n" +
                "cc(girls-6, and-4)\n" +
                "det(girls-6, the-5)\n" +
                "conj:and(boys-3, girls-6)\n" +
-               "root(ROOT-0, are-7)\n" +
-               "advmod(are-7, here-8)\n"},
+               "cop(here-8, are-7)\n" +
+               "root(ROOT-0, here-8)\n"},
              {TestType.COLLAPSED,
               "( (S (NP (NNP Fred)) (VP (VBD flew) (PP (IN across) (CC or) (IN across) (NP (NNP Serbia)))) (. .)))",
               "nsubj(flew-2, Fred-1)\n" +
@@ -2263,7 +2791,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
              {TestType.COLLAPSED,
               "( (S (NP (EX There)) (VP (VBZ 's) (ADVP (RB never)) (VP (VBN been) (NP (DT an) (NN exception)))) (. .)))",
               "expl(exception-6, There-1)\n" +
-               "aux:pass(exception-6, 's-2)\n" +
+               "aux(exception-6, 's-2)\n" +
                "advmod(exception-6, never-3)\n" +
                "cop(exception-6, been-4)\n" +
                "det(exception-6, an-5)\n" +
@@ -2303,13 +2831,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
               "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
               "cc:preconj(boys-3, Both-1)\n" +
                "det(boys-3, the-2)\n" +
-               "nsubj(are-7, boys-3)\n" +
+               "nsubj(here-8, boys-3)\n" +
                "cc(girls-6, and-4)\n" +
                "det(girls-6, the-5)\n" +
                "conj:and(boys-3, girls-6)\n" +
-               "nsubj(are-7, girls-6)\n" +
-               "root(ROOT-0, are-7)\n" +
-               "advmod(are-7, here-8)\n"},
+               "nsubj(here-8, girls-6)\n" +
+               "cop(here-8, are-7)\n" +
+               "root(ROOT-0, here-8)\n"},
              {TestType.CC_PROCESSED,
               "(ROOT (S (NP-SBJ-38 (DT Neither) (NP (PRP they) ) (CC nor) (NP (NNP Mr.) (NNP McAlpine) )) (VP (MD could) (VP (VB be) (VP (VBN reached) (NP (-NONE- *-38) ) (PP-PRP (IN for) (NP (NN comment) ))))) (. .) ))",
               "cc:preconj(they-2, Neither-1)\n" +
