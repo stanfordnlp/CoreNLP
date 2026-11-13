@@ -157,6 +157,13 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
+   * The participle of a passive.  "been" is the participle of "be"
+   * itself, so in "he's been happy" the "'s" is "has", not a passive
+   * auxiliary.
+   */
+  private static final String PASSIVE_PARTICIPLE = "(VBN|VBD !< /^(?i:been)$/)";
+
+  /**
     * The "passive auxiliary" grammatical relation. A passive auxiliary of a
     * clause is a
     * non-main verb of the clause which contains the passive information.
@@ -169,11 +176,11 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation AUX_PASSIVE_MODIFIER =
      new GrammaticalRelation(Language.UniversalEnglish, "aux:pass", "passive auxiliary",
          AUX_MODIFIER, "VP|SQ|SINV", tregexCompiler,
-         "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )",
-         "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < VBD|VBN))",
+         "VP < (/^(?:VB|AUX|POS)/=target < " + passiveAuxWordRegex + " ) < (VP|ADJP [ < " + PASSIVE_PARTICIPLE + " | < (VP|ADJP < " + PASSIVE_PARTICIPLE + ") < CC ] )",
+         "SQ|SINV < (/^(?:VB|AUX|POS)/=target < " + beAuxiliaryRegex + " $++ (VP < " + PASSIVE_PARTICIPLE + "))",
          // add handling of tricky VP fronting cases...
-         "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < VBD|VBN))",
-         "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ")) $-- (VP < VBD|VBN))");
+         "SINV < (VP=target < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ") $-- (VP < " + PASSIVE_PARTICIPLE + "))",
+         "SINV < (VP=target < (VP < (/^(?:VB|AUX|POS)/=aux < " + beAuxiliaryRegex + ")) $-- (VP < " + PASSIVE_PARTICIPLE + "))");
 
   /** An adverb which the head finder can make the predicate of a copula */
   private static final String COPULAR_ADVERB =
@@ -508,7 +515,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation NOMINAL_PASSIVE_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nsubj:pass", "nominal passive subject",
         NOMINAL_SUBJECT, "S|SQ", tregexCompiler,
-            "S|SQ < (WHNP|NP=target !< EX) < (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + ")  < (VP < VBN|VBD))");
+            "S|SQ < (WHNP|NP=target !< EX) < (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + ")  < (VP < " + PASSIVE_PARTICIPLE + "))");
 
 
   /**
@@ -538,8 +545,8 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CLAUSAL_PASSIVE_SUBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "csubj:pass", "clausal passive subject",
         CLAUSAL_SUBJECT, "S", tregexCompiler,
-            "S < (SBAR|S=target !$+ /^,$/ $++ (VP < (VP < VBN|VBD) < (/^(?:VB|AUXG?)/ < " + passiveAuxWordRegex + ") !$-- NP))",
-            "S < (SBAR|S=target !$+ /^,$/ $++ (VP <+(VP) (VP < VBN|VBD > (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + "))) !$-- NP))");
+            "S < (SBAR|S=target !$+ /^,$/ $++ (VP < (VP < " + PASSIVE_PARTICIPLE + ") < (/^(?:VB|AUXG?)/ < " + passiveAuxWordRegex + ") !$-- NP))",
+            "S < (SBAR|S=target !$+ /^,$/ $++ (VP <+(VP) (VP < " + PASSIVE_PARTICIPLE + " > (VP < (/^(?:VB|AUX)/ < " + passiveAuxWordRegex + "))) !$-- NP))");
 
 
 
