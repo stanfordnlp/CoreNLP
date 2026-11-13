@@ -495,7 +495,22 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
               }
             }
           if ( ! foundAnotherNp) {
+            // The NP is the subject, so look for a PP predicate after it,
+            // as in "Is the diplomat in Baghdad now?"
+            Tree subject = pti;
             pti = null;
+            boolean afterSubject = false;
+            for (Tree kid : tmpFilteredChildren) {
+              if (kid == subject) {
+                afterSubject = true;
+              } else if (afterSubject && kid.label() != null) {
+                String category = tlp.basicCategory(kid.label().value());
+                if (category.equals("PP") || category.equals("UCP")) {
+                  pti = kid;
+                  break;
+                }
+              }
+            }
           }
         }
 

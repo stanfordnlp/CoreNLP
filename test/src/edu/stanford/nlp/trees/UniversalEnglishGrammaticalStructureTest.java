@@ -810,6 +810,25 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, investigating-4)\n" +
            "det(causes-6, the-5)\n" +
            "obj(investigating-4, causes-6)\n"},
+         // a PP after the subject is the predicate of a yes/no question
+         {TestType.BASIC,
+          "(ROOT (SQ (VBD Was) (NP (NNP bin) (NNP Laden)) (PP (IN behind) (NP (DT the) (NNS attacks))) (. ?)))",
+          "cop(attacks-6, Was-1)\n" +
+           "compound(Laden-3, bin-2)\n" +
+           "nsubj(attacks-6, Laden-3)\n" +
+           "case(attacks-6, behind-4)\n" +
+           "det(attacks-6, the-5)\n" +
+           "root(ROOT-0, attacks-6)\n"},
+         // an existential question keeps the copula as the head
+         {TestType.BASIC,
+          "(ROOT (SQ (VBZ Is) (NP (EX there)) (NP (DT a) (NN book)) (PP (IN on) (NP (DT the) (NN table))) (. ?)))",
+          "root(ROOT-0, Is-1)\n" +
+           "expl(Is-1, there-2)\n" +
+           "det(book-4, a-3)\n" +
+           "nsubj(Is-1, book-4)\n" +
+           "case(table-7, on-5)\n" +
+           "det(table-7, the-6)\n" +
+           "obl(Is-1, table-7)\n"},
          // a fronted wh-adverb is the predicate of an empty copula
          {TestType.BASIC,
           "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBZ is) (NP (DT the) (NN station))) (. ?)))",

@@ -193,7 +193,7 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "cop", "copula",
         AUX_MODIFIER, "VP|SQ|SINV|SBARQ", tregexCompiler,
         "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$|PP|UCP)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) | $++ " + COPULAR_ADVERB + " !$++ /^VP/ ] )",
-        "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) | $++ (NP $++ " + COPULAR_ADVERB + ") !$++ /^VP/ ] )",
+        "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) | $++ (NP $++ " + COPULAR_ADVERB + ") !$++ /^VP/ | $++ (NP !<: EX $++ PP|UCP) !$++ /^(?:VP|ADJP)/ ] )",
         // the inverted "here's the link", in either of the shapes it can
         // have, with the adverb outside the VP or moved into it
         "SINV < (" + COPULAR_ADVERB + " $++ (VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") !< /^(?:VP|ADJP|NP|UCP|PP|ADVP|PRT|S|SBAR)/))",
