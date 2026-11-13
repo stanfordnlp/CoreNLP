@@ -218,6 +218,21 @@ public class UniversalDependenciesConverter {
     return false;
   }
 
+  /**
+   * Whether the token has an expl dependent, as "be" does in "there is a
+   * book on the table".  An existential "be" is VERB in UD, and any
+   * other "be" is AUX, including one which heads its clause, as in
+   * "Mine was." or "than I am".
+   */
+  private static boolean isExistential(SemanticGraph sg, IndexedWord token) {
+    for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(token)) {
+      if (edge.getRelation().getShortName().equals("expl")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /** variables for accessing NERClassifierCombiner via reflection **/
   private static Object NER_TAGGER; // = null;
   private static Method NER_CLASSIFY_METHOD; // = null;
@@ -369,7 +384,9 @@ public class UniversalDependenciesConverter {
         for (IndexedWord token: sg.vertexListSorted()) {
           int idx = token.index() - 1;
           String uposTag = uposLabels.get(idx).value();
-          if (uposTag.equals("VERB") && isAuxiliary(sg, token)) {
+          if ((uposTag.equals("VERB") || uposTag.equals("AUX")) && "be".equals(token.lemma())) {
+            uposTag = isExistential(sg, token) ? "VERB" : "AUX";
+          } else if (uposTag.equals("VERB") && isAuxiliary(sg, token)) {
             uposTag = "AUX";
           }
           token.set(CoreAnnotations.CoarseTagAnnotation.class, uposTag);

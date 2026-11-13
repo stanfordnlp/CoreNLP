@@ -185,6 +185,20 @@ public class UniversalDependenciesConverterTest {
     assertTrue(output, output.contains("6\tis\tbe\tAUX\tVBZ\t_\t4\tcop\t_\t_"));
   }
 
+  /**
+   * "be" is VERB when it is existential, and AUX otherwise, even when it
+   * heads its clause
+   */
+  @Test
+  public void testBeIsVerbOnlyWhenExistential() throws Exception {
+    String output = convertTrees("(ROOT (S (NP (EX There)) (VP (VBZ is) (NP (NN rain))) (. .)))\n" +
+                                 "(ROOT (SQ (VBZ Is) (NP (EX there)) (NP (DT a) (NN book)) (. ?)))\n" +
+                                 "(ROOT (S (NP (PRP Mine)) (VP (VBD was)) (. .)))\n");
+    assertTrue(output, output.contains("2\tis\tbe\tVERB\tVBZ\t"));
+    assertTrue(output, output.contains("1\tIs\tbe\tVERB\tVBZ\t"));
+    assertTrue(output, output.contains("2\twas\tbe\tAUX\tVBD\t"));
+  }
+
   @Test
   public void testAdverbHeadOfADVPIsAdv() throws Exception {
     // "down" is tagged IN here, as it often is in the PTB, but it heads
