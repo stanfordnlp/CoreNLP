@@ -410,6 +410,31 @@ public class UniversalEnglishGrammaticalRelations {
     " | <, (WHADVP < (WRB < /^(?i:where|when)$/)) $-- " + extraposingPredicate("ADJP < (JJ < " + KNOWLEDGE_ADJECTIVE_REGEX + ")") + " ]";
 
   /**
+   * An S with no verb of its own, such as the headline "India unhappy
+   * with Lanka" or the absolute "with Bush in office".  Under a VP it is
+   * a small clause, and under an SBAR other than one with "with" or
+   * "without" it usually has no subject, as in "though long a leader in
+   * the business", so the rules using this also check the parent with
+   * VERBLESS_CLAUSE_PARENT.  The predicate is the head; see
+   * UniversalSemanticHeadFinder.
+   */
+  private static final String VERBLESS_CLAUSE_CONDITION =
+    "!< VP|S|SBAR|SINV|SQ|SBARQ|FRAG|UCP|TO";
+
+  private static final String SUBJECTLESS_SBAR =
+    "(SBAR !< (IN < /^(?i:with|without)$/))";
+
+  private static final String VERBLESS_CLAUSE_PARENT =
+    "!> VP !> " + SUBJECTLESS_SBAR;
+
+  /**
+   * The subject of a verbless clause is the first NP, with a predicate
+   * after it.  An existential "there" is not a subject.
+   */
+  private static final String VERBLESS_SUBJECT_CONDITION =
+    "!<: EX !$-- NP $++ ADJP|PP|ADVP|NP";
+
+  /**
    * Keeps an extraposed clause out of the ccomp and advcl rules,
    * which would otherwise win over csubj for the same clause
    */
@@ -440,6 +465,13 @@ public class UniversalEnglishGrammaticalRelations {
             "SINV < (NP $++ (NP=target $++ (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))",
             //matches subj in xcomp like "He considered him a friend"
             "S < (NP=target $+ NP|ADJP) > VP",
+            // matches subj in a verbless clause, such as the headline
+            // "India unhappy with Lanka" or the absolute "with Bush in
+            // office"; the predicate is the head, see UniversalSemanticHeadFinder
+            "S " + VERBLESS_CLAUSE_PARENT + " " + VERBLESS_CLAUSE_CONDITION + " < (NP=target " + VERBLESS_SUBJECT_CONDITION + ")",
+            // under an SBAR such as "if" or "though", only an ADJP predicate
+            // is clear enough, as in "if no margin agreed"
+            "S > " + SUBJECTLESS_SBAR + " " + VERBLESS_CLAUSE_CONDITION + " < (NP=target !<: EX !$-- NP $++ ADJP)",
             // matches subj in relative clauses
             "SBAR < WHNP=target [ < (S < (VP !$-- NP) !< SBAR) | < (VP !$-- NP) !< S ]",  // second disjunct matches errors where there is no S under SBAR and otherwise does no harm
             // matches subj in relative clauses
@@ -876,6 +908,8 @@ public class UniversalEnglishGrammaticalRelations {
                   "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
                   "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
                   "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S",
+                  // "Prices higher in Tokyo", where the clause has no verb
+                  "S " + VERBLESS_CLAUSE_PARENT + " " + VERBLESS_CLAUSE_CONDITION + " < (NP " + VERBLESS_SUBJECT_CONDITION + ") < (PP|PP-TMP=target !< SBAR|S)",
                   // For cases like "some uzi - toting guards" with new tokenization
                   "@ADJP > @NP < (@NP|NN|NNP|NNS|NNPS=target . (HYPH . VBN|VBG))"
           );
@@ -1367,6 +1401,7 @@ public class UniversalEnglishGrammaticalRelations {
             // combining expressions into a single disjunction should improve speed a little
             "@PP < (IN|TO|VBG|FW $++ (@NP [ $+ NP-TMP=target | $+ (NP=target <# (/^NN/ < " + timeWordRegex + ")) ]))",
             "S < (NP-TMP=target $++ VP $ NP )",
+            "S " + VERBLESS_CLAUSE_PARENT + " " + VERBLESS_CLAUSE_CONDITION + " < (NP " + VERBLESS_SUBJECT_CONDITION + ") < NP-TMP=target",
             "S < (NP=target <# (/^NN/ < " + timeWordRegex + ") $++ (NP $++ VP))",
             // matches when relative clauses as temporal modifiers of verbs!
             "SBAR < (@WHADVP < (WRB < when)) < (S < (NP $+ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) ))) !$-- CC $-- NP > NP=target",

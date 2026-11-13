@@ -424,6 +424,20 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       // if none of the above patterns match, use the standard method
     }
 
+    // a verbless clause, such as the headline "Stocks on the rise" or
+    // the absolute "with Bush in office", has its predicate as the head.
+    // A small clause under a verb, as in "consider him in charge",
+    // keeps its subject as the head, since the subject is the object
+    // of that verb.  Under an SBAR other than "with" or "without", the
+    // clause usually has no subject, as in "though long a leader in the
+    // business", so the first NP is the predicate there
+    if (motherCat.equals("S") && !isSmallClauseOrSubjectless(parent)) {
+      Tree predicate = predicateOfVerblessClause(t);
+      if (predicate != null) {
+        return predicate;
+      }
+    }
+
     // do VPs with auxiliary as special case
     if ((motherCat.equals("VP") || motherCat.equals("SQ") || motherCat.equals("SINV"))) {
       Tree[] kids = t.children();
@@ -572,6 +586,90 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       log.info("Determined head (case 3) for " + t.value() + " is: " + hd);
     }
     return hd;
+  }
+
+  private static final Set<String> VERBLESS_CLAUSE_BLOCKERS =
+    Generics.newHashSet(Arrays.asList("VP", "S", "SBAR", "SINV", "SQ", "SBARQ", "FRAG", "ADJP", "UCP", "TO"));
+
+  private static final Pattern WITH_ABSOLUTE = Pattern.compile("(?i)with|without");
+
+  /**
+   * True if an S under this parent is a small clause, under a VP, or is
+   * probably missing its subject, under an SBAR other than "with" or
+   * "without"
+   */
+  private boolean isSmallClauseOrSubjectless(Tree parent) {
+    if (parent == null) {
+      return false;
+    }
+    String category = tlp.basicCategory(parent.label().value());
+    if (category.equals("VP")) {
+      return true;
+    }
+    if (!category.equals("SBAR")) {
+      return false;
+    }
+    for (Tree kid : parent.children()) {
+      if (kid.value().equals("IN") && kid.numChildren() == 1 &&
+          WITH_ABSOLUTE.matcher(kid.firstChild().value()).matches()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Adverbs which modify a verbless clause rather than being its
+   * predicate, as in "with the monthly level never more than 21.4%".
+   * "notwithstanding" is the case marker of the NP before it
+   */
+  private static final Set<String> NON_PREDICATE_ADVERBS =
+    Generics.newHashSet(Arrays.asList("not", "never", "also", "still", "just", "only", "even",
+                                      "almost", "nearly", "already", "always", "ever", "often",
+                                      "now", "then", "too", "however", "perhaps", "probably",
+                                      "notwithstanding", "withstanding"));
+
+  private static boolean isNonPredicateAdverb(Tree advp) {
+    for (Tree leaf : advp.getLeaves()) {
+      if (!NON_PREDICATE_ADVERBS.contains(leaf.value().toLowerCase())) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Returns the first PP, ADVP or NP after the subject of an S with no
+   * verb, or null if t is not such a clause.  An ADJP predicate is
+   * already the head of an S, so a clause with an ADJP is left alone.
+   * A temporal NP or an ADVP such as "never" is not a predicate, and an
+   * existential "there" is not a subject.
+   */
+  private Tree predicateOfVerblessClause(Tree t) {
+    for (Tree kid : t.children()) {
+      if (kid.isLeaf() || kid.label() == null ||
+          VERBLESS_CLAUSE_BLOCKERS.contains(tlp.basicCategory(kid.label().value()))) {
+        return null;
+      }
+    }
+    Tree subject = null;
+    for (Tree kid : t.children()) {
+      String value = kid.label().value();
+      String category = tlp.basicCategory(value);
+      if (subject == null) {
+        if (category.equals("NP") && !value.contains("-TMP")) {
+          if (kid.numChildren() == 1 && kid.firstChild().value().equals("EX")) {
+            return null;
+          }
+          subject = kid;
+        }
+      } else if ((category.equals("PP") || category.equals("NP") ||
+                  (category.equals("ADVP") && !isNonPredicateAdverb(kid))) &&
+                 !value.contains("-TMP")) {
+        return kid;
+      }
+    }
+    return null;
   }
 
   /* Checks whether the tree t is an existential constituent
