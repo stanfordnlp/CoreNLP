@@ -897,6 +897,19 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "advmod(%-9, never-7)\n" +
            "nummod(%-9, 21-8)\n" +
            "advcl(rose-2, %-9)\n"},
+         // "been" is not a passive participle, so "'s" is "has" here
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBZ 's) (VP (VBN been) (ADJP (JJ happy)))) (. .)))",
+          "nsubj(happy-4, He-1)\n" +
+           "aux(happy-4, 's-2)\n" +
+           "cop(happy-4, been-3)\n" +
+           "root(ROOT-0, happy-4)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBZ 's) (VP (VBN been) (VP (VBN seen)))) (. .)))",
+          "nsubj:pass(seen-4, He-1)\n" +
+           "aux(seen-4, 's-2)\n" +
+           "aux:pass(seen-4, been-3)\n" +
+           "root(ROOT-0, seen-4)\n"},
          // a fronted wh-adverb is the predicate of an empty copula
          {TestType.BASIC,
           "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBZ is) (NP (DT the) (NN station))) (. ?)))",
@@ -2778,7 +2791,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
              {TestType.COLLAPSED,
               "( (S (NP (EX There)) (VP (VBZ 's) (ADVP (RB never)) (VP (VBN been) (NP (DT an) (NN exception)))) (. .)))",
               "expl(exception-6, There-1)\n" +
-               "aux:pass(exception-6, 's-2)\n" +
+               "aux(exception-6, 's-2)\n" +
                "advmod(exception-6, never-3)\n" +
                "cop(exception-6, been-4)\n" +
                "det(exception-6, an-5)\n" +
