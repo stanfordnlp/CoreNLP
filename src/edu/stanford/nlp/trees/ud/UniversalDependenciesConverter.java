@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -81,11 +82,49 @@ public class UniversalDependenciesConverter {
         GrammaticalStructure.Extras.NONE, null, false, true);
 
     addLemmata(sg);
+    fixContractedHas(sg);
 
     if (USE_NAME) {
       addNERTags(sg);
     }
     return sg;
+  }
+
+  private static final Pattern CONTRACTED_S = Pattern.compile("['\u2019][sS]");
+
+  private static final Pattern BEEN = Pattern.compile("(?i)been");
+
+  /**
+   * "'s" can be "is" or "has", and Morphology always gives "be".  Before
+   * "been" it is "has", as in "it's been raining" or "there's been an
+   * accident", so its lemma there is "have".  That is when "'s" is the
+   * aux of "been", or of a word with "been" as its cop or auxiliary.
+   */
+  private static void fixContractedHas(SemanticGraph sg) {
+    for (IndexedWord word : sg.vertexSet()) {
+      if (!"VBZ".equals(word.tag()) || !"be".equals(word.lemma()) ||
+          word.word() == null || !CONTRACTED_S.matcher(word.word()).matches()) {
+        continue;
+      }
+      for (SemanticGraphEdge edge : sg.incomingEdgeIterable(word)) {
+        if (!edge.getRelation().toString().equals("aux")) {
+          continue;
+        }
+        IndexedWord head = edge.getGovernor();
+        boolean beforeBeen = isBeenAfter(head, word);
+        for (IndexedWord sibling : sg.getChildren(head)) {
+          beforeBeen = beforeBeen || isBeenAfter(sibling, word);
+        }
+        if (beforeBeen) {
+          word.setLemma("have");
+        }
+      }
+    }
+  }
+
+  private static boolean isBeenAfter(IndexedWord candidate, IndexedWord word) {
+    return candidate.index() > word.index() && candidate.word() != null &&
+      BEEN.matcher(candidate.word()).matches();
   }
 
 

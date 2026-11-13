@@ -199,6 +199,17 @@ public class UniversalDependenciesConverterTest {
     assertTrue(output, output.contains("2\twas\tbe\tAUX\tVBD\t"));
   }
 
+  /**
+   * "'s" before "been" is "has", but otherwise it is still "be"
+   */
+  @Test
+  public void testContractedHasBeforeBeen() throws Exception {
+    String output = convertTrees("(ROOT (S (NP (PRP He)) (VP (VBZ 's) (VP (VBN been) (ADJP (JJ happy)))) (. .)))\n" +
+                                 "(ROOT (S (NP (PRP He)) (VP (VBZ 's) (VP (VBG going))) (. .)))\n");
+    assertTrue(output, output.contains("2\t's\thave\tAUX\tVBZ\t"));
+    assertTrue(output, output.contains("2\t's\tbe\tAUX\tVBZ\t"));
+  }
+
   @Test
   public void testAdverbHeadOfADVPIsAdv() throws Exception {
     // "down" is tagged IN here, as it often is in the PTB, but it heads
