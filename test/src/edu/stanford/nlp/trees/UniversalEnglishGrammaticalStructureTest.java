@@ -843,6 +843,60 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "case(table-7, on-5)\n" +
            "det(table-7, the-6)\n" +
            "obl(Is-1, table-7)\n"},
+         // the subject of a verbless headline is nsubj of its predicate
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNP India)) (ADJP (JJ unhappy) (PP (IN with) (NP (NNP Lanka))) (PP (IN over) (NP (NN fighting)))) (. .)))",
+          "nsubj(unhappy-2, India-1)\n" +
+           "root(ROOT-0, unhappy-2)\n" +
+           "case(Lanka-4, with-3)\n" +
+           "obl(unhappy-2, Lanka-4)\n" +
+           "case(fighting-6, over-5)\n" +
+           "obl(unhappy-2, fighting-6)\n"},
+         // a PP or ADVP after the subject is the predicate
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Stocks)) (PP (IN on) (NP (DT the) (NN rise))) (NP-TMP (NN today))))",
+          "nsubj(rise-4, Stocks-1)\n" +
+           "case(rise-4, on-2)\n" +
+           "det(rise-4, the-3)\n" +
+           "root(ROOT-0, rise-4)\n" +
+           "obl:tmod(rise-4, today-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Prices)) (ADVP (RBR higher)) (PP (IN in) (NP (NNP Tokyo)))))",
+          "nsubj(higher-2, Prices-1)\n" +
+           "root(ROOT-0, higher-2)\n" +
+           "case(Tokyo-4, in-3)\n" +
+           "obl(higher-2, Tokyo-4)\n"},
+         // the same goes for an absolute with "with"
+         {TestType.BASIC,
+          "(ROOT (S (PP (IN With) (S (NP (NNP Bush)) (PP (IN in) (NP (NN office))))) (, ,) (NP (NNS buyers)) (VP (VBD waited)) (. .)))",
+          "mark(office-4, With-1)\n" +
+           "nsubj(office-4, Bush-2)\n" +
+           "case(office-4, in-3)\n" +
+           "advcl(waited-7, office-4)\n" +
+           "nsubj(waited-7, buyers-6)\n" +
+           "root(ROOT-0, waited-7)\n"},
+         // PTB often puts the absolute under an SBAR instead
+         {TestType.BASIC,
+          "(ROOT (S (SBAR (IN With) (S (NP (NNS pros) (CC and) (NNS cons)) (PP (IN in) (NP (NN limbo))))) (, ,) (NP (PRP I)) (VP (VBP wait)) (. .)))",
+          "mark(limbo-6, With-1)\n" +
+           "nsubj(limbo-6, pros-2)\n" +
+           "cc(cons-4, and-3)\n" +
+           "conj(pros-2, cons-4)\n" +
+           "case(limbo-6, in-5)\n" +
+           "advcl(wait-9, limbo-6)\n" +
+           "nsubj(wait-9, I-8)\n" +
+           "root(ROOT-0, wait-9)\n"},
+         // "never" modifies the predicate rather than being it
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Sales)) (VP (VBD rose)) (, ,) (PP (IN with) (S (NP (DT the) (NN level)) (ADVP (RB never)) (NP (CD 21) (NN %)))) (. .)))",
+          "nsubj(rose-2, Sales-1)\n" +
+           "root(ROOT-0, rose-2)\n" +
+           "mark(%-9, with-4)\n" +
+           "det(level-6, the-5)\n" +
+           "nsubj(%-9, level-6)\n" +
+           "advmod(%-9, never-7)\n" +
+           "nummod(%-9, 21-8)\n" +
+           "advcl(rose-2, %-9)\n"},
          // a fronted wh-adverb is the predicate of an empty copula
          {TestType.BASIC,
           "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBZ is) (NP (DT the) (NN station))) (. ?)))",
