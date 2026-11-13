@@ -174,6 +174,14 @@ public class TreeGraphNode extends Tree implements HasParent  {
   }
 
   /**
+   * Get the parent for the current node, which a TreeGraphNode always knows.
+   */
+  @Override
+  public TreeGraphNode parentSafe() {
+    return parent;
+  }
+
+  /**
    * Set the parent for the current node.
    */
   public void setParent(TreeGraphNode parent) {

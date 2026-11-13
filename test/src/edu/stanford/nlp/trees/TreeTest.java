@@ -118,4 +118,27 @@ public class TreeTest extends TestCase {
     checkBinary("(1 (2 3) (4 5) (6 7))", false);
     checkBinary("(1 (2 3) (4 (5 6) (6 7)))", true);
   }
+
+  /**
+   * An ordinary tree does not keep its parents, so parent() throws and
+   * parentSafe() returns null.  A TreeGraphNode knows its parents.
+   */
+  public void testParentSafe() {
+    Tree tree = Tree.valueOf("(ROOT (S (NP (PRP I)) (VP (VBD left))))");
+    Tree vp = tree.firstChild().getChild(1);
+    assertNull(vp.parentSafe());
+    try {
+      vp.parent();
+      fail("Expected parent() to throw on an ordinary tree");
+    } catch (UnsupportedOperationException e) {
+      // expected
+    }
+
+    TreeGraphNode graph = new TreeGraphNode(tree, (TreeGraphNode) null);
+    Tree graphS = graph.firstChild();
+    Tree graphVP = graphS.getChild(1);
+    assertSame(graphS, graphVP.parentSafe());
+    assertSame(graphS, graphVP.parent());
+    assertNull(graph.parentSafe());
+  }
 }
