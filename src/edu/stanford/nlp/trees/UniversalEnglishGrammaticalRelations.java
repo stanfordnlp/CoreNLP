@@ -981,7 +981,9 @@ public class UniversalEnglishGrammaticalRelations {
             "S|SINV < (S=target (< VP=verb | < (VP <1 VP=verb)) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] ) : (=verb [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])",
             "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
             // What are you wearing dancing tonight?
-            "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
+            // A gerund clause with its own subject, as in "having someone
+            // using it", is a small clause instead
+            "(VP < (S=target < (VP < VBG) !< (NP " + NOT_POSSESSIVE + " $++ VP) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
             // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
             // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
             // they wrote asking the SEC to ...
