@@ -421,12 +421,12 @@ public class UniversalEnglishGrammaticalRelations {
 
   /**
    * An S with no verb of its own, such as the headline "India unhappy
-   * with Lanka" or the absolute "with Bush in office".  Under a VP it is
-   * a small clause, and under an SBAR other than one with "with" or
-   * "without" it usually has no subject, as in "though long a leader in
-   * the business", so the rules using this also check the parent with
-   * VERBLESS_CLAUSE_PARENT.  The predicate is the head; see
-   * UniversalSemanticHeadFinder.
+   * with Lanka" or the absolute "with Bush in office".  Under a VP with
+   * no comma before it, it is a small clause, and under an SBAR other
+   * than one with "with" or "without" it usually has no subject, as in
+   * "though long a leader in the business", so the rules using this
+   * also check the parent with VERBLESS_CLAUSE_PARENT.  The predicate is
+   * the head; see UniversalSemanticHeadFinder.
    */
   private static final String VERBLESS_CLAUSE_CONDITION =
     "!< VP|S|SBAR|SINV|SQ|SBARQ|FRAG|UCP|TO";
@@ -435,7 +435,7 @@ public class UniversalEnglishGrammaticalRelations {
     "(SBAR !< (IN < /^(?i:with|without)$/))";
 
   private static final String VERBLESS_CLAUSE_PARENT =
-    "!> VP !> " + SUBJECTLESS_SBAR;
+    "[ !> VP | $- /^,$/ ] !> " + SUBJECTLESS_SBAR;
 
   /**
    * The subject of a verbless clause is the first NP, with a predicate
@@ -944,6 +944,11 @@ public class UniversalEnglishGrammaticalRelations {
         MODIFIER, "VP|S|SQ|SINV|SBARQ|NP|ADVP|ADJP", tregexCompiler,
             "VP < (@SBAR=target <= (@SBAR [ < (IN|MWE !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ) " + NOT_EXTRAPOSED_CLAUSE + ")",
             "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
+            // a verbless absolute set off by a comma, as in "Consumers,
+            // credit cards in hand, waited" or "Pound concerns aside, ..."
+            "S < VP < (S=target " + VERBLESS_CLAUSE_CONDITION + " < (NP " + VERBLESS_SUBJECT_CONDITION + ") [ $- /^,$/ | $+ /^,$/ ])",
+            // and after a comma in the VP, as in "came, almost all of them new"
+            "VP < (S=target " + VERBLESS_CLAUSE_CONDITION + " < (NP " + VERBLESS_SUBJECT_CONDITION + ") $- /^,$/)",
             // to get "rather than"
             //"S|SQ|SINV < (SBAR|SBAR-TMP=target <2 (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?$).*$/)",
             // this one might just be better, but at any rate license one with quotation marks or a conjunction beforehand

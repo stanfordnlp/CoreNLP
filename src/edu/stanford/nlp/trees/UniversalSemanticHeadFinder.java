@@ -428,10 +428,12 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     // the absolute "with Bush in office", has its predicate as the head.
     // A small clause under a verb, as in "consider him in charge",
     // keeps its subject as the head, since the subject is the object
-    // of that verb.  Under an SBAR other than "with" or "without", the
-    // clause usually has no subject, as in "though long a leader in the
-    // business", so the first NP is the predicate there
-    if (motherCat.equals("S") && !isSmallClauseOrSubjectless(parent)) {
+    // of that verb, but after a comma under a VP the clause is an
+    // absolute, as in "wrote letters, this one in plain English".
+    // Under an SBAR other than "with" or "without", the clause usually
+    // has no subject, as in "though long a leader in the business", so
+    // the first NP is the predicate there
+    if (motherCat.equals("S") && !isSmallClauseOrSubjectless(t, parent)) {
       Tree predicate = predicateOfVerblessClause(t);
       if (predicate != null) {
         return predicate;
@@ -594,17 +596,17 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
   private static final Pattern WITH_ABSOLUTE = Pattern.compile("(?i)with|without");
 
   /**
-   * True if an S under this parent is a small clause, under a VP, or is
-   * probably missing its subject, under an SBAR other than "with" or
-   * "without"
+   * True if the S t is a small clause, under a VP with no comma before
+   * it, or is probably missing its subject, under an SBAR other than
+   * "with" or "without"
    */
-  private boolean isSmallClauseOrSubjectless(Tree parent) {
+  private boolean isSmallClauseOrSubjectless(Tree t, Tree parent) {
     if (parent == null) {
       return false;
     }
     String category = tlp.basicCategory(parent.label().value());
     if (category.equals("VP")) {
-      return true;
+      return !followsComma(t, parent);
     }
     if (!category.equals("SBAR")) {
       return false;
@@ -616,6 +618,16 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       }
     }
     return true;
+  }
+
+  private static boolean followsComma(Tree t, Tree parent) {
+    Tree[] kids = parent.children();
+    for (int i = 1; i < kids.length; ++i) {
+      if (kids[i] == t) {
+        return kids[i - 1].value().equals(",");
+      }
+    }
+    return false;
   }
 
   /**

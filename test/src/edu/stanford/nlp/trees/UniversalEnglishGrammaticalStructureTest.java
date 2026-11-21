@@ -886,6 +886,27 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "advcl(wait-9, limbo-6)\n" +
            "nsubj(wait-9, I-8)\n" +
            "root(ROOT-0, wait-9)\n"},
+         // a verbless absolute set off by commas is advcl
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Consumers)) (, ,) (S (NP (NN credit) (NNS cards)) (PP (IN in) (NP (NN hand)))) (, ,) (VP (VBD waited)) (. .)))",
+          "nsubj(waited-8, Consumers-1)\n" +
+           "compound(cards-4, credit-3)\n" +
+           "nsubj(hand-6, cards-4)\n" +
+           "case(hand-6, in-5)\n" +
+           "advcl(waited-8, hand-6)\n" +
+           "root(ROOT-0, waited-8)\n"},
+         // after a comma in the VP, it is an absolute, not a small clause
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD wrote) (NP (DT a) (NN letter)) (, ,) (S (NP (DT this) (NN one)) (PP (IN in) (NP (JJ plain) (NNP English))))) (. .)))",
+          "nsubj(wrote-2, He-1)\n" +
+           "root(ROOT-0, wrote-2)\n" +
+           "det(letter-4, a-3)\n" +
+           "obj(wrote-2, letter-4)\n" +
+           "det(one-7, this-6)\n" +
+           "nsubj(English-10, one-7)\n" +
+           "case(English-10, in-8)\n" +
+           "amod(English-10, plain-9)\n" +
+           "advcl(wrote-2, English-10)\n"},
          // "never" modifies the predicate rather than being it
          {TestType.BASIC,
           "(ROOT (S (NP (NNS Sales)) (VP (VBD rose)) (, ,) (PP (IN with) (S (NP (DT the) (NN level)) (ADVP (RB never)) (NP (CD 21) (NN %)))) (. .)))",
