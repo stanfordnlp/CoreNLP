@@ -200,7 +200,7 @@ public class UniversalDependenciesConverterTest {
   }
 
   /**
-   * "'s" before "been" is "has", but otherwise it is still "be"
+   * "'s" before "been", "got" or "gotten" is "has", but otherwise it is still "be"
    */
   @Test
   public void testContractedHasBeforeBeen() throws Exception {
@@ -208,6 +208,9 @@ public class UniversalDependenciesConverterTest {
                                  "(ROOT (S (NP (PRP He)) (VP (VBZ 's) (VP (VBG going))) (. .)))\n");
     assertTrue(output, output.contains("2\t's\thave\tAUX\tVBZ\t"));
     assertTrue(output, output.contains("2\t's\tbe\tAUX\tVBZ\t"));
+
+    output = convertTrees("(ROOT (S (NP (PRP It)) (VP (VBZ 's) (VP (VBN got) (NP (CD four) (NNS wheels)))) (. .)))\n");
+    assertTrue(output, output.contains("2\t's\thave\tAUX\tVBZ\t"));
   }
 
   @Test
