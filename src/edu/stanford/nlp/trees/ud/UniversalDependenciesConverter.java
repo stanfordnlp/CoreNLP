@@ -92,13 +92,14 @@ public class UniversalDependenciesConverter {
 
   private static final Pattern CONTRACTED_S = Pattern.compile("['\u2019][sS]");
 
-  private static final Pattern BEEN = Pattern.compile("(?i)been");
+  private static final Pattern HAS_PARTICIPLE = Pattern.compile("(?i)been|got|gotten");
 
   /**
    * "'s" can be "is" or "has", and Morphology always gives "be".  Before
-   * "been" it is "has", as in "it's been raining" or "there's been an
-   * accident", so its lemma there is "have".  That is when "'s" is the
-   * aux of "been", or of a word with "been" as its cop or auxiliary.
+   * "been", "got" or "gotten" it is "has", as in "it's been raining",
+   * "there's been an accident" or "it's got four wheels", so its lemma
+   * there is "have".  That is when "'s" is the aux of one of those
+   * participles, or of a word with one of them as its cop or auxiliary.
    */
   private static void fixContractedHas(SemanticGraph sg) {
     for (IndexedWord word : sg.vertexSet()) {
@@ -111,20 +112,20 @@ public class UniversalDependenciesConverter {
           continue;
         }
         IndexedWord head = edge.getGovernor();
-        boolean beforeBeen = isBeenAfter(head, word);
+        boolean beforeParticiple = isHasParticipleAfter(head, word);
         for (IndexedWord sibling : sg.getChildren(head)) {
-          beforeBeen = beforeBeen || isBeenAfter(sibling, word);
+          beforeParticiple = beforeParticiple || isHasParticipleAfter(sibling, word);
         }
-        if (beforeBeen) {
+        if (beforeParticiple) {
           word.setLemma("have");
         }
       }
     }
   }
 
-  private static boolean isBeenAfter(IndexedWord candidate, IndexedWord word) {
+  private static boolean isHasParticipleAfter(IndexedWord candidate, IndexedWord word) {
     return candidate.index() > word.index() && candidate.word() != null &&
-      BEEN.matcher(candidate.word()).matches();
+      HAS_PARTICIPLE.matcher(candidate.word()).matches();
   }
 
 

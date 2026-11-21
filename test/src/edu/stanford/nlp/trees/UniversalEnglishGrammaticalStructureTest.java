@@ -910,6 +910,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "aux(seen-4, 's-2)\n" +
            "aux:pass(seen-4, been-3)\n" +
            "root(ROOT-0, seen-4)\n"},
+         // "'s got" is "has got", not a passive
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ 's) (VP (VBN got) (NP (CD four) (NNS wheels)))) (. .)))",
+          "nsubj(got-3, It-1)\n" +
+           "aux(got-3, 's-2)\n" +
+           "root(ROOT-0, got-3)\n" +
+           "nummod(wheels-5, four-4)\n" +
+           "obj(got-3, wheels-5)\n"},
          // a gerund clause with its own subject after a gerund is a small clause
          {TestType.BASIC,
           "(ROOT (S (S (VP (VBG Seeing) (S (NP (PRP him)) (VP (VBG winning))))) (, ,) (NP (PRP I)) (VP (VBD smiled)) (. .)))",

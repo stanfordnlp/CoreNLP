@@ -159,9 +159,12 @@ public class UniversalEnglishGrammaticalRelations {
   /**
    * The participle of a passive.  "been" is the participle of "be"
    * itself, so in "he's been happy" the "'s" is "has", not a passive
-   * auxiliary.
+   * auxiliary.  "got" and "gotten" after "'s" are almost always "has
+   * got", as in "it's got four wheels" or "it's gotten worse", and a
+   * passive with "got" as its participle is rare, so they are left out
+   * as well.
    */
-  private static final String PASSIVE_PARTICIPLE = "(VBN|VBD !< /^(?i:been)$/)";
+  private static final String PASSIVE_PARTICIPLE = "(VBN|VBD !< /^(?i:been|got|gotten)$/)";
 
   /**
     * The "passive auxiliary" grammatical relation. A passive auxiliary of a
