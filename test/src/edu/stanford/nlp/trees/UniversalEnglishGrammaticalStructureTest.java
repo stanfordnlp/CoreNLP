@@ -910,6 +910,21 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "aux(seen-4, 's-2)\n" +
            "aux:pass(seen-4, been-3)\n" +
            "root(ROOT-0, seen-4)\n"},
+         // a gerund clause with its own subject after a gerund is a small clause
+         {TestType.BASIC,
+          "(ROOT (S (S (VP (VBG Seeing) (S (NP (PRP him)) (VP (VBG winning))))) (, ,) (NP (PRP I)) (VP (VBD smiled)) (. .)))",
+          "advcl(smiled-6, Seeing-1)\n" +
+           "obj(Seeing-1, him-2)\n" +
+           "xcomp(Seeing-1, winning-3)\n" +
+           "nsubj(smiled-6, I-5)\n" +
+           "root(ROOT-0, smiled-6)\n"},
+         // without a subject, it is still an adverbial
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBZ is) (VP (VBG enjoying) (S (VP (VBG playing))))) (. .)))",
+          "nsubj(enjoying-3, He-1)\n" +
+           "aux(enjoying-3, is-2)\n" +
+           "root(ROOT-0, enjoying-3)\n" +
+           "advcl(enjoying-3, playing-4)\n"},
          // a fronted wh-adverb is the predicate of an empty copula
          {TestType.BASIC,
           "(ROOT (SBARQ (WHADVP (WRB Where)) (SQ (VBZ is) (NP (DT the) (NN station))) (. ?)))",
