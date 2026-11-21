@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees; 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -655,7 +656,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
    * verb, or null if t is not such a clause.  An ADJP predicate is
    * already the head of an S, so a clause with an ADJP is left alone.
    * A temporal NP or an ADVP such as "never" is not a predicate, and an
-   * existential "there" is not a subject.
+   * existential "there" is not a subject.  A manner adverb in -ly with
+   * another predicate after it modifies that predicate, as in
+   * "headphones jauntily in place", so it is skipped as well.
    */
   private Tree predicateOfVerblessClause(Tree t) {
     for (Tree kid : t.children()) {
@@ -665,6 +668,7 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       }
     }
     Tree subject = null;
+    List<Tree> candidates = new ArrayList<>();
     for (Tree kid : t.children()) {
       String value = kid.label().value();
       String category = tlp.basicCategory(value);
@@ -678,10 +682,27 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       } else if ((category.equals("PP") || category.equals("NP") ||
                   (category.equals("ADVP") && !isNonPredicateAdverb(kid))) &&
                  !value.contains("-TMP")) {
-        return kid;
+        candidates.add(kid);
       }
     }
+    for (int i = 0; i < candidates.size(); ++i) {
+      Tree candidate = candidates.get(i);
+      if (i + 1 < candidates.size() && isMannerAdverb(candidate)) {
+        continue;
+      }
+      return candidate;
+    }
     return null;
+  }
+
+  /** An ADVP of a single adverb in -ly, such as "jauntily" */
+  private boolean isMannerAdverb(Tree advp) {
+    if (!tlp.basicCategory(advp.label().value()).equals("ADVP") || advp.numChildren() != 1) {
+      return false;
+    }
+    Tree adverb = advp.firstChild();
+    return adverb.value().equals("RB") && adverb.numChildren() == 1 &&
+      adverb.firstChild().value().toLowerCase().endsWith("ly");
   }
 
   /* Checks whether the tree t is an existential constituent
