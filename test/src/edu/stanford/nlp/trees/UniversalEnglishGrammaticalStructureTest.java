@@ -907,6 +907,15 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "case(English-10, in-8)\n" +
            "amod(English-10, plain-9)\n" +
            "advcl(wrote-2, English-10)\n"},
+         // so does a manner adverb in -ly before another predicate
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP She)) (VP (VBZ jogs) (, ,) (S (NP (NNS headphones)) (ADVP (RB jauntily)) (PP (IN in) (NP (NN place))))) (. .)))",
+          "nsubj(jogs-2, She-1)\n" +
+           "root(ROOT-0, jogs-2)\n" +
+           "nsubj(place-7, headphones-4)\n" +
+           "advmod(place-7, jauntily-5)\n" +
+           "case(place-7, in-6)\n" +
+           "advcl(jogs-2, place-7)\n"},
          // "never" modifies the predicate rather than being it
          {TestType.BASIC,
           "(ROOT (S (NP (NNS Sales)) (VP (VBD rose)) (, ,) (PP (IN with) (S (NP (DT the) (NN level)) (ADVP (RB never)) (NP (CD 21) (NN %)))) (. .)))",
