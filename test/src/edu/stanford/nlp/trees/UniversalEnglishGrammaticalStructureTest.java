@@ -948,6 +948,23 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, got-3)\n" +
            "nummod(wheels-5, four-4)\n" +
            "obj(got-3, wheels-5)\n"},
+         // VPs joined by a comma with no conjunction are conj
+         {TestType.BASIC,
+          "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
+          "nsubj(kills-2, Collision-1)\n" +
+           "root(ROOT-0, kills-2)\n" +
+           "obj(kills-2, one-3)\n" +
+           "conj(kills-2, injures-5)\n" +
+           "obj(injures-5, 60-6)\n"},
+         // and share their subject in the enhanced graph
+         {TestType.CC_PROCESSED,
+          "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
+          "nsubj(kills-2, Collision-1)\n" +
+           "nsubj(injures-5, Collision-1)\n" +
+           "root(ROOT-0, kills-2)\n" +
+           "obj(kills-2, one-3)\n" +
+           "conj(kills-2, injures-5)\n" +
+           "obj(injures-5, 60-6)\n"},
          // a gerund clause with its own subject after a gerund is a small clause
          {TestType.BASIC,
           "(ROOT (S (S (VP (VBG Seeing) (S (NP (PRP him)) (VP (VBG winning))))) (, ,) (NP (PRP I)) (VP (VBD smiled)) (. .)))",

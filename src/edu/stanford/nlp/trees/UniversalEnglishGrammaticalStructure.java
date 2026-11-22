@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -1104,6 +1105,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
 
+  private static final Pattern UNSHARED_CONJUNCT_TAG =
+    Pattern.compile("[,.:]|``|''|-LRB-|-RRB-|HYPH|NFP|IN|TO");
+
+  /** Punctuation or a preposition, which a plain conj does not share dependents with */
+  private static boolean isUnsharedConjunct(IndexedWord word) {
+    return word.tag() == null || UNSHARED_CONJUNCT_TAG.matcher(word.tag()).matches();
+  }
+
   private static void treatCC(SemanticGraph sg) {
 
     // Construct a map from tree nodes to the set of typed
@@ -1175,9 +1184,16 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
 
     SemanticGraph sgCopy = sg.makeSoftCopy();
 
-    // find typed deps of form conj(gov,dep)
+    // find typed deps of form conj(gov,dep).  A plain conj, with no
+    // conjunction found for it, counts as well, as in "kills one,
+    // injures 60" or "clouds, beaches, deserts, sunsets, etc", except
+    // when one end is punctuation or a preposition, which comes from
+    // an odd tree, as with the hyphens in "savings - and - loan" or
+    // "in and out of"
     for (SemanticGraphEdge edge: sgCopy.edgeIterable()) {
-      if (UniversalEnglishGrammaticalRelations.getConjs().contains(edge.getRelation())) {
+      if (UniversalEnglishGrammaticalRelations.getConjs().contains(edge.getRelation()) ||
+          (edge.getRelation() == CONJUNCT && !isUnsharedConjunct(edge.getGovernor()) &&
+           !isUnsharedConjunct(edge.getDependent()))) {
         IndexedWord gov = edge.getGovernor();
         IndexedWord dep = edge.getDependent();
 
