@@ -1105,6 +1105,26 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
   }
 
 
+  /**
+   * A shared amod or compound takes the label that fits the conjunct it
+   * is copied to: a noun conjunct of an adjective is a compound, as
+   * "design" in "architectural and design services", and an adjective
+   * conjunct of a noun is an amod.
+   */
+  private static GrammaticalRelation modifierForConjunct(GrammaticalRelation relation, IndexedWord conjunct) {
+    String tag = conjunct.tag();
+    if (tag == null) {
+      return relation;
+    }
+    if (relation == ADJECTIVAL_MODIFIER && tag.startsWith("NN")) {
+      return COMPOUND_MODIFIER;
+    }
+    if (relation == COMPOUND_MODIFIER && tag.startsWith("JJ")) {
+      return ADJECTIVAL_MODIFIER;
+    }
+    return relation;
+  }
+
   private static final Pattern UNSHARED_CONJUNCT_TAG =
     Pattern.compile("[,.:]|``|''|-LRB-|-RRB-|HYPH|NFP|IN|TO");
 
@@ -1210,7 +1230,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
               continue;
             }
 
-            GrammaticalRelation newRel = edge1.getRelation();
+            GrammaticalRelation newRel = modifierForConjunct(edge1.getRelation(), dep);
             //TODO: Do we want to copy case markers here?
             if (newRel != ROOT && newRel != CASE_MARKER) {
               if (rcmodHeads.contains(gov) && rcmodHeads.contains(dep)) {
