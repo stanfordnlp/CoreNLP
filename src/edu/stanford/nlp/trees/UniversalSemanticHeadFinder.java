@@ -245,11 +245,47 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     return newHeadIdx;
   }
 
+  private static final Pattern ETC_WORD = Pattern.compile("(?i)etc|ect");
+
+  /**
+   * True if everything after headIdx is punctuation, including a comma,
+   * and a single "etc", as in "clouds, beaches, deserts, etc"
+   */
+  private boolean followedByEtc(int headIdx, Tree[] daughterTrees) {
+    boolean seenComma = false;
+    boolean seenEtc = false;
+    for (int i = headIdx + 1; i < daughterTrees.length; ++i) {
+      Tree kid = daughterTrees[i];
+      String label = tlp.basicCategory(kid.value());
+      if (!seenEtc && ",".equals(label)) {
+        seenComma = true;
+      } else if (!seenEtc && seenComma && label.equals("FW") && kid.isPreTerminal() &&
+                 ETC_WORD.matcher(kid.firstChild().value()).matches()) {
+        seenEtc = true;
+      } else if (!(kid.isPreTerminal() && tlp.isPunctuationTag(label))) {
+        return false;
+      }
+    }
+    return seenEtc;
+  }
+
   /**
    * Overwrite the postOperationFix method.  For "a, b and c" or similar: we want "a" to be the head.
+   * A list ending in "etc" with no conjunction, as in "a, b, c, etc", is treated the same way.
    */
   @Override
   protected int postOperationFix(int headIdx, Tree[] daughterTrees) {
+    if (headIdx >= 2 && followedByEtc(headIdx, daughterTrees)) {
+      int newHeadIdx = headIdx;
+      while (newHeadIdx >= 2) {
+        int nextHead = findPreviousHead(newHeadIdx, daughterTrees, false);
+        if (nextHead < 0) {
+          break;
+        }
+        newHeadIdx = nextHead;
+      }
+      return newHeadIdx;
+    }
     if (headIdx >= 2) {
       String prevLab = tlp.basicCategory(daughterTrees[headIdx - 1].value());
       if (prevLab.equals("CC") || prevLab.equals("CONJP")) {
