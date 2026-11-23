@@ -948,6 +948,15 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, got-3)\n" +
            "nummod(wheels-5, four-4)\n" +
            "obj(got-3, wheels-5)\n"},
+         // a flat list ending in "etc" has its first item as head, as with a conjunction
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBD showed) (NP (NNS clouds) (, ,) (NNS beaches) (, ,) (NNS deserts) (, ,) (FW etc))) (. .)))",
+          "nsubj(showed-2, It-1)\n" +
+           "root(ROOT-0, showed-2)\n" +
+           "obj(showed-2, clouds-3)\n" +
+           "conj(clouds-3, beaches-5)\n" +
+           "conj(clouds-3, deserts-7)\n" +
+           "conj(clouds-3, etc-9)\n"},
          // VPs joined by a comma with no conjunction are conj
          {TestType.BASIC,
           "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
