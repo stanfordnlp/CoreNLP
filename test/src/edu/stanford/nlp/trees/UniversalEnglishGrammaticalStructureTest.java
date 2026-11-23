@@ -988,6 +988,16 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "cc(copper-7, and-6)\n" +
            "conj(steel-3, copper-7)\n" +
            "obj(watched-2, prices-8)\n"},
+         // a shared amod copied to a noun conjunct becomes compound
+         {TestType.CC_PROCESSED,
+          "(ROOT (S (NP (PRP We)) (VP (VBP sell) (NP (ADJP (JJ architectural) (CC and) (NN design)) (NNS services))) (. .)))",
+          "nsubj(sell-2, We-1)\n" +
+           "root(ROOT-0, sell-2)\n" +
+           "amod(services-6, architectural-3)\n" +
+           "cc(design-5, and-4)\n" +
+           "conj:and(architectural-3, design-5)\n" +
+           "compound(services-6, design-5)\n" +
+           "obj(sell-2, services-6)\n"},
          // VPs joined by a comma with no conjunction are conj
          {TestType.BASIC,
           "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
@@ -3255,7 +3265,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
               "amod(gyrations-4, Political-1)\n" +
                "cc(currency-3, and-2)\n" +
                "conj:and(Political-1, currency-3)\n" +
-               "amod(gyrations-4, currency-3)\n" +
+               "compound(gyrations-4, currency-3)\n" +
                "nsubj(whipsaw-6, gyrations-4)\n" +
                "aux(whipsaw-6, can-5)\n" +
                "root(ROOT-0, whipsaw-6)\n" +
