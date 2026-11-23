@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /**
  * Coordination transformer transforms a PennTreebank tree containing
@@ -152,6 +153,10 @@ public class CoordinationTransformer implements TreeTransformer  {
     t = UCPtransform(t);
     if (VERBOSE) {
       debugLine("After UCPTransformer:             ", t);
+    }
+    t = splitFlatNPList(t);
+    if (VERBOSE) {
+      debugLine("After splitFlatNPList:            ", t);
     }
     t = CCtransform(t);
     if (VERBOSE) {
@@ -662,6 +667,115 @@ public class CoordinationTransformer implements TreeTransformer  {
       }
     }
     return t;
+  }
+
+  private static final Pattern ETC_WORD = Pattern.compile("(?i)etc|ect");
+
+  private static boolean isEtc(Tree t) {
+    return t.value().equals("FW") && ETC_WORD.matcher(t.firstChild().value()).matches();
+  }
+
+  private static boolean isCommonNoun(Tree t) {
+    return t.value().equals("NN") || t.value().equals("NNS");
+  }
+
+  /**
+   * A flat NP list whose items have modifiers, as in "red apples, green
+   * pears and ripe plums" or "red apples, green pears, etc", gets each
+   * item as its own NP, so that the first item is the head and the
+   * others are its conjuncts, as with (NP (NP ...) , (NP ...) CC (NP ...)).
+   * Otherwise the last noun is the head and the earlier items become
+   * its compounds.
+   *
+   * This only applies when the NP has a CC or a final "etc" and at
+   * least one comma, every item ends in a common noun, and the first
+   * item has a modifier of its own other than a determiner.  The last
+   * condition leaves "steel, aluminum and copper prices", where the
+   * final noun is shared, as it is, and the others leave dates, places
+   * such as "Boston, Mass." and names such as "Smith Barney, Harris
+   * Upham {@literal &} Co." alone.
+   */
+  public static Tree splitFlatNPList(Tree t) {
+    if (t == null) {
+      return t;
+    }
+    for (Tree node : t.preOrderNodeList()) {
+      if (!node.isLeaf() && !node.isPreTerminal() && node.value() != null && node.value().startsWith("NP")) {
+        splitFlatList(node);
+      }
+    }
+    return t;
+  }
+
+  private static void splitFlatList(Tree np) {
+    Tree[] kids = np.children();
+    for (Tree kid : kids) {
+      if (!kid.isPreTerminal()) {
+        return;
+      }
+    }
+    if (kids.length == 0 || kids[0].value().equals("CC")) {
+      return;
+    }
+    // each element is either an item (a list of words) or a separator
+    List<List<Tree>> items = new ArrayList<>();
+    List<Tree> sequence = new ArrayList<>();
+    List<Tree> current = null;
+    boolean seenComma = false;
+    boolean seenMarker = false;
+    for (Tree kid : kids) {
+      String tag = kid.value();
+      boolean separator = tag.equals(",") || tag.equals("CC") || isEtc(kid) ||
+        tag.equals(":") || tag.equals(".") || tag.equals("``") || tag.equals("''");
+      if (separator) {
+        if (tag.equals(",")) {
+          seenComma = true;
+        } else if (tag.equals("CC") || isEtc(kid)) {
+          seenMarker = true;
+        }
+        current = null;
+        sequence.add(kid);
+      } else {
+        if (current == null) {
+          current = new ArrayList<>();
+          items.add(current);
+          sequence.add(null);
+        }
+        current.add(kid);
+      }
+    }
+    if (!seenComma || !seenMarker || items.size() < 2) {
+      return;
+    }
+    for (List<Tree> item : items) {
+      if (!isCommonNoun(item.get(item.size() - 1))) {
+        return;
+      }
+    }
+    List<Tree> first = items.get(0);
+    int start = (first.get(0).value().equals("DT") || first.get(0).value().equals("PDT")) ? 1 : 0;
+    if (first.size() - start < 2) {
+      return;
+    }
+
+    TreeFactory tf = np.treeFactory();
+    LabelFactory lf = np.label().labelFactory();
+    while (np.numChildren() > 0) {
+      np.removeChild(0);
+    }
+    int itemIndex = 0;
+    for (Tree element : sequence) {
+      if (element != null) {
+        np.addChild(element);
+      } else {
+        List<Tree> item = items.get(itemIndex++);
+        Tree itemNP = tf.newTreeNode(lf.newLabel("NP"), null);
+        for (Tree word : item) {
+          itemNP.addChild(word);
+        }
+        np.addChild(itemNP);
+      }
+    }
   }
 
   private static String getHeadTag(Tree t) {

@@ -957,6 +957,37 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "conj(clouds-3, beaches-5)\n" +
            "conj(clouds-3, deserts-7)\n" +
            "conj(clouds-3, etc-9)\n"},
+         // a flat list whose items have modifiers has the first item as head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBD bought) (NP (JJ red) (NNS apples) (, ,) (JJ green) (NNS pears) (CC and) (JJ ripe) (NNS plums))) (. .)))",
+          "nsubj(bought-2, We-1)\n" +
+           "root(ROOT-0, bought-2)\n" +
+           "amod(apples-4, red-3)\n" +
+           "obj(bought-2, apples-4)\n" +
+           "amod(pears-7, green-6)\n" +
+           "conj(apples-4, pears-7)\n" +
+           "cc(plums-10, and-8)\n" +
+           "amod(plums-10, ripe-9)\n" +
+           "conj(apples-4, plums-10)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBD bought) (NP (JJ red) (NNS apples) (, ,) (JJ green) (NNS pears) (, ,) (FW etc))) (. .)))",
+          "nsubj(bought-2, We-1)\n" +
+           "root(ROOT-0, bought-2)\n" +
+           "amod(apples-4, red-3)\n" +
+           "obj(bought-2, apples-4)\n" +
+           "amod(pears-7, green-6)\n" +
+           "conj(apples-4, pears-7)\n" +
+           "conj(apples-4, etc-9)\n"},
+         // but a noun shared by the items stays the head
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBD watched) (NP (NN steel) (, ,) (NN aluminum) (CC and) (NN copper) (NNS prices))) (. .)))",
+          "nsubj(watched-2, We-1)\n" +
+           "root(ROOT-0, watched-2)\n" +
+           "compound(prices-8, steel-3)\n" +
+           "conj(steel-3, aluminum-5)\n" +
+           "cc(copper-7, and-6)\n" +
+           "conj(steel-3, copper-7)\n" +
+           "obj(watched-2, prices-8)\n"},
          // VPs joined by a comma with no conjunction are conj
          {TestType.BASIC,
           "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
