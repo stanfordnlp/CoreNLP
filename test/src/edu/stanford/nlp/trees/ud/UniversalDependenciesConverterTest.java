@@ -213,6 +213,15 @@ public class UniversalDependenciesConverterTest {
     assertTrue(output, output.contains("2\t's\thave\tAUX\tVBZ\t"));
   }
 
+  /**
+   * The percent sign is SYM even when PTB tags it JJ
+   */
+  @Test
+  public void testPercentIsSym() throws Exception {
+    String output = convertTrees("(ROOT (S (NP (PRP It)) (VP (VBD rose) (NP (CD 5) (JJ %))) (. .)))\n");
+    assertTrue(output, output.contains("4\t%\t%\tSYM\tJJ\t"));
+  }
+
   @Test
   public void testAdverbHeadOfADVPIsAdv() throws Exception {
     // "down" is tagged IN here, as it often is in the PTB, but it heads
