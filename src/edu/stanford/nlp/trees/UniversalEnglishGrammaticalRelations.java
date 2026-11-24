@@ -879,6 +879,13 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
+   * A PP or SBAR of a measure, a preposition and a clause, as in "two
+   * days after leaving office", whose head is the clause.
+   */
+  private static final String MEASURE_BEFORE_CLAUSE =
+    "<1 (@NP " + CoordinationTransformer.MEASURE_BEFORE_PREP_CONDITION + ") <3 @S !<4 __";
+
+  /**
    * The "nominal modifier" grammatical relation.  The nmod relation is
    * used for nominal modifiers of nouns or clausal predicates. {@code nmod}
    * is a noun functioning as a non-core (oblique) argument or adjunct.
@@ -903,7 +910,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation NOMINAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod", "nominal modifier",
         MODIFIER, ".*", tregexCompiler,
-            "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|PRN)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+            "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|PRN)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)] ![" + MEASURE_BEFORE_CLAUSE + "]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
             "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|PRN)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
             // only allow a PP < PP one if there is not a verb, or other pattern that matches acl/advcl under it.  Else acl/advcl
             "@NP < (@UCP|PRN=target <# @PP)");
@@ -913,7 +920,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation OBLIQUE_MODIFIER =
           new GrammaticalRelation(Language.UniversalEnglish, "obl", "oblique modifier",
                   MODIFIER, ".*", tregexCompiler,
-                  "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+                  "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)] ![" + MEASURE_BEFORE_CLAUSE + "]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
                   "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
                   // to handle "What weapon is Apollo most proficient with?"
                   "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP <: IN)) $++ (NP $++ =adj)))",
@@ -1008,7 +1015,7 @@ public class UniversalEnglishGrammaticalRelations {
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
 
             //former pcomp
-            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC|S)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!(PP|IN)).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC|S)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [ !< @NP|WHNP|NML | [" + MEASURE_BEFORE_CLAUSE + "] ] !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!(PP|IN)).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
             "VP|ADJP < /^PP(?:-TMP|-ADV)?$/=target < (@PP < @SBAR|S $++ CONJP|CC)");
 
 
@@ -1231,7 +1238,7 @@ public class UniversalEnglishGrammaticalRelations {
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
 
           //former pcomp
-          "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) < /^((?!(PP|CC|CONJP|,)).)*$/  !< (@PP <1 IN|RB|MWE|PCONJP|VBN|JJ <2 @NP))  !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+          "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [ !< @NP|WHNP|NML | [" + MEASURE_BEFORE_CLAUSE + "] ] !$- (@CC|CONJP $- __) < /^((?!(PP|CC|CONJP|,)).)*$/  !< (@PP <1 IN|RB|MWE|PCONJP|VBN|JJ <2 @NP))  !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
 
           // NML in the following rules is to cover some errors by the parser
           // It makes no difference to PTB
@@ -1385,8 +1392,12 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation NP_ADVERBIAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "obl:npmod", "noun phrase adverbial modifier",
-        MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP|QP)(?:-TMP|-ADV)?", tregexCompiler,
+        MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP|QP|SBAR)(?:-TMP|-ADV)?", tregexCompiler,
             "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
+            // a measure before a preposition and its object, as in "two
+            // days after the election", "two days after leaving office"
+            // or "two days after she arrived", where the object is the head
+            "@PP|SBAR <1 (@NP=target " + CoordinationTransformer.MEASURE_BEFORE_PREP_CONDITION + ") <3 @NP|S !<4 __",
             // a measure phrase after a predicate adverb, as in "the Dow was
             // down 80.53 points" or "was up 3/4"
             "@ADVP <# (/^(?:RB|IN|RP)/ < " + UniversalSemanticHeadFinder.COPULAR_ADVERB_REGEX + " $+ (@NP|QP|CD=target !< NNP|NNPS))",

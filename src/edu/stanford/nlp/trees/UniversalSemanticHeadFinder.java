@@ -370,6 +370,18 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
     TregexPattern.compile("ADVP <, (/^(?:RB|IN|RP)/=head < " + COPULAR_ADVERB_REGEX + " [ $+ (/^(?:NP|QP)/ [ << CD | << /^(?i:little|bit|lot)$/ ]) | $+ CD | !< /^(?i:far|farther|further)$/ $+ (/^RBR?$/ < " + DEGREE_ADVERB_REGEX + ") ])");
 
   /**
+   * A measure before a preposition and its object, as in "two days
+   * after the election", "four years in the making" or "two days after
+   * leaving office", which PTB brackets as
+   * (PP (NP two days) (IN after) (NP the election)).  The object is the
+   * head, with the measure as its npmod, as in EWT.  A percentage keeps
+   * the head, as in "22 % below regular prices", which
+   * CoordinationTransformer rebrackets.
+   */
+  static final TregexPattern headOfMeasureBeforePrepTregex =
+    TregexPattern.compile("@PP <1 (@NP " + CoordinationTransformer.MEASURE_BEFORE_PREP_CONDITION + ") <3 @NP|S=head !<4 __");
+
+  /**
    * An inverted "here's the link" or "there was the problem": the
    * adverb before a VP which is just the copula is the predicate
    */
@@ -432,6 +444,13 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder  {
       Tree lastKid = t.lastChild();
       if (lastKid.value().equals("WRB")) {
         return lastKid;
+      }
+    }
+
+    if (motherCat.equals("PP")) {
+      TregexMatcher matcher = headOfMeasureBeforePrepTregex.matcher(t);
+      if (matcher.matchesAt(t)) {
+        return matcher.getNode("head");
       }
     }
 

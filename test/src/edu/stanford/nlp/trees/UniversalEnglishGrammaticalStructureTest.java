@@ -1070,6 +1070,45 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nmod:poss(level-12, 1988-10)\n" +
            "case(1988-10, 's-11)\n" +
            "nmod(%-5, level-12)\n"},
+         // another measure before a preposition: the object is the head
+         // and the measure its npmod
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD left) (PP-TMP (NP (CD two) (NNS days)) (IN after) (NP (DT the) (NN election)))) (. .)))",
+          "nsubj(left-2, He-1)\n" +
+           "root(ROOT-0, left-2)\n" +
+           "nummod(days-4, two-3)\n" +
+           "obl:npmod(election-7, days-4)\n" +
+           "case(election-7, after-5)\n" +
+           "det(election-7, the-6)\n" +
+           "obl(left-2, election-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD left) (SBAR-TMP (NP (CD two) (NNS days)) (IN after) (S (NP (PRP she)) (VP (VBD arrived))))) (. .)))",
+          "nsubj(left-2, He-1)\n" +
+           "root(ROOT-0, left-2)\n" +
+           "nummod(days-4, two-3)\n" +
+           "obl:npmod(arrived-7, days-4)\n" +
+           "mark(arrived-7, after-5)\n" +
+           "nsubj(arrived-7, she-6)\n" +
+           "advcl(left-2, arrived-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VBD died) (PP-TMP (NP (CD two) (NNS days)) (IN after) (S (VP (VBG leaving) (NP (NN office)))))) (. .)))",
+          "nsubj(died-2, He-1)\n" +
+           "root(ROOT-0, died-2)\n" +
+           "nummod(days-4, two-3)\n" +
+           "obl:npmod(leaving-6, days-4)\n" +
+           "mark(leaving-6, after-5)\n" +
+           "advcl(died-2, leaving-6)\n" +
+           "obj(leaving-6, office-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (PP (NP (DT a) (NN bit)) (IN like) (S (VP (VBG straddling) (NP (DT a) (NN recliner)))))) (. .)))",
+          "nsubj(straddling-6, It-1)\n" +
+           "cop(straddling-6, is-2)\n" +
+           "det(bit-4, a-3)\n" +
+           "obl:npmod(straddling-6, bit-4)\n" +
+           "mark(straddling-6, like-5)\n" +
+           "root(ROOT-0, straddling-6)\n" +
+           "det(recliner-8, a-7)\n" +
+           "obj(straddling-6, recliner-8)\n"},
          // VPs joined by a comma with no conjunction are conj
          {TestType.BASIC,
           "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
