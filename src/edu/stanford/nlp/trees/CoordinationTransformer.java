@@ -716,6 +716,14 @@ public class CoordinationTransformer implements TreeTransformer  {
   /** A word for a percentage, as in "22 %" or "5.2 per cent". */
   public static final String PERCENT_WORD_REGEX = "/^(?i:%|percent|cent|pct)$/";
 
+  /**
+   * The tregex conditions on an NP for a measure other than a
+   * percentage before a preposition other than "of", "than" or "that",
+   * as in "two days after the election".
+   */
+  public static final String MEASURE_BEFORE_PREP_CONDITION =
+    "!<<- (/^(?:NN|SYM)/ < " + PERCENT_WORD_REGEX + ") $+ (IN !< /^(?i:of|than|that)$/)";
+
   private static final TregexPattern percentBeforePrepTregex =
     TregexPattern.compile("@PP <1 (@NP=pct <<- (/^(?:NN|SYM)/ < " + PERCENT_WORD_REGEX + ")) " +
                           "<2 (IN=prep !< /^(?i:of|than|that)$/) <3 @NP=obj !<4 __");
