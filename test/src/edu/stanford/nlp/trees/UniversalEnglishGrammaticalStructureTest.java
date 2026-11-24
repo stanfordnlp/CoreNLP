@@ -998,6 +998,21 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "conj:and(architectural-3, design-5)\n" +
            "compound(services-6, design-5)\n" +
            "obj(sell-2, services-6)\n"},
+         // a percentage before a noun: nummod inside, compound outside
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP They)) (VP (VBD amassed) (NP (CD 15) (JJ %) (NNS stakes))) (. .)))",
+          "nsubj(amassed-2, They-1)\n" +
+           "root(ROOT-0, amassed-2)\n" +
+           "nummod(%-4, 15-3)\n" +
+           "compound(stakes-5, %-4)\n" +
+           "obj(amassed-2, stakes-5)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP They)) (VP (VBD amassed) (NP (ADJP (CD 15) (NN %)) (NNS stakes))) (. .)))",
+          "nsubj(amassed-2, They-1)\n" +
+           "root(ROOT-0, amassed-2)\n" +
+           "nummod(%-4, 15-3)\n" +
+           "compound(stakes-5, %-4)\n" +
+           "obj(amassed-2, stakes-5)\n"},
          // VPs joined by a comma with no conjunction are conj
          {TestType.BASIC,
           "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",

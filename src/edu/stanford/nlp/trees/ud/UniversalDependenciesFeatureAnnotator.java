@@ -96,6 +96,10 @@ public class UniversalDependenciesFeatureAnnotator  {
 
   private HashMap<String,String> getPOSFeatures(String word, String pos) {
     HashMap<String, String> features = new HashMap<>();
+    // PTB tags "%" NN, and occasionally JJ; it is Number=Sing either way
+    if (word.equals("%")) {
+      pos = "NN";
+    }
     String wordPos = word.toLowerCase() + '_' + pos;
     if (wordPosFeatureMap.containsKey(wordPos)) {
        features.putAll(wordPosFeatureMap.get(wordPos));
