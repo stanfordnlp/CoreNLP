@@ -170,6 +170,10 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (VERBOSE) {
       debugLine("After percentBeforePrep:          ", t);
     }
+    t = modifierBeforeVPConjunct(t);
+    if (VERBOSE) {
+      debugLine("After modifierBeforeVPConjunct:   ", t);
+    }
     t = qp.transformTree(t);
     if (VERBOSE) {
       debugLine("After QPTreeTransformer:          ", t);
@@ -711,6 +715,32 @@ public class CoordinationTransformer implements TreeTransformer  {
     t = Tsurgeon.processPattern(percentAsJJTregex, percentAsJJTsurgeon, t);
     t = Tsurgeon.processPattern(flatPercentTregex, flatPercentTsurgeon, t);
     return Tsurgeon.processPattern(percentADJPTregex, percentADJPTsurgeon, t);
+  }
+
+  private static final String VP_CONJUNCT_MODIFIER = "/^(?:PP|ADVP|SBAR|RB)$/";
+
+  private static final TregexPattern modifierBeforeVPConjunctTregex =
+    TregexPattern.compile("@VP < (@VP $+ (CC|CONJP $+ (" + VP_CONJUNCT_MODIFIER + "=first $+ @VP=last)))");
+
+  private static final TregexPattern commaModifierBeforeVPConjunctTregex =
+    TregexPattern.compile("@VP < (@VP $+ (CC|CONJP $+ (/^,$/=first $+ (" + VP_CONJUNCT_MODIFIER + " $+ (/^,$/ $+ @VP=last)))))");
+
+  private static final TsurgeonPattern modifierBeforeVPConjunctTsurgeon =
+    Tsurgeon.parseOperation("createSubtree VP first last");
+
+  /**
+   * A modifier between the conjunction and the second of two VPs, as in
+   * "dons a cap and, for fun, may field a team", belongs to the second
+   * VP.  PTB has it flat in the VP of the coordination, as in
+   * (VP (VP dons a cap) (CC and) (, ,) (PP for fun) (, ,) (VP may field a team)),
+   * so the modifier, any commas around it and the second VP become a VP.
+   */
+  public static Tree modifierBeforeVPConjunct(Tree t) {
+    if (t == null) {
+      return t;
+    }
+    t = Tsurgeon.processPattern(modifierBeforeVPConjunctTregex, modifierBeforeVPConjunctTsurgeon, t);
+    return Tsurgeon.processPattern(commaModifierBeforeVPConjunctTregex, modifierBeforeVPConjunctTsurgeon, t);
   }
 
   /** A word for a percentage, as in "22 %" or "5.2 per cent". */

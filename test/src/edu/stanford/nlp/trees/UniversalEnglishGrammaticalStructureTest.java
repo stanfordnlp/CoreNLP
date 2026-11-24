@@ -1109,6 +1109,34 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "root(ROOT-0, straddling-6)\n" +
            "det(recliner-8, a-7)\n" +
            "obj(straddling-6, recliner-8)\n"},
+         // a modifier between the conjunction and a VP conjunct
+         // modifies that conjunct
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VP (VBZ dons) (NP (DT a) (NN cap))) (CC and) (, ,) (PP (IN for) (NP (NN fun))) (, ,) (VP (MD may) (VP (VB field) (NP (DT a) (NN team))))) (. .)))",
+          "nsubj(dons-2, He-1)\n" +
+           "root(ROOT-0, dons-2)\n" +
+           "det(cap-4, a-3)\n" +
+           "obj(dons-2, cap-4)\n" +
+           "cc(field-11, and-5)\n" +
+           "case(fun-8, for-7)\n" +
+           "obl(field-11, fun-8)\n" +
+           "aux(field-11, may-10)\n" +
+           "conj(dons-2, field-11)\n" +
+           "det(team-13, a-12)\n" +
+           "obj(field-11, team-13)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP He)) (VP (VP (VBZ dons) (NP (DT a) (NN cap))) (CC and) (PP (IN for) (NP (NN fun))) (VP (MD may) (VP (VB field) (NP (DT a) (NN team))))) (. .)))",
+          "nsubj(dons-2, He-1)\n" +
+           "root(ROOT-0, dons-2)\n" +
+           "det(cap-4, a-3)\n" +
+           "obj(dons-2, cap-4)\n" +
+           "cc(field-9, and-5)\n" +
+           "case(fun-7, for-6)\n" +
+           "obl(field-9, fun-7)\n" +
+           "aux(field-9, may-8)\n" +
+           "conj(dons-2, field-9)\n" +
+           "det(team-11, a-10)\n" +
+           "obj(field-9, team-11)\n"},
          // VPs joined by a comma with no conjunction are conj
          {TestType.BASIC,
           "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
