@@ -162,6 +162,10 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (VERBOSE) {
       debugLine("After CCTransformer:              ", t);
     }
+    t = percentModifiers(t);
+    if (VERBOSE) {
+      debugLine("After percentModifiers:           ", t);
+    }
     t = qp.transformTree(t);
     if (VERBOSE) {
       debugLine("After QPTreeTransformer:          ", t);
@@ -667,6 +671,42 @@ public class CoordinationTransformer implements TreeTransformer  {
       }
     }
     return t;
+  }
+
+  private static final TregexPattern percentAsJJTregex =
+    TregexPattern.compile("JJ=pct <: /^%$/");
+
+  private static final TsurgeonPattern percentAsJJTsurgeon =
+    Tsurgeon.parseOperation("relabel pct NN");
+
+  private static final TregexPattern flatPercentTregex =
+    TregexPattern.compile("@NP < (CD=num $+ (NN=pct <: /^%$/ $+ __))");
+
+  private static final TsurgeonPattern flatPercentTsurgeon =
+    Tsurgeon.parseOperation("createSubtree NP num pct");
+
+  private static final TregexPattern percentADJPTregex =
+    TregexPattern.compile("@NP < (ADJP=adjp <1 CD <2 (NN <: /^%$/) !<3 __ $+ __)");
+
+  private static final TsurgeonPattern percentADJPTsurgeon =
+    Tsurgeon.parseOperation("relabel adjp NP");
+
+  /**
+   * A percentage before a noun, as in "15 % stakes", is a nominal
+   * modifier made of the number and "%": nummod(%, 15) and
+   * compound(stakes, %), as in EWT.  PTB has it flat, as in
+   * (NP (CD 15) (NN %) (NNS stakes)), or as an ADJP, and sometimes tags
+   * the "%" JJ.  The "%" is tagged NN, a flat "CD %" with more of the
+   * NP after it becomes its own NP, and an ADJP of just "CD %" there
+   * becomes an NP.
+   */
+  public static Tree percentModifiers(Tree t) {
+    if (t == null) {
+      return t;
+    }
+    t = Tsurgeon.processPattern(percentAsJJTregex, percentAsJJTsurgeon, t);
+    t = Tsurgeon.processPattern(flatPercentTregex, flatPercentTsurgeon, t);
+    return Tsurgeon.processPattern(percentADJPTregex, percentADJPTsurgeon, t);
   }
 
   private static final Pattern ETC_WORD = Pattern.compile("(?i)etc|ect");
