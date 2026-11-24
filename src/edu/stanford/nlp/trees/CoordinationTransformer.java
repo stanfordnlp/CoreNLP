@@ -166,6 +166,10 @@ public class CoordinationTransformer implements TreeTransformer  {
     if (VERBOSE) {
       debugLine("After percentModifiers:           ", t);
     }
+    t = percentBeforePrep(t);
+    if (VERBOSE) {
+      debugLine("After percentBeforePrep:          ", t);
+    }
     t = qp.transformTree(t);
     if (VERBOSE) {
       debugLine("After QPTreeTransformer:          ", t);
@@ -707,6 +711,34 @@ public class CoordinationTransformer implements TreeTransformer  {
     t = Tsurgeon.processPattern(percentAsJJTregex, percentAsJJTsurgeon, t);
     t = Tsurgeon.processPattern(flatPercentTregex, flatPercentTsurgeon, t);
     return Tsurgeon.processPattern(percentADJPTregex, percentADJPTsurgeon, t);
+  }
+
+  /** A word for a percentage, as in "22 %" or "5.2 per cent". */
+  public static final String PERCENT_WORD_REGEX = "/^(?i:%|percent|cent|pct)$/";
+
+  private static final TregexPattern percentBeforePrepTregex =
+    TregexPattern.compile("@PP <1 (@NP=pct <<- (/^(?:NN|SYM)/ < " + PERCENT_WORD_REGEX + ")) " +
+                          "<2 (IN=prep !< /^(?i:of|than|that)$/) <3 @NP=obj !<4 __");
+
+  private static final TsurgeonPattern percentBeforePrepTsurgeon =
+    Tsurgeon.parseOperation("[createSubtree NP pct obj] [createSubtree PP prep obj]");
+
+  /**
+   * A percentage before a preposition and its object, as in "22 %
+   * below regular prices", has the percentage as the head, with the
+   * object as its nmod and the preposition as the object's case, as in
+   * EWT's "5.2 per cent below 1990 levels".  A phrase ending in a
+   * percentage, such as "40 % to 45 %", counts as a percentage.  PTB
+   * has the three flat in a PP, as in
+   * (PP (NP 22 %) (IN below) (NP regular prices)), so the preposition
+   * and object become a PP and that PP and the percentage become an NP
+   * inside the PP.
+   */
+  public static Tree percentBeforePrep(Tree t) {
+    if (t == null) {
+      return t;
+    }
+    return Tsurgeon.processPattern(percentBeforePrepTregex, percentBeforePrepTsurgeon, t);
   }
 
   private static final Pattern ETC_WORD = Pattern.compile("(?i)etc|ect");

@@ -1036,6 +1036,40 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "nummod(%-4, 15-3)\n" +
            "compound(stakes-5, %-4)\n" +
            "obj(amassed-2, stakes-5)\n"},
+         // a percentage before a preposition: the object is its nmod
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Prices)) (VP (VBD were) (PP (NP (CD 22) (NN %)) (IN below) (NP (JJ regular) (NNS prices)))) (. .)))",
+          "nsubj(%-4, Prices-1)\n" +
+           "cop(%-4, were-2)\n" +
+           "nummod(%-4, 22-3)\n" +
+           "root(ROOT-0, %-4)\n" +
+           "case(prices-7, below-5)\n" +
+           "amod(prices-7, regular-6)\n" +
+           "nmod(%-4, prices-7)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Shares)) (VP (VBD closed) (PP (NP (CD 3) (NN percent)) (IN above) (NP (DT the) (NN offer) (NN price)))) (. .)))",
+          "nsubj(closed-2, Shares-1)\n" +
+           "root(ROOT-0, closed-2)\n" +
+           "nummod(percent-4, 3-3)\n" +
+           "obl(closed-2, percent-4)\n" +
+           "case(price-8, above-5)\n" +
+           "det(price-8, the-6)\n" +
+           "compound(price-8, offer-7)\n" +
+           "nmod(percent-4, price-8)\n"},
+         {TestType.BASIC,
+          "(ROOT (S (NP (NNS Profits)) (VP (MD would) (VP (VB be) (PP (NP (NP (CD 40) (NN %)) (CC or) (NP (CD 45) (NN %))) (IN below) (NP (NP (CD 1988) (POS 's)) (NN level))))) (. .)))",
+          "nsubj(%-5, Profits-1)\n" +
+           "aux(%-5, would-2)\n" +
+           "cop(%-5, be-3)\n" +
+           "nummod(%-5, 40-4)\n" +
+           "root(ROOT-0, %-5)\n" +
+           "cc(%-8, or-6)\n" +
+           "nummod(%-8, 45-7)\n" +
+           "conj(%-5, %-8)\n" +
+           "case(level-12, below-9)\n" +
+           "nmod:poss(level-12, 1988-10)\n" +
+           "case(1988-10, 's-11)\n" +
+           "nmod(%-5, level-12)\n"},
          // VPs joined by a comma with no conjunction are conj
          {TestType.BASIC,
           "(ROOT (S (NP (NN Collision)) (VP (VP (VBZ kills) (NP (CD one))) (, ,) (VP (VBZ injures) (NP (CD 60)))) (. .)))",
