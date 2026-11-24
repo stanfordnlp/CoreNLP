@@ -998,6 +998,29 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert {
            "conj:and(architectural-3, design-5)\n" +
            "compound(services-6, design-5)\n" +
            "obj(sell-2, services-6)\n"},
+         // "%" counts as a noun when a shared amod is relabelled
+         {TestType.CC_PROCESSED,
+          "(ROOT (S (NP (PRP We)) (VP (VBP sell) (NP (ADJP (JJ low) (CC and) (NN %)) (NNS prices))) (. .)))",
+          "nsubj(sell-2, We-1)\n" +
+           "root(ROOT-0, sell-2)\n" +
+           "amod(prices-6, low-3)\n" +
+           "cc(%-5, and-4)\n" +
+           "conj:and(low-3, %-5)\n" +
+           "compound(prices-6, %-5)\n" +
+           "obj(sell-2, prices-6)\n"},
+         {TestType.CC_PROCESSED,
+          "(ROOT (S (NP (PRP It)) (VP (VBZ is) (PP (IN below) (NP (DT the) (NP (NP (CD 85) (NN %)) (CC and) (NP (CD 100) (JJ %))) (NNS reserves)))) (. .)))",
+          "nsubj(reserves-10, It-1)\n" +
+           "cop(reserves-10, is-2)\n" +
+           "case(reserves-10, below-3)\n" +
+           "det(reserves-10, the-4)\n" +
+           "nummod(%-6, 85-5)\n" +
+           "compound(reserves-10, %-6)\n" +
+           "cc(%-9, and-7)\n" +
+           "nummod(%-9, 100-8)\n" +
+           "conj:and(%-6, %-9)\n" +
+           "compound(reserves-10, %-9)\n" +
+           "root(ROOT-0, reserves-10)\n"},
          // a percentage before a noun: nummod inside, compound outside
          {TestType.BASIC,
           "(ROOT (S (NP (PRP They)) (VP (VBD amassed) (NP (CD 15) (JJ %) (NNS stakes))) (. .)))",
