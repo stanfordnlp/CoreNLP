@@ -1109,11 +1109,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure  
    * A shared amod or compound takes the label that fits the conjunct it
    * is copied to: a noun conjunct of an adjective is a compound, as
    * "design" in "architectural and design services", and an adjective
-   * conjunct of a noun is an amod.
+   * conjunct of a noun is an amod.  A word with no letters keeps the
+   * label, since its tag is less reliable: PTB tags "%" JJ in places,
+   * as in "the 85 % and 100 % reserves".
    */
   private static GrammaticalRelation modifierForConjunct(GrammaticalRelation relation, IndexedWord conjunct) {
     String tag = conjunct.tag();
-    if (tag == null) {
+    String word = conjunct.word();
+    if (tag == null || word == null || word.chars().noneMatch(Character::isLetter)) {
       return relation;
     }
     if (relation == ADJECTIVAL_MODIFIER && tag.startsWith("NN")) {

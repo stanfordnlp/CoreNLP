@@ -115,8 +115,9 @@ public class UniversalPOSMapper  {
       // IN -> ADP (otherwise)
       { "IN=target < __", "ADP" },
 
-      // NN -> SYM (in case of the percent sign)
-      { "NN=target <... {/[%]/}", "SYM" },
+      // the percent sign is SYM, whatever its tag; PTB has it as NN,
+      // and occasionally as JJ, as in "the 85 % and 100 % reserves"
+      { "!SYM=target <... {/[%]/}", "SYM" },
 
       // fused det-noun pronouns -> PRON
       { "NN=target < (/^(?i:(somebody|something|someone|anybody|anything|anyone|everybody|everything|everyone|nobody|nothing))$/)",
